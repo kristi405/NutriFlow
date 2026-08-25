@@ -12,20 +12,20 @@ export function CategoryCard({
       category: category.id
     }
   }} asChild>
-      <Pressable style={({
-      pressed
-    }) => [{
+      <Pressable style={{
       width
-    }, pressed && styles.pressed]}>
-        <View style={styles.imageWrapper}>
-          <Image source={{
-          uri: category.imageUrl
-        }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
-          <View style={[StyleSheet.absoluteFill, styles.overlay]} />
-          <ThemedText type="smallBold" style={styles.label} numberOfLines={2}>
-            {category.name}
-          </ThemedText>
-        </View>
+    }}>
+        {({ pressed }) => <View style={pressed && styles.pressed}>
+            <View style={styles.imageWrapper}>
+              <Image source={{
+              uri: category.imageUrl
+            }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
+              <View style={[StyleSheet.absoluteFill, styles.overlay]} />
+              <ThemedText type="smallBold" style={styles.label} numberOfLines={2}>
+                {category.name}
+              </ThemedText>
+            </View>
+          </View>}
       </Pressable>
     </Link>;
 }

@@ -10,6 +10,7 @@ export default function AppTabs() {
       <TabSlot style={{
       height: '100%'
     }} />
+      <TabTrigger name="profile" href="/profile" />
       <TabList asChild>
         <CustomTabList>
           <TabTrigger name="home" href="/" asChild>
@@ -21,11 +22,11 @@ export default function AppTabs() {
           <TabTrigger name="meal-plan" href="/meal-plan" asChild>
             <TabButton>{t('tabs.mealPlan')}</TabButton>
           </TabTrigger>
+          <TabTrigger name="ai-analysis" href="/ai-analysis" asChild>
+            <TabButton>{t('tabs.aiAnalysis')}</TabButton>
+          </TabTrigger>
           <TabTrigger name="progress" href="/progress" asChild>
             <TabButton>{t('tabs.progress')}</TabButton>
-          </TabTrigger>
-          <TabTrigger name="profile" href="/profile" asChild>
-            <TabButton>{t('tabs.profile')}</TabButton>
           </TabTrigger>
         </CustomTabList>
       </TabList>

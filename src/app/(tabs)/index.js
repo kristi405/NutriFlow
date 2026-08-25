@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { AiInsightCard } from '@/components/home/ai-insight-card';
 import { DateStrip } from '@/components/home/date-strip';
 import { MacroCard } from '@/components/home/macro-card';
@@ -14,6 +14,7 @@ import { WavingHand } from '@/components/home/waving-hand';
 import { ThemedText } from '@/components/themed-text';
 import { CalorieRing } from '@/components/ui/calorie-ring';
 import { EmptyState } from '@/components/ui/empty-state';
+import { PremiumCard } from '@/components/ui/premium-card';
 import { QuickAction } from '@/components/ui/quick-action';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { SectionHeader } from '@/components/ui/section-header';
@@ -21,7 +22,9 @@ import { getIngredientById } from '@/data/seed/ingredients';
 import { getRecipeById } from '@/data/seed/recipes';
 import { useDailyNutrition } from '@/hooks/useDailyNutrition';
 import { useNutritionScore } from '@/hooks/useNutritionScore';
+import { useStepCount } from '@/hooks/useStepCount';
 import { calculateDailyTargets, calculateRecipeNutrition, scaleForServings } from '@/lib/nutrition';
+import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
 import { todayKey } from '@/lib/date';
 import { Colors, LoginButtonGreen, LoginGradientAccent, Spacing } from '@/constants/theme';
 const theme = Colors.light;
@@ -50,11 +53,19 @@ function HomeScreen() {
     total
   } = useDailyNutrition(date);
   const scoreResult = useNutritionScore(date);
+  const { steps } = useStepCount();
   const waterMl = waterStore.totalForDate(date);
   const addWater = waterStore.addWater;
   const planItems = mealPlanStore.itemsForDate(date);
   const loggedEntries = foodLogStore.entriesForDate(date);
   const targets = useMemo(() => profile ? calculateDailyTargets(profile) : undefined, [profile]);
+  useEffect(() => {
+    if (!targets) return;
+    const today = todayKey();
+    if (mealPlanStore.itemsForDate(today).length > 0) return;
+    const generated = generateDailyMealPlan(targets.calories);
+    generated.forEach(item => mealPlanStore.addItem({ date: today, ...item }));
+  }, [targets]);
   const nextMeal = useMemo(() => {
     const loggedRecipeIds = new Set(loggedEntries.map(entry => `${entry.mealType}:${entry.recipeId}`));
     const pending = planItems.filter(item => !loggedRecipeIds.has(`${item.mealType}:${item.recipeId}`)).sort((a, b) => MEAL_ORDER.indexOf(a.mealType) - MEAL_ORDER.indexOf(b.mealType));
@@ -70,11 +81,17 @@ function HomeScreen() {
     };
   }, [planItems, loggedEntries]);
   if (!profile || !targets) return null;
+  const consumedCalories = Math.round(total.nutrition.calories);
+  const burnedCalories = Math.round(steps * profile.weightKg * 0.0005);
+  const remainingCalories = Math.max(0, targets.calories - consumedCalories + burnedCalories);
   return <ScreenScrollView gap={Spacing.three}>
-      <View style={styles.headerRow}>
+      <Pressable onPress={() => router.push('/profile')} style={styles.headerRow}>
+        <View style={styles.avatar}>
+          <SymbolView name="person.fill" size={22} tintColor={LoginButtonGreen} />
+        </View>
         <View style={styles.headerTextColumn}>
           <View style={styles.greetingRow}>
-            <ThemedText type="headline" style={styles.name} color={theme.text}>
+            <ThemedText type="headline" style={styles.name} color={theme.text} numberOfLines={1}>
               {t(greetingKey())}, {profile.name.split(' ')[0]}
             </ThemedText>
             <WavingHand size={24} />
@@ -83,10 +100,10 @@ function HomeScreen() {
             {t('home.trackSubtitle')}
           </ThemedText>
         </View>
-        <View style={styles.avatar}>
-          <SymbolView name="person.fill" size={22} tintColor={LoginButtonGreen} />
+        <View style={styles.settingsButton}>
+          <SymbolView name="gearshape" size={30} tintColor={theme.textSecondary} />
         </View>
-      </View>
+      </Pressable>
 
       <DateStrip selectedDate={date} onSelectDate={setDate} style={styles.dateStrip} />
 
@@ -94,20 +111,43 @@ function HomeScreen() {
         <View style={styles.nutritionHeader}>
           <ThemedText type="smallBold" color={theme.text}>{t('home.dailyCalories')}</ThemedText>
           <View style={styles.calorieBadge}>
-            <ThemedText type="caption" color={theme.primary}>
+            <ThemedText type="caption" style={styles.calorieBadgeText} color={theme.primary}>
               {targets.calories} {t('home.kcalGoal')}
             </ThemedText>
           </View>
         </View>
-        <View style={styles.ringSection}>
+        <View style={styles.ringRow}>
           <CalorieRing consumed={total.nutrition.calories} target={targets.calories} size={140} strokeWidth={12} />
+          <View style={styles.calorieStatsColumn}>
+            <View style={styles.calorieStatRow}>
+              <SymbolView name="fork.knife" size={18} tintColor={theme.primary} />
+              <View>
+                <ThemedText type="smallBold" style={styles.calorieStatValue} color={theme.primary}>{consumedCalories} {t('common.kcal')}</ThemedText>
+                <ThemedText type="caption" color={theme.textSecondary}>{t('home.consumed')}</ThemedText>
+              </View>
+            </View>
+            <View style={styles.calorieStatRow}>
+              <SymbolView name="flame.fill" size={18} tintColor={theme.warning} />
+              <View>
+                <ThemedText type="smallBold" style={styles.calorieStatValue} color={theme.warning}>{burnedCalories} {t('common.kcal')}</ThemedText>
+                <ThemedText type="caption" color={theme.textSecondary}>{t('home.burned')}</ThemedText>
+              </View>
+            </View>
+            <View style={styles.calorieStatRow}>
+              <SymbolView name="gauge" size={18} tintColor={theme.secondary} />
+              <View>
+                <ThemedText type="smallBold" style={styles.calorieStatValue} color={theme.secondary}>{remainingCalories} {t('common.kcal')}</ThemedText>
+                <ThemedText type="caption" color={theme.textSecondary}>{t('home.remaining')}</ThemedText>
+              </View>
+            </View>
+          </View>
         </View>
       </View>
 
       <View style={styles.macroRow}>
-        <MacroCard label={t('home.protein')} value={total.nutrition.protein} target={targets.protein} color={theme.primary} />
-        <MacroCard label={t('home.carbs')} value={total.nutrition.carbs} target={targets.carbs} color={theme.secondary} />
-        <MacroCard label={t('home.fat')} value={total.nutrition.fat} target={targets.fat} color={theme.warning} />
+        <MacroCard label={t('home.protein')} value={total.nutrition.protein} target={targets.protein} color="#2F80ED" trackColor="#DCEBFC" detailed />
+        <MacroCard label={t('home.fat')} value={total.nutrition.fat} target={targets.fat} color="#F2994A" trackColor="#FCE7D3" detailed />
+        <MacroCard label={t('home.carbs')} value={total.nutrition.carbs} target={targets.carbs} color="#9B51E0" trackColor="#EEE0FA" detailed />
       </View>
 
       <WaterCard consumedMl={waterMl} targetMl={targets.water} onAdd={amount => addWater(date, amount)} />
@@ -117,6 +157,8 @@ function HomeScreen() {
       {scoreResult && <NutritionScoreCard score={scoreResult.score} explanation={scoreResult.explanation} />}
 
       <AiInsightCard insight={scoreResult ? insightService.getDailyInsight(scoreResult) : t('home.defaultInsight')} />
+
+      <PremiumCard />
 
       {nextMeal && <View style={styles.section}>
           <SectionHeader title={t('home.nextMeal')} />
@@ -136,38 +178,38 @@ function HomeScreen() {
 
       <View style={styles.section}>
         <SectionHeader title={t('home.quickActions')} />
-        <View style={styles.quickActionsGrid}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickActionsRow}>
           <QuickAction icon={{
           ios: 'plus.circle.fill',
           android: 'add_circle',
           web: 'add_circle'
-        }} label={t('home.addMeal')} onPress={() => router.push('/recipes')} />
+        }} label={t('home.addMeal')} color={LoginButtonGreen} onPress={() => router.push('/recipes')} />
           <QuickAction icon={{
           ios: 'camera.fill',
           android: 'photo_camera',
           web: 'photo_camera'
-        }} label={t('home.scanFood')} onPress={() => showComingSoon(t('home.scanFood'))} />
+        }} label={t('home.scanFood')} color="#EB5757" onPress={() => showComingSoon(t('home.scanFood'))} />
           <QuickAction icon={{
           ios: 'sparkles',
           android: 'auto_awesome',
           web: 'auto_awesome'
-        }} label={t('home.aiRecipe')} onPress={() => showComingSoon(t('home.aiRecipe'))} />
+        }} label={t('home.aiRecipe')} color="#9B51E0" onPress={() => showComingSoon(t('home.aiRecipe'))} />
           <QuickAction icon={{
           ios: 'cart.fill',
           android: 'shopping_cart',
           web: 'shopping_cart'
-        }} label={t('home.shoppingList')} onPress={() => showComingSoon(t('home.shoppingList'))} />
+        }} label={t('home.shoppingList')} color="#F2994A" onPress={() => showComingSoon(t('home.shoppingList'))} />
           <QuickAction icon={{
           ios: 'scalemass.fill',
           android: 'monitor_weight',
           web: 'monitor_weight'
-        }} label={t('home.addWeight')} onPress={() => router.push('/progress')} />
+        }} label={t('home.addWeight')} color="#5B6EE1" onPress={() => router.push('/progress')} />
           <QuickAction icon={{
           ios: 'drop.fill',
           android: 'water_drop',
           web: 'water_drop'
-        }} label={t('home.addWater')} onPress={() => addWater(date, 250)} />
-        </View>
+        }} label={t('home.addWater')} color="#2F80ED" onPress={() => addWater(date, 250)} />
+        </ScrollView>
       </View>
     </ScreenScrollView>;
 }
@@ -188,6 +230,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
+  settingsButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
   headerTextColumn: {
     flex: 1,
     gap: Spacing.half
@@ -198,7 +246,9 @@ const styles = StyleSheet.create({
     gap: Spacing.one
   },
   name: {
-    flexShrink: 1
+    flexShrink: 1,
+    fontSize: 17,
+    lineHeight: 22
   },
   dateStrip: {
     marginTop: -Spacing.one
@@ -222,9 +272,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one
   },
-  ringSection: {
+  calorieBadgeText: {
+    fontWeight: '700'
+  },
+  calorieStatValue: {
+    fontSize: 16,
+    lineHeight: 22
+  },
+  ringRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.two
+    justifyContent: 'center',
+    gap: Spacing.four
+  },
+  calorieStatsColumn: {
+    gap: Spacing.three
+  },
+  calorieStatRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one
   },
   macroRow: {
     flexDirection: 'row',
@@ -236,10 +303,9 @@ const styles = StyleSheet.create({
   mealList: {
     gap: Spacing.two
   },
-  quickActionsGrid: {
+  quickActionsRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: Spacing.three,
-    justifyContent: 'space-between'
+    paddingRight: Spacing.two
   }
 });

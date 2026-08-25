@@ -1,81 +1,130 @@
+import { observer } from 'mobx-react-lite';
 import { ThemedText } from '@/components/themed-text';
+import { RecipeImage } from '@/components/ui/recipe-image';
 import { Colors, Spacing } from '@/constants/theme';
-import { Image } from 'expo-image';
+import { favoritesStore } from '@/store/favoritesStore';
 import { Link } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 const theme = Colors.light;
-export function RecipeCard({
+function RecipeCardComponent({
   recipe,
   calories,
   style
 }) {
   const { t } = useTranslation();
   const totalTime = recipe.prepTimeMinutes + recipe.cookTimeMinutes;
+  const isFavorite = favoritesStore.isFavorite(recipe.id);
   return <Link href={{
     pathname: '/recipes/[id]',
     params: {
       id: recipe.id
     }
   }} asChild>
-      <Pressable style={({
-      pressed
-    }) => [styles.card, style, pressed && styles.pressed]}>
-        <Image source={{
-        uri: recipe.imageUrl
-      }} style={styles.image} contentFit="cover" transition={150} />
-        <View style={styles.body}>
-          <ThemedText type="caption" color={theme.text} style={styles.title} numberOfLines={2}>
-            {recipe.title}
-          </ThemedText>
-          <View style={styles.metaRow}>
-            <ThemedText type="caption" color={theme.textSecondary}>
-              {totalTime} {t('common.min')}
-            </ThemedText>
-            {calories !== undefined && <>
-                <View style={[styles.dot, {
-              backgroundColor: theme.textSecondary
-            }]} />
-                <ThemedText type="caption" color={theme.textSecondary}>
-                  {Math.round(calories)} {t('common.kcal')}
-                </ThemedText>
-              </>}
-          </View>
-        </View>
+      <Pressable style={StyleSheet.flatten([styles.card, style])}>
+        {({ pressed }) => <View style={[styles.cardInner, pressed && styles.pressed]}>
+            <View style={styles.imageWrapper}>
+              <RecipeImage uri={recipe.imageUrl} style={styles.image} />
+              {recipe.difficulty && <View style={styles.difficultyBadge}>
+                  <ThemedText type="caption" color="#ffffff">
+                    {t(`recipes.difficulty.${recipe.difficulty}`, { defaultValue: recipe.difficulty })}
+                  </ThemedText>
+                </View>}
+              <Pressable onPress={() => favoritesStore.toggleFavorite(recipe.id)} hitSlop={8} style={styles.bookmarkButton}>
+                <SymbolView name={isFavorite ? 'bookmark.fill' : 'bookmark'} size={18} tintColor={isFavorite ? theme.primary : theme.text} />
+              </Pressable>
+            </View>
+            <View style={styles.body}>
+              <ThemedText type="caption" color={theme.text} style={styles.title} numberOfLines={2}>
+                {recipe.title}
+              </ThemedText>
+              <View style={styles.metaRow}>
+                <View style={styles.metaItem}>
+                  <SymbolView name="clock" size={11} tintColor={theme.textSecondary} />
+                  <ThemedText type="caption" color={theme.textSecondary}>
+                    {totalTime} {t('common.min')}
+                  </ThemedText>
+                </View>
+                {calories !== undefined && <View style={styles.calorieBadge}>
+                    <ThemedText type="caption" color={theme.primary}>
+                      {Math.round(calories)} {t('common.kcal')}
+                    </ThemedText>
+                  </View>}
+              </View>
+            </View>
+          </View>}
       </Pressable>
     </Link>;
 }
+export const RecipeCard = observer(RecipeCardComponent);
 const styles = StyleSheet.create({
   card: {
     backgroundColor: theme.background,
     borderColor: theme.border,
     borderWidth: 1,
     borderRadius: 16,
-    padding: Spacing.two,
+    overflow: 'hidden'
+  },
+  cardInner: {
     gap: Spacing.two
+  },
+  imageWrapper: {
+    width: '100%'
   },
   image: {
     width: '100%',
-    aspectRatio: 1,
-    borderRadius: 10
+    aspectRatio: 4 / 3,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15
+  },
+  difficultyBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 3
+  },
+  bookmarkButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   body: {
-    gap: 3
+    paddingHorizontal: Spacing.two,
+    paddingBottom: Spacing.two,
+    gap: 4
   },
   title: {
+    height: 40,
     fontSize: 15,
     lineHeight: 20,
-    fontWeight: '700'
+    fontWeight: '700',
+    marginBottom: Spacing.one
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6
+    justifyContent: 'space-between'
   },
-  dot: {
-    width: 3,
-    height: 3,
-    borderRadius: 2
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3
+  },
+  calorieBadge: {
+    backgroundColor: theme.primarySoft,
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 3
   },
   pressed: {
     opacity: 0.85

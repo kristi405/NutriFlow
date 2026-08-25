@@ -42,6 +42,14 @@ const MACRO_SPLIT_BY_GOAL = {
   }
 };
 const MIN_SAFE_CALORIES = 1200;
+const LOW_CALORIE_THRESHOLD = 1500;
+const LOW_CALORIE_BUMP = 50;
+
+/** Low targets get a small +50 kcal bump (then rounded to the nearest ten) so the plan doesn't skew too lean. */
+function applyLowCalorieBump(calories) {
+  if (calories >= LOW_CALORIE_THRESHOLD) return calories;
+  return Math.round((calories + LOW_CALORIE_BUMP) / 10) * 10;
+}
 
 /** Mifflin-St Jeor equation. */
 export function calculateBMR(profile) {
@@ -102,7 +110,7 @@ function waterTargetFor(weightKg) {
 export function calculateDailyTargets(profile) {
   const tdee = calculateTDEE(profile);
   const goalAdjusted = tdee + CALORIE_ADJUSTMENT_BY_GOAL[profile.goal.type];
-  const calories = Math.max(MIN_SAFE_CALORIES, profile.goal.manualCalorieTarget ?? Math.round(goalAdjusted));
+  const calories = applyLowCalorieBump(Math.max(MIN_SAFE_CALORIES, profile.goal.manualCalorieTarget ?? Math.round(goalAdjusted)));
   const split = profile.goal.manualMacroSplit ?? MACRO_SPLIT_BY_GOAL[profile.goal.type];
   return {
     calories,

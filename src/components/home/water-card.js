@@ -1,9 +1,12 @@
+import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Spacing } from '@/constants/theme';
 const theme = Colors.light;
-const QUICK_AMOUNTS_ML = [250, 500, 750];
+const WATER_BLUE = '#2F80ED';
+const WATER_TRACK = '#DCEBFC';
+const QUICK_AMOUNTS_ML = [100, 250, 500];
 export function WaterCard({
   consumedMl,
   targetMl,
@@ -11,22 +14,32 @@ export function WaterCard({
 }) {
   const { t } = useTranslation();
   const progress = targetMl > 0 ? Math.min(1, consumedMl / targetMl) : 0;
+  const goalReached = targetMl > 0 && consumedMl >= targetMl;
   return <View style={[styles.card, {
     backgroundColor: theme.background,
-    borderColor: theme.border
+    borderColor: goalReached ? WATER_BLUE : theme.border
   }]}>
       <View style={styles.headerRow}>
-        <ThemedText type="smallBold" color={theme.text}>{t('nutrition.water')}</ThemedText>
-        <ThemedText type="small" color={theme.textSecondary}>
-          {(consumedMl / 1000).toFixed(1)} / {(targetMl / 1000).toFixed(1)} L
-        </ThemedText>
+        <View style={styles.titleRow}>
+          <SymbolView name="drop.fill" size={16} tintColor={WATER_BLUE} />
+          <ThemedText type="smallBold" color={theme.text}>{t('nutrition.water')}</ThemedText>
+          {goalReached && <SymbolView name="star.fill" size={14} tintColor="#FFC107" />}
+        </View>
+        <View style={styles.headerRight}>
+          <ThemedText type="small" color={theme.textSecondary}>
+            {(consumedMl / 1000).toFixed(1)} / {(targetMl / 1000).toFixed(1)} L
+          </ThemedText>
+          <Pressable onPress={() => onAdd(-Math.min(100, consumedMl))} hitSlop={8} disabled={consumedMl <= 0}>
+            <SymbolView name="minus.circle" size={18} tintColor={consumedMl <= 0 ? theme.border : WATER_BLUE} />
+          </Pressable>
+        </View>
       </View>
       <View style={[styles.track, {
-      backgroundColor: theme.backgroundElement
+      backgroundColor: WATER_TRACK
     }]}>
         <View style={[styles.fill, {
         width: `${progress * 100}%`,
-        backgroundColor: theme.secondary
+        backgroundColor: WATER_BLUE
       }]} />
       </View>
       <View style={styles.buttonRow}>
@@ -35,7 +48,7 @@ export function WaterCard({
       }) => [styles.quickButton, {
         borderColor: theme.border
       }, pressed && styles.pressed]}>
-            <ThemedText type="small" color={theme.text}>+{amount} ml</ThemedText>
+            <ThemedText type="caption" color={theme.text}>+{amount} ml</ThemedText>
           </Pressable>)}
       </View>
     </View>;
@@ -49,7 +62,18 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between'
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one
   },
   track: {
     height: 8,
@@ -62,13 +86,14 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: Spacing.two
+    gap: Spacing.two,
+    marginTop: Spacing.one
   },
   quickButton: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: Spacing.two,
-    borderRadius: 12,
+    paddingVertical: Spacing.one,
+    borderRadius: 10,
     borderWidth: 1
   },
   pressed: {

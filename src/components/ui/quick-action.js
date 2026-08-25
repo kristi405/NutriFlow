@@ -6,15 +6,17 @@ const theme = Colors.light;
 export function QuickAction({
   icon,
   label,
-  onPress
+  onPress,
+  color = theme.primary
 }) {
   return <Pressable onPress={onPress} style={({
     pressed
   }) => [styles.container, pressed && styles.pressed]}>
       <View style={[styles.iconWrapper, {
-      backgroundColor: theme.primarySoft
+      backgroundColor: `${color}1F`,
+      borderColor: `${color}66`
     }]}>
-        <SymbolView name={icon} size={22} tintColor={theme.primary} />
+        <SymbolView name={icon} size={26} tintColor={color} />
       </View>
       <ThemedText type="caption" style={styles.label} color={theme.text} numberOfLines={2}>
         {label}
@@ -28,9 +30,10 @@ const styles = StyleSheet.create({
     width: 72
   },
   iconWrapper: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center'
   },

@@ -6,7 +6,9 @@ import { Colors } from '@/constants/theme';
 const theme = Colors.light;
 export function SectionHeader({
   title,
-  seeAllHref
+  seeAllHref,
+  actionLabel,
+  onAction
 }) {
   const { t } = useTranslation();
   return <View style={styles.row}>
@@ -16,6 +18,9 @@ export function SectionHeader({
             <ThemedText type="linkPrimary">{t('common.seeAll')}</ThemedText>
           </Pressable>
         </Link>}
+      {onAction && <Pressable onPress={onAction} hitSlop={8}>
+          <ThemedText type="smallBold" color={theme.textSecondary}>{actionLabel}</ThemedText>
+        </Pressable>}
     </View>;
 }
 const styles = StyleSheet.create({

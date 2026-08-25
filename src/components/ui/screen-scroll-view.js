@@ -8,6 +8,7 @@ export function ScreenScrollView({
   children,
   contentContainerStyle,
   gap = Spacing.five,
+  horizontalPadding = Spacing.four,
   ...rest
 }) {
   const safeAreaInsets = useSafeAreaInsets();
@@ -34,7 +35,7 @@ export function ScreenScrollView({
   });
   return <LinearGradient colors={[Colors.light.background, Colors.light.primarySoft, LoginGradientAccent]} style={styles.flex1}>
       <ScrollView style={styles.scrollView} contentInset={insets} contentContainerStyle={[styles.contentContainer, platformStyle, contentContainerStyle]} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} {...rest}>
-        <View style={[styles.container, { gap }]}>{children}</View>
+        <View style={[styles.container, { gap, paddingHorizontal: horizontalPadding }]}>{children}</View>
       </ScrollView>
     </LinearGradient>;
 }

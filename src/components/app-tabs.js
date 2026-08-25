@@ -7,7 +7,11 @@ export default function AppTabs() {
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
   return <NativeTabs backgroundColor={colors.background} indicatorColor={colors.backgroundElement} labelStyle={{
+    default: {
+      fontSize: 9
+    },
     selected: {
+      fontSize: 9,
       color: colors.text
     }
   }}>
@@ -26,14 +30,16 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Icon sf="calendar" md="calendar_today" />
       </NativeTabs.Trigger>
 
+      <NativeTabs.Trigger name="ai-analysis">
+        <NativeTabs.Trigger.Label>{t('tabs.aiAnalysis')}</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="sparkles" md="auto_awesome" />
+      </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name="progress">
         <NativeTabs.Trigger.Label>{t('tabs.progress')}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="chart.line.uptrend.xyaxis" md="show_chart" />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="profile">
-        <NativeTabs.Trigger.Label>{t('tabs.profile')}</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="person.crop.circle" md="person" />
-      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="profile" hidden />
     </NativeTabs>;
 }

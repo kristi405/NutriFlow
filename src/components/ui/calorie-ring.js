@@ -26,7 +26,7 @@ export function CalorieRing({
       <View style={styles.center} pointerEvents="none">
         <ThemedText type="stat" color={theme.text}>{remaining}</ThemedText>
         <ThemedText type="caption" color={theme.textSecondary}>
-          {t('nutrition.kcalLeft')}
+          {t('home.remaining')}
         </ThemedText>
       </View>
     </View>;

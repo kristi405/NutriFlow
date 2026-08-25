@@ -1,27 +1,30 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import '@/i18n';
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef, useState } from 'react';
 import { useColorScheme } from 'react-native';
-import AppTabs from '@/components/app-tabs';
+import { useTranslation } from 'react-i18next';
 import { AuthFlow } from '@/components/auth/auth-flow';
 import { CalculatingScreen } from '@/components/calculating-screen';
 import { IntroScreen } from '@/components/intro-screen';
 import { OnboardingFlow } from '@/components/onboarding/onboarding-flow';
 import { ThemedView } from '@/components/themed-view';
+import { Colors } from '@/constants/theme';
 import { queryClient } from '@/lib/query-client';
 import { authStore } from '@/store/authStore';
 import { profileStore } from '@/store/profileStore';
 SplashScreen.preventAutoHideAsync();
 const CALCULATING_DURATION = 5000;
+const SKIP_AUTH_FOR_TESTING = false;
 function TabLayout() {
+  const { t } = useTranslation();
   const colorScheme = useColorScheme();
   const [showIntro, setShowIntro] = useState(true);
   const [showCalculating, setShowCalculating] = useState(false);
   const hasHydrated = profileStore.hasHydrated && authStore.hasHydrated;
-  const isAuthenticated = authStore.isAuthenticated;
+  const isAuthenticated = SKIP_AUTH_FOR_TESTING || authStore.isAuthenticated;
   const hasOnboarded = profileStore.hasOnboarded;
   const prevHasOnboardedRef = useRef(hasOnboarded);
   useEffect(() => {
@@ -38,7 +41,18 @@ function TabLayout() {
     if (!isAuthenticated) return <AuthFlow key="auth" />;
     if (!hasOnboarded) return <OnboardingFlow key="onboarding" />;
     if (showCalculating) return <CalculatingScreen key="calculating" />;
-    return <AppTabs key="tabs" />;
+    return <Stack key="tabs" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="profile" options={{
+          headerShown: true,
+          headerTitle: t('tabs.profile'),
+          headerBackTitle: t('common.back'),
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: Colors.light.background },
+          headerTintColor: Colors.light.text,
+          headerTitleStyle: { fontWeight: '700' }
+        }} />
+      </Stack>;
   }
   return <QueryClientProvider client={queryClient}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

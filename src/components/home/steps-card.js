@@ -15,15 +15,17 @@ export function StepsCard() {
   if (!available) return null;
 
   const progress = Math.min(1, steps / DAILY_STEP_GOAL);
+  const goalReached = steps >= DAILY_STEP_GOAL;
 
   return <View style={[styles.card, {
     backgroundColor: theme.background,
-    borderColor: theme.border
+    borderColor: goalReached ? theme.primary : theme.border
   }]}>
       <View style={styles.headerRow}>
         <View style={styles.titleRow}>
           <SymbolView name="figure.walk" size={18} tintColor={theme.primary} />
           <ThemedText type="smallBold" color={theme.text}>{t('home.steps')}</ThemedText>
+          {goalReached && <SymbolView name="star.fill" size={14} tintColor="#FFC107" />}
         </View>
         <ThemedText type="small" color={theme.textSecondary}>
           {steps.toLocaleString()} / {DAILY_STEP_GOAL.toLocaleString()}

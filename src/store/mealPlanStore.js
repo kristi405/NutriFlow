@@ -22,6 +22,10 @@ class MealPlanStore {
     this.items = this.items.filter(item => item.id !== id);
   }
 
+  removeItemsForDate(date) {
+    this.items = this.items.filter(item => item.date !== date);
+  }
+
   updateServings(id, servings) {
     const item = this.items.find(item => item.id === id);
     if (item) item.servings = servings;

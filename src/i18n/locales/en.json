@@ -10,7 +10,11 @@
     "min": "min",
     "kcal": "kcal",
     "kg": "kg",
-    "back": "Back"
+    "back": "Back",
+    "of": "of",
+    "edit": "Edit",
+    "done": "Done",
+    "clear": "Clear"
   },
   "auth": {
     "login": {
@@ -140,6 +144,9 @@
     "greetingEvening": "Good evening",
     "trackSubtitle": "Track your nutrition today",
     "dailyCalories": "Daily Calories",
+    "consumed": "Consumed",
+    "burned": "Burned",
+    "remaining": "Remaining",
     "kcalGoal": "kcal goal",
     "logOut": "Log out",
     "nextMeal": "Next meal",
@@ -208,15 +215,30 @@
   "mealPlan": {
     "title": "Meal Plan",
     "subtitle": "Plan your meals for the day",
-    "noMealPlanned": "No meal planned yet"
+    "noMealPlanned": "No meal planned yet",
+    "weeklyMenu": "Weekly menu"
   },
   "recipes": {
     "title": "Recipes",
     "subtitle": "Browse collections and find your next meal",
+    "searchPlaceholder": "Search recipes",
+    "allCategories": "All",
+    "favorites": "Favorites",
+    "recentlyViewed": "Recently Viewed",
+    "voiceSearch": "Voice Search",
+    "voicePermissionDenied": "Microphone and speech recognition access is required for voice search.",
+    "noResults": "No recipes found",
+    "noResultsMessage": "Try a different search term.",
     "servings": "servings",
     "calories": "Calories",
     "ingredients": "Ingredients",
     "steps": "Steps",
+    "nutrients": "Nutrients",
+    "fiber": "Fiber",
+    "sugar": "Sugar",
+    "saturatedFat": "Saturated Fat",
+    "cholesterol": "Cholesterol",
+    "sodium": "Sodium",
     "difficulty": {
       "easy": "Easy",
       "medium": "Medium",
@@ -252,7 +274,25 @@
     "home": "Home",
     "recipes": "Recipes",
     "mealPlan": "Meal Plan",
+    "aiAnalysis": "AI",
     "progress": "Progress",
     "profile": "Profile"
+  },
+  "aiAnalysis": {
+    "title": "AI Analysis",
+    "subtitle": "Upload lab results and get personalized nutrition advice",
+    "uploadTitle": "Upload your lab results",
+    "uploadSubtitle": "PDF, JPG or PNG up to 10MB",
+    "uploadButton": "Choose File",
+    "howItWorks": "How it works",
+    "step1Title": "Upload",
+    "step1Subtitle": "Add a photo or PDF of your blood test or lab report",
+    "step2Title": "Analyze",
+    "step2Subtitle": "AI reviews your results against nutrition science",
+    "step3Title": "Get advice",
+    "step3Subtitle": "Receive a personalized nutrition plan based on your levels",
+    "recentAnalyses": "Recent analyses",
+    "emptyTitle": "No analyses yet",
+    "emptyMessage": "Upload your first lab result to get AI-powered nutrition insights"
   }
 }

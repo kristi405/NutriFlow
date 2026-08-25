@@ -42,6 +42,13 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Allow NutriFlow to use the microphone for voice search.",
+          "speechRecognitionPermission": "Allow NutriFlow to use speech recognition for voice search."
+        }
       ]
     ],
     "experiments": {

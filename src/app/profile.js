@@ -1,4 +1,5 @@
 import { ThemedText } from '@/components/themed-text';
+import { PremiumCard } from '@/components/ui/premium-card';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Colors, LoginButtonGreen, Spacing } from '@/constants/theme';
 import { authStore } from '@/store/authStore';
@@ -213,16 +214,7 @@ function ProfileScreen() {
         </View>
       </View>
 
-      <Pressable onPress={() => showComingSoon(t('profile.premiumCta'))} style={styles.premiumCard}>
-        <View style={styles.premiumIconWrapper}>
-          <SymbolView name="crown.fill" size={20} tintColor="#ffffff" />
-        </View>
-        <View style={styles.premiumText}>
-          <ThemedText type="smallBold" color="#ffffff">{t('profile.premiumTitle')}</ThemedText>
-          <ThemedText type="caption" color="#ffffff">{t('profile.premiumSubtitle')}</ThemedText>
-        </View>
-        <SymbolView name="chevron.right" size={16} tintColor="#ffffff" />
-      </Pressable>
+      <PremiumCard />
 
       <Pressable onPress={() => authStore.logout()} style={styles.signOutButton}>
         <ThemedText type="smallBold" color={theme.error}>{t('profile.signOut')}</ThemedText>
@@ -370,26 +362,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.two
-  },
-  premiumCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.two,
-    backgroundColor: theme.secondary,
-    borderRadius: 20,
-    padding: Spacing.three
-  },
-  premiumIconWrapper: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  premiumText: {
-    flex: 1,
-    gap: 2
   },
   signOutButton: {
     alignItems: 'center',
