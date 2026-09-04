@@ -16,27 +16,27 @@ export function ActivityStep({
     level: 'sedentary',
     title: t('onboarding.activity.sedentary'),
     subtitle: t('onboarding.activity.sedentarySubtitle'),
-    icon: 'chair.fill'
+    icon: { ios: 'chair.fill', android: 'chair', web: 'chair' }
   }, {
     level: 'light',
     title: t('onboarding.activity.light'),
     subtitle: t('onboarding.activity.lightSubtitle'),
-    icon: 'figure.walk'
+    icon: { ios: 'figure.walk', android: 'directions_walk', web: 'directions_walk' }
   }, {
     level: 'moderate',
     title: t('onboarding.activity.moderate'),
     subtitle: t('onboarding.activity.moderateSubtitle'),
-    icon: 'figure.run'
+    icon: { ios: 'figure.run', android: 'directions_run', web: 'directions_run' }
   }, {
     level: 'active',
     title: t('onboarding.activity.active'),
     subtitle: t('onboarding.activity.activeSubtitle'),
-    icon: 'flame.fill'
+    icon: { ios: 'flame.fill', android: 'local_fire_department', web: 'local_fire_department' }
   }, {
     level: 'very-active',
     title: t('onboarding.activity.veryActive'),
     subtitle: t('onboarding.activity.veryActiveSubtitle'),
-    icon: 'bolt.fill'
+    icon: { ios: 'bolt.fill', android: 'bolt', web: 'bolt' }
   }];
   return <View style={styles.container}>
       <ThemedText type="title" style={styles.title} color={theme.text}>

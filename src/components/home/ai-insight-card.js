@@ -10,7 +10,7 @@ export function AiInsightCard({
     backgroundColor: theme.background,
     borderColor: theme.border
   }]}>
-      <SymbolView name="sparkles" size={20} tintColor={theme.primary} />
+      <SymbolView name={{ ios: 'sparkles', android: 'auto_awesome', web: 'auto_awesome' }} size={20} tintColor={theme.primary} />
       <ThemedText type="small" style={styles.text} color={theme.text}>
         {insight}
       </ThemedText>

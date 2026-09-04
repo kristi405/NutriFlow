@@ -25,7 +25,7 @@ export function RecentRecipeRow({ recipe, calories, style }) {
                   {Math.round(calories)} {t('common.kcal')}
                 </ThemedText>}
             </View>
-            <SymbolView name="chevron.right" size={14} tintColor={theme.textSecondary} />
+            <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={14} tintColor={theme.textSecondary} />
           </View>}
       </Pressable>
     </Link>;

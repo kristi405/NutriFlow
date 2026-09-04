@@ -12,9 +12,9 @@ export function ScreenScrollView({
   ...rest
 }) {
   const safeAreaInsets = useSafeAreaInsets();
-  // NativeTabs already reserves safe-area space for its content on iOS/Android,
-  // so this only needs a small breathing-room buffer, not the full safe area
-  // stacked on top of it again.
+  // NativeTabs reserves safe-area space for its content on iOS, but on Android
+  // (edge-to-edge by default) it does not pad the top for the status bar / camera
+  // cutout, so that has to be added here explicitly.
   const insets = {
     top: Spacing.two,
     left: safeAreaInsets.left,
@@ -23,7 +23,7 @@ export function ScreenScrollView({
   };
   const platformStyle = Platform.select({
     android: {
-      paddingTop: insets.top,
+      paddingTop: safeAreaInsets.top + insets.top,
       paddingLeft: insets.left,
       paddingRight: insets.right,
       paddingBottom: insets.bottom

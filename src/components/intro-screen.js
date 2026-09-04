@@ -71,7 +71,7 @@ export function IntroScreen({ onFinish }) {
         <Animated.View style={[styles.iconBadge, {
         transform: [{ scale: Animated.multiply(iconScale, iconPulse) }]
       }]}>
-          <SymbolView name="leaf.fill" size={64} tintColor="#ffffff" />
+          <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={64} tintColor="#ffffff" />
         </Animated.View>
         <Animated.Text style={[styles.title, {
         opacity: titleOpacity,

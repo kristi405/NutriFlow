@@ -9,9 +9,9 @@ import { Colors, LoginButtonGreen, LoginIconBackground, Spacing } from '@/consta
 const theme = Colors.light;
 
 const STEPS = [
-  { icon: 'doc.badge.plus', titleKey: 'aiAnalysis.step1Title', subtitleKey: 'aiAnalysis.step1Subtitle' },
-  { icon: 'sparkles', titleKey: 'aiAnalysis.step2Title', subtitleKey: 'aiAnalysis.step2Subtitle' },
-  { icon: 'heart.text.square.fill', titleKey: 'aiAnalysis.step3Title', subtitleKey: 'aiAnalysis.step3Subtitle' }
+  { icon: { ios: 'doc.badge.plus', android: 'note_add', web: 'note_add' }, titleKey: 'aiAnalysis.step1Title', subtitleKey: 'aiAnalysis.step1Subtitle' },
+  { icon: { ios: 'sparkles', android: 'auto_awesome', web: 'auto_awesome' }, titleKey: 'aiAnalysis.step2Title', subtitleKey: 'aiAnalysis.step2Subtitle' },
+  { icon: { ios: 'heart.text.square.fill', android: 'favorite', web: 'favorite' }, titleKey: 'aiAnalysis.step3Title', subtitleKey: 'aiAnalysis.step3Subtitle' }
 ];
 
 export default function AiAnalysisScreen() {
@@ -33,7 +33,7 @@ export default function AiAnalysisScreen() {
 
       <View style={styles.uploadCard}>
         <View style={styles.uploadIconWrapper}>
-          <SymbolView name="doc.badge.plus" size={28} tintColor={LoginButtonGreen} />
+          <SymbolView name={{ ios: 'doc.badge.plus', android: 'note_add', web: 'note_add' }} size={28} tintColor={LoginButtonGreen} />
         </View>
         <ThemedText type="headline" color={theme.text} style={styles.centerText}>
           {t('aiAnalysis.uploadTitle')}
@@ -42,7 +42,7 @@ export default function AiAnalysisScreen() {
           {t('aiAnalysis.uploadSubtitle')}
         </ThemedText>
         <Pressable onPress={handleUpload} style={({ pressed }) => [styles.uploadButton, pressed && styles.pressed]}>
-          <SymbolView name="arrow.up.doc" size={15} tintColor="#ffffff" />
+          <SymbolView name={{ ios: 'arrow.up.doc', android: 'upload_file', web: 'upload_file' }} size={15} tintColor="#ffffff" />
           <ThemedText type="smallBold" style={styles.uploadButtonText}>
             {t('aiAnalysis.uploadButton')}
           </ThemedText>
@@ -74,7 +74,7 @@ export default function AiAnalysisScreen() {
         <ThemedText type="smallBold" color={theme.text}>
           {t('aiAnalysis.recentAnalyses')}
         </ThemedText>
-        <EmptyState icon="doc.text.magnifyingglass" title={t('aiAnalysis.emptyTitle')} message={t('aiAnalysis.emptyMessage')} />
+        <EmptyState icon={{ ios: 'doc.text.magnifyingglass', android: 'find_in_page', web: 'find_in_page' }} title={t('aiAnalysis.emptyTitle')} message={t('aiAnalysis.emptyMessage')} />
       </View>
     </ScreenScrollView>;
 }

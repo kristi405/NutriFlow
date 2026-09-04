@@ -46,10 +46,10 @@ const theme = Colors.light;
 const CALORIE_MATCH_TOLERANCE = 100;
 const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'];
 const MEAL_TYPE_ICONS = {
-  breakfast: 'sunrise.fill',
-  lunch: 'sun.max.fill',
-  dinner: 'moon.stars.fill',
-  snack: 'leaf.fill'
+  breakfast: { ios: 'sunrise.fill', android: 'wb_twilight', web: 'wb_twilight' },
+  lunch: { ios: 'sun.max.fill', android: 'wb_sunny', web: 'wb_sunny' },
+  dinner: { ios: 'moon.stars.fill', android: 'bedtime', web: 'bedtime' },
+  snack: { ios: 'leaf.fill', android: 'eco', web: 'eco' }
 };
 
 function MealPlanScreen() {
@@ -158,7 +158,7 @@ function MealPlanScreen() {
             </ThemedText>
           </View>
           <Pressable onPress={handleRegenerateToday} hitSlop={8} style={styles.regenerateButton}>
-            <SymbolView name="arrow.clockwise" size={18} tintColor={LoginButtonGreen} />
+            <SymbolView name={{ ios: 'arrow.clockwise', android: 'refresh', web: 'refresh' }} size={18} tintColor={LoginButtonGreen} />
           </Pressable>
         </View>
 
@@ -193,7 +193,7 @@ function MealPlanScreen() {
                 </ThemedText>
               </View>
               <Pressable onPress={() => setSwapMealType(mealType)} hitSlop={8} style={styles.editButton}>
-                <SymbolView name="pencil" size={16} tintColor={LoginButtonGreen} />
+                <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={16} tintColor={LoginButtonGreen} />
               </Pressable>
             </View>
             {items.length === 0 ? <ThemedText type="small" color={theme.textSecondary}>
@@ -214,7 +214,7 @@ function MealPlanScreen() {
       {!hasFullWeekPlanned && <Pressable onPress={handleGenerateWeek} style={[styles.weekButton, {
       bottom: BottomTabInset + Spacing.five + Spacing.two
     }]}>
-          <SymbolView name="calendar.badge.plus" size={16} tintColor="#ffffff" />
+          <SymbolView name={{ ios: 'calendar.badge.plus', android: 'calendar_add_on', web: 'calendar_add_on' }} size={16} tintColor="#ffffff" />
           <ThemedText type="smallBold" style={styles.weekButtonText}>
             {t('mealPlan.weeklyMenu')}
           </ThemedText>
@@ -229,7 +229,7 @@ function MealPlanScreen() {
                 <ThemedText type="caption" color={theme.textSecondary}>{t('mealPlan.swapSubtitle')}</ThemedText>
               </View>
               <Pressable onPress={() => setSwapMealType(null)} hitSlop={8} style={styles.editButton}>
-                <SymbolView name="xmark" size={16} tintColor={LoginButtonGreen} />
+                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={LoginButtonGreen} />
               </Pressable>
             </View>
 
@@ -242,7 +242,7 @@ function MealPlanScreen() {
                         <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{recipe.title}</ThemedText>
                         <ThemedText type="small" color={theme.textSecondary}>{Math.round(calories)} {t('common.kcal')}</ThemedText>
                       </View>
-                      <SymbolView name="chevron.right" size={16} tintColor={theme.textSecondary} />
+                      <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={16} tintColor={theme.textSecondary} />
                     </Pressable>;
             })}
               </View>}

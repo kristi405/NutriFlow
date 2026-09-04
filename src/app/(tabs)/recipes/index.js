@@ -81,13 +81,13 @@ function RecipesScreen() {
   return <ScreenScrollView gap={Spacing.five} horizontalPadding={CONTAINER_PADDING}>
       <View style={styles.searchSection}>
         <View style={styles.searchBar}>
-          <SymbolView name="magnifyingglass" size={16} tintColor={theme.textSecondary} />
+          <SymbolView name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} size={16} tintColor={theme.textSecondary} />
           <TextInput value={query} onChangeText={setQuery} placeholder={t('recipes.searchPlaceholder')} placeholderTextColor={theme.textSecondary} style={styles.searchInput} returnKeyType="search" />
           {query.length > 0 && <Pressable onPress={() => setQuery('')} hitSlop={8}>
-              <SymbolView name="xmark.circle.fill" size={18} tintColor={theme.textSecondary} />
+              <SymbolView name={{ ios: 'xmark.circle.fill', android: 'cancel', web: 'cancel' }} size={18} tintColor={theme.textSecondary} />
             </Pressable>}
           <Pressable onPress={handleVoiceSearch} hitSlop={8} style={[styles.micButton, isListening && styles.micButtonActive]}>
-            <SymbolView name="mic.fill" size={20} tintColor={isListening ? '#ffffff' : theme.textSecondary} />
+            <SymbolView name={{ ios: 'mic.fill', android: 'mic', web: 'mic' }} size={20} tintColor={isListening ? '#ffffff' : theme.textSecondary} />
           </Pressable>
         </View>
 
@@ -98,7 +98,7 @@ function RecipesScreen() {
             </ThemedText>
           </Pressable>
           <Pressable onPress={() => setSelectedFilter(current => current === 'favorites' ? null : 'favorites')} style={[styles.categoryChip, styles.favoritesChip, selectedFilter === 'favorites' && styles.favoritesChipActive]}>
-            <SymbolView name="heart.fill" size={13} tintColor={selectedFilter === 'favorites' ? '#ffffff' : FAVORITE_RED} />
+            <SymbolView name={{ ios: 'heart.fill', android: 'favorite', web: 'favorite' }} size={13} tintColor={selectedFilter === 'favorites' ? '#ffffff' : FAVORITE_RED} />
             <ThemedText type="small" color={selectedFilter === 'favorites' ? '#ffffff' : FAVORITE_RED}>
               {t('recipes.favorites')}
             </ThemedText>
@@ -118,7 +118,7 @@ function RecipesScreen() {
           </ScrollView>
         </View>}
 
-      {collections.length === 0 ? <EmptyState icon="magnifyingglass" title={t('recipes.noResults')} message={t('recipes.noResultsMessage')} /> : collections.map(({ category, rows }) => <View key={category.id} style={styles.section}>
+      {collections.length === 0 ? <EmptyState icon={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} title={t('recipes.noResults')} message={t('recipes.noResultsMessage')} /> : collections.map(({ category, rows }) => <View key={category.id} style={styles.section}>
           <SectionHeader title={category.name} />
           <View style={styles.rows}>
             {rows.map((pair, index) => <View key={index} style={styles.row}>

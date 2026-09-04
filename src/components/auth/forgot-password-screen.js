@@ -64,7 +64,7 @@ export function ForgotPasswordScreen({ onBackToLogin }) {
 
       <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.fieldGroup}>
         <View style={styles.inputWrapper}>
-          <SymbolView name="envelope.fill" size={18} tintColor={theme.textSecondary} />
+          <SymbolView name={{ ios: 'envelope.fill', android: 'mail', web: 'mail' }} size={18} tintColor={theme.textSecondary} />
           <TextInput value={email} onChangeText={text => {
           setEmail(text);
           setError(null);
@@ -72,18 +72,18 @@ export function ForgotPasswordScreen({ onBackToLogin }) {
         </View>
 
         <View style={styles.inputWrapper}>
-          <SymbolView name="lock.fill" size={18} tintColor={theme.textSecondary} />
+          <SymbolView name={{ ios: 'lock.fill', android: 'lock', web: 'lock' }} size={18} tintColor={theme.textSecondary} />
           <TextInput value={newPassword} onChangeText={text => {
           setNewPassword(text);
           setError(null);
         }} placeholder={t('auth.forgotPassword.newPasswordPlaceholder')} placeholderTextColor={theme.textSecondary} secureTextEntry={!showPassword} autoComplete="password-new" style={styles.input} />
           <Pressable onPress={() => setShowPassword(prev => !prev)} hitSlop={8}>
-            <SymbolView name={showPassword ? 'eye.slash.fill' : 'eye.fill'} size={18} tintColor={theme.textSecondary} />
+            <SymbolView name={showPassword ? { ios: 'eye.slash.fill', android: 'visibility_off', web: 'visibility_off' } : { ios: 'eye.fill', android: 'visibility', web: 'visibility' }} size={18} tintColor={theme.textSecondary} />
           </Pressable>
         </View>
 
         <View style={styles.inputWrapper}>
-          <SymbolView name="lock.fill" size={18} tintColor={theme.textSecondary} />
+          <SymbolView name={{ ios: 'lock.fill', android: 'lock', web: 'lock' }} size={18} tintColor={theme.textSecondary} />
           <TextInput value={confirmPassword} onChangeText={text => {
           setConfirmPassword(text);
           setError(null);

@@ -30,7 +30,7 @@ export function OptionCard({
             {subtitle}
           </ThemedText>}
       </View>
-      {selected && <SymbolView name="checkmark.circle.fill" size={20} tintColor={theme.primary} />}
+      {selected && <SymbolView name={{ ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }} size={20} tintColor={theme.primary} />}
     </Pressable>;
 }
 const styles = StyleSheet.create({

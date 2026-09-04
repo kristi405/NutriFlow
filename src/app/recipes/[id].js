@@ -27,9 +27,9 @@ const STATS = [
 ];
 
 const TABS = [
-  { key: 'ingredients', labelKey: 'recipes.ingredients', icon: 'checklist' },
-  { key: 'steps', labelKey: 'recipes.steps', icon: 'doc.text.fill' },
-  { key: 'nutrients', labelKey: 'recipes.nutrients', icon: 'chart.pie.fill' }
+  { key: 'ingredients', labelKey: 'recipes.ingredients', icon: { ios: 'checklist', android: 'checklist', web: 'checklist' } },
+  { key: 'steps', labelKey: 'recipes.steps', icon: { ios: 'doc.text.fill', android: 'description', web: 'description' } },
+  { key: 'nutrients', labelKey: 'recipes.nutrients', icon: { ios: 'chart.pie.fill', android: 'pie_chart', web: 'pie_chart' } }
 ];
 
 const NUTRIENT_ROWS = [
@@ -129,10 +129,10 @@ export default function RecipeDetailScreen() {
       backgroundColor: isScrolledPastImage ? LoginGradientAccent : 'transparent'
     }]}>
         <Pressable onPress={() => router.back()} hitSlop={8} style={styles.floatingButton}>
-          <SymbolView name="chevron.left" size={18} tintColor={theme.text} />
+          <SymbolView name={{ ios: 'chevron.left', android: 'chevron_left', web: 'chevron_left' }} size={18} tintColor={theme.text} />
         </Pressable>
         <Pressable onPress={handleShare} hitSlop={8} style={styles.floatingButton}>
-          <SymbolView name="square.and.arrow.up" size={17} tintColor={theme.text} />
+          <SymbolView name={{ ios: 'square.and.arrow.up', android: 'ios_share', web: 'ios_share' }} size={17} tintColor={theme.text} />
         </Pressable>
       </View>
 
@@ -152,9 +152,9 @@ export default function RecipeDetailScreen() {
           </View>
 
           <View style={styles.metaRow}>
-            <MetaItem icon="clock" label={`${totalTime} ${t('common.min')}`} color={WATER_BLUE} />
-            <MetaItem icon="person.2.fill" label={`${recipe.servings} ${t('recipes.servings')}`} />
-            <MetaItem icon="chart.bar.fill" label={t(`recipes.difficulty.${recipe.difficulty}`, { defaultValue: recipe.difficulty })} color={recipe.difficulty === 'easy' ? theme.primary : theme.textSecondary} />
+            <MetaItem icon={{ ios: 'clock', android: 'schedule', web: 'schedule' }} label={`${totalTime} ${t('common.min')}`} color={WATER_BLUE} />
+            <MetaItem icon={{ ios: 'person.2.fill', android: 'group', web: 'group' }} label={`${recipe.servings} ${t('recipes.servings')}`} />
+            <MetaItem icon={{ ios: 'chart.bar.fill', android: 'bar_chart', web: 'bar_chart' }} label={t(`recipes.difficulty.${recipe.difficulty}`, { defaultValue: recipe.difficulty })} color={recipe.difficulty === 'easy' ? theme.primary : theme.textSecondary} />
           </View>
 
           {nutrition && <View style={styles.statsCard}>
@@ -198,7 +198,7 @@ export default function RecipeDetailScreen() {
               <View style={styles.sectionHeaderRow}>
                 <ThemedText type="headline" color={theme.text}>{t('recipes.ingredients')}</ThemedText>
                 <Pressable onPress={() => setIsEditingIngredients(current => !current)} hitSlop={8} style={[styles.editButton, isEditingIngredients && styles.editButtonActive]}>
-                  <SymbolView name={isEditingIngredients ? 'checkmark' : 'square.and.pencil'} size={15} tintColor={isEditingIngredients ? '#ffffff' : LoginButtonGreen} />
+                  <SymbolView name={isEditingIngredients ? { ios: 'checkmark', android: 'check', web: 'check' } : { ios: 'square.and.pencil', android: 'edit_square', web: 'edit_square' }} size={15} tintColor={isEditingIngredients ? '#ffffff' : LoginButtonGreen} />
                   <ThemedText type="small" color={isEditingIngredients ? '#ffffff' : LoginButtonGreen}>
                     {isEditingIngredients ? t('common.done') : t('common.edit')}
                   </ThemedText>
@@ -210,7 +210,7 @@ export default function RecipeDetailScreen() {
                 const isExcluded = excludedIngredientIds.has(line.ingredientId);
                 const RowComponent = isEditingIngredients ? Pressable : View;
                 return <RowComponent key={line.ingredientId} onPress={isEditingIngredients ? () => toggleIngredient(line.ingredientId) : undefined} style={styles.ingredientRow}>
-                      {isEditingIngredients && <SymbolView name={isExcluded ? 'circle' : 'checkmark.circle.fill'} size={22} tintColor={isExcluded ? theme.border : theme.primary} />}
+                      {isEditingIngredients && <SymbolView name={isExcluded ? { ios: 'circle', android: 'radio_button_unchecked', web: 'radio_button_unchecked' } : { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }} size={22} tintColor={isExcluded ? theme.border : theme.primary} />}
                       <View style={styles.ingredientCard}>
                         <ThemedText type="small" color={isExcluded ? theme.textSecondary : theme.text} style={isExcluded && styles.strikethrough}>
                           {ingredient?.name ?? line.ingredientId}

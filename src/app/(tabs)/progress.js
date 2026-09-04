@@ -26,19 +26,19 @@ const STAT_CARD_GAP = Spacing.two;
 const STAT_CARD_WIDTH = (Dimensions.get('window').width - CONTAINER_PADDING * 2 - STAT_CARD_GAP) / 2;
 
 const ACHIEVEMENTS = [{
-  icon: 'flame.fill',
+  icon: { ios: 'flame.fill', android: 'local_fire_department', web: 'local_fire_department' },
   titleKey: 'progress.achievementStreakTitle',
   subtitleKey: 'progress.achievementStreakSubtitle'
 }, {
-  icon: 'drop.fill',
+  icon: { ios: 'drop.fill', android: 'water_drop', web: 'water_drop' },
   titleKey: 'progress.achievementWaterTitle',
   subtitleKey: 'progress.achievementWaterSubtitle'
 }, {
-  icon: 'bolt.fill',
+  icon: { ios: 'bolt.fill', android: 'bolt', web: 'bolt' },
   titleKey: 'progress.achievementProteinTitle',
   subtitleKey: 'progress.achievementProteinSubtitle'
 }, {
-  icon: 'fork.knife',
+  icon: { ios: 'fork.knife', android: 'restaurant_menu', web: 'restaurant_menu' },
   titleKey: 'progress.achievementFirstRecipeTitle',
   subtitleKey: 'progress.achievementFirstRecipeSubtitle'
 }];
@@ -109,10 +109,10 @@ function ProgressScreen() {
       </View>
 
       <View style={styles.statsGrid}>
-        <StatCard icon="scalemass.fill" label={t('progress.currentWeight')} value={Math.round(currentWeightKg * 10) / 10} unit={t('common.kg')} />
-        <StatCard icon="arrow.down.right" label={t('progress.weightLost')} value={Math.round(weightLostKg * 10) / 10} unit={t('common.kg')} />
-        <StatCard icon="figure" label={t('progress.bmi')} value={Math.round(bmi * 10) / 10} />
-        <StatCard icon="target" label={t('progress.targetWeight')} value={targetWeightKg !== undefined ? Math.round(targetWeightKg * 10) / 10 : '—'} unit={targetWeightKg !== undefined ? t('common.kg') : undefined} />
+        <StatCard icon={{ ios: 'scalemass.fill', android: 'monitor_weight', web: 'monitor_weight' }} label={t('progress.currentWeight')} value={Math.round(currentWeightKg * 10) / 10} unit={t('common.kg')} />
+        <StatCard icon={{ ios: 'arrow.down.right', android: 'south_east', web: 'south_east' }} label={t('progress.weightLost')} value={Math.round(weightLostKg * 10) / 10} unit={t('common.kg')} />
+        <StatCard icon={{ ios: 'figure', android: 'accessibility_new', web: 'accessibility_new' }} label={t('progress.bmi')} value={Math.round(bmi * 10) / 10} />
+        <StatCard icon={{ ios: 'target', android: 'target', web: 'target' }} label={t('progress.targetWeight')} value={targetWeightKg !== undefined ? Math.round(targetWeightKg * 10) / 10 : '—'} unit={targetWeightKg !== undefined ? t('common.kg') : undefined} />
       </View>
 
       <View style={styles.card}>

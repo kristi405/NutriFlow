@@ -87,7 +87,7 @@ function HomeScreen() {
   return <ScreenScrollView gap={Spacing.three}>
       <Pressable onPress={() => router.push('/profile')} style={styles.headerRow}>
         <View style={styles.avatar}>
-          <SymbolView name="person.fill" size={22} tintColor={LoginButtonGreen} />
+          <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={22} tintColor={LoginButtonGreen} />
         </View>
         <View style={styles.headerTextColumn}>
           <View style={styles.greetingRow}>
@@ -101,7 +101,7 @@ function HomeScreen() {
           </ThemedText>
         </View>
         <View style={styles.settingsButton}>
-          <SymbolView name="gearshape" size={30} tintColor={theme.textSecondary} />
+          <SymbolView name={{ ios: 'gearshape', android: 'settings', web: 'settings' }} size={30} tintColor={theme.textSecondary} />
         </View>
       </Pressable>
 
@@ -120,21 +120,21 @@ function HomeScreen() {
           <CalorieRing consumed={total.nutrition.calories} target={targets.calories} size={140} strokeWidth={12} />
           <View style={styles.calorieStatsColumn}>
             <View style={styles.calorieStatRow}>
-              <SymbolView name="fork.knife" size={18} tintColor={theme.primary} />
+              <SymbolView name={{ ios: 'fork.knife', android: 'restaurant_menu', web: 'restaurant_menu' }} size={18} tintColor={theme.primary} />
               <View>
                 <ThemedText type="smallBold" style={styles.calorieStatValue} color={theme.primary}>{consumedCalories} {t('common.kcal')}</ThemedText>
                 <ThemedText type="caption" color={theme.textSecondary}>{t('home.consumed')}</ThemedText>
               </View>
             </View>
             <View style={styles.calorieStatRow}>
-              <SymbolView name="flame.fill" size={18} tintColor={theme.warning} />
+              <SymbolView name={{ ios: 'flame.fill', android: 'local_fire_department', web: 'local_fire_department' }} size={18} tintColor={theme.warning} />
               <View>
                 <ThemedText type="smallBold" style={styles.calorieStatValue} color={theme.warning}>{burnedCalories} {t('common.kcal')}</ThemedText>
                 <ThemedText type="caption" color={theme.textSecondary}>{t('home.burned')}</ThemedText>
               </View>
             </View>
             <View style={styles.calorieStatRow}>
-              <SymbolView name="gauge" size={18} tintColor={theme.secondary} />
+              <SymbolView name={{ ios: 'gauge', android: 'speed', web: 'speed' }} size={18} tintColor={theme.secondary} />
               <View>
                 <ThemedText type="smallBold" style={styles.calorieStatValue} color={theme.secondary}>{remainingCalories} {t('common.kcal')}</ThemedText>
                 <ThemedText type="caption" color={theme.textSecondary}>{t('home.remaining')}</ThemedText>

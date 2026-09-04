@@ -27,7 +27,7 @@ export function WavingHand({ size = 18 }) {
 
   return <Pressable onPress={() => setToneIndex(index => (index + 1) % SKIN_TONES.length)} hitSlop={8}>
       <Animated.View style={{ transform: [{ rotate }] }}>
-        <SymbolView name="hand.wave.fill" size={size} tintColor={SKIN_TONES[toneIndex]} />
+        <SymbolView name={{ ios: 'hand.wave.fill', android: 'waving_hand', web: 'waving_hand' }} size={size} tintColor={SKIN_TONES[toneIndex]} />
       </Animated.View>
     </Pressable>;
 }

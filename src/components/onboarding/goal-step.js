@@ -16,27 +16,27 @@ export function GoalStep({
     type: 'lose-weight',
     title: t('onboarding.goal.loseWeight'),
     subtitle: t('onboarding.goal.loseWeightSubtitle'),
-    icon: 'arrow.down.circle'
+    icon: { ios: 'arrow.down.circle', android: 'arrow_circle_down', web: 'arrow_circle_down' }
   }, {
     type: 'maintain-weight',
     title: t('onboarding.goal.maintainWeight'),
     subtitle: t('onboarding.goal.maintainWeightSubtitle'),
-    icon: 'equal.circle'
+    icon: { ios: 'equal.circle', android: 'balance', web: 'balance' }
   }, {
     type: 'gain-weight',
     title: t('onboarding.goal.gainWeight'),
     subtitle: t('onboarding.goal.gainWeightSubtitle'),
-    icon: 'arrow.up.circle'
+    icon: { ios: 'arrow.up.circle', android: 'arrow_circle_up', web: 'arrow_circle_up' }
   }, {
     type: 'build-muscle',
     title: t('onboarding.goal.buildMuscle'),
     subtitle: t('onboarding.goal.buildMuscleSubtitle'),
-    icon: 'figure.strengthtraining.traditional'
+    icon: { ios: 'figure.strengthtraining.traditional', android: 'fitness_center', web: 'fitness_center' }
   }, {
     type: 'eat-healthier',
     title: t('onboarding.goal.eatHealthier'),
     subtitle: t('onboarding.goal.eatHealthierSubtitle'),
-    icon: 'leaf'
+    icon: { ios: 'leaf', android: 'eco', web: 'eco' }
   }];
   return <View style={styles.container}>
       <ThemedText type="title" style={styles.title} color={theme.text}>

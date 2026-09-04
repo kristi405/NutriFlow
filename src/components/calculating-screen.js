@@ -43,7 +43,7 @@ export function CalculatingScreen() {
   return <LinearGradient colors={[Colors.light.background, Colors.light.primarySoft, LoginGradientAccent]} style={styles.flex1}>
       <View style={styles.content}>
         <Animated.View style={{ transform: [{ scale: pulse }] }}>
-          <SymbolView name="leaf.fill" size={32} tintColor={LoginButtonGreen} />
+          <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={32} tintColor={LoginButtonGreen} />
         </Animated.View>
 
         <View style={styles.track}>

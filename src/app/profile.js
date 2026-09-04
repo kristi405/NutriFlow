@@ -70,27 +70,27 @@ function ProfileScreen() {
   const activityLabel = profile.activityLevel ? t(ACTIVITY_LABEL_KEYS[profile.activityLevel] ?? '', { defaultValue: profile.activityLevel }) : '—';
 
   const infoRows = [{
-    icon: 'flag.fill',
+    icon: { ios: 'flag.fill', android: 'flag', web: 'flag' },
     label: t('profile.goal'),
     value: goalLabel
   }, {
-    icon: 'birthday.cake.fill',
+    icon: { ios: 'birthday.cake.fill', android: 'cake', web: 'cake' },
     label: t('onboarding.personalInfo.age'),
     value: profile.age
   }, {
-    icon: 'ruler.fill',
+    icon: { ios: 'ruler.fill', android: 'straighten', web: 'straighten' },
     label: t('onboarding.personalInfo.height'),
     value: `${profile.heightCm} cm`
   }, {
-    icon: 'scalemass.fill',
+    icon: { ios: 'scalemass.fill', android: 'monitor_weight', web: 'monitor_weight' },
     label: t('onboarding.personalInfo.weight'),
     value: `${profile.weightKg} ${t('common.kg')}`
   }, {
-    icon: 'target',
+    icon: { ios: 'target', android: 'target', web: 'target' },
     label: t('onboarding.personalInfo.targetWeight'),
     value: profile.targetWeightKg !== undefined ? `${profile.targetWeightKg} ${t('common.kg')}` : '—'
   }, {
-    icon: 'figure.walk',
+    icon: { ios: 'figure.walk', android: 'directions_walk', web: 'directions_walk' },
     label: t('profile.activityLevel'),
     value: activityLabel
   }];
@@ -113,7 +113,7 @@ function ProfileScreen() {
             </ThemedText>
           </View>
           <Pressable onPress={() => showComingSoon(t('profile.editPhoto'))} hitSlop={8} style={styles.avatarEditBadge}>
-            <SymbolView name="pencil" size={11} tintColor="#ffffff" />
+            <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={11} tintColor="#ffffff" />
           </Pressable>
         </View>
         <View style={styles.heroTextColumn}>
@@ -121,23 +121,23 @@ function ProfileScreen() {
           <ThemedText type="caption" color="#ffffff">{account?.email ?? ''}</ThemedText>
         </View>
         <Pressable onPress={() => showComingSoon(t('profile.editProfile'))} hitSlop={8} style={styles.editButton}>
-          <SymbolView name="pencil" size={20} tintColor="#ffffff" />
+          <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={20} tintColor="#ffffff" />
         </Pressable>
       </LinearGradient>
 
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
-          <SymbolView name="fork.knife" size={20} tintColor={LoginButtonGreen} />
+          <SymbolView name={{ ios: 'fork.knife', android: 'restaurant_menu', web: 'restaurant_menu' }} size={20} tintColor={LoginButtonGreen} />
           <ThemedText type="smallBold" color={theme.text}>{foodLogStore.entries.length}</ThemedText>
           <ThemedText type="caption" color={theme.textSecondary}>{t('profile.mealsLogged')}</ThemedText>
         </View>
         <View style={styles.statCard}>
-          <SymbolView name="calendar" size={20} tintColor={theme.secondary} />
+          <SymbolView name={{ ios: 'calendar', android: 'calendar_month', web: 'calendar_month' }} size={20} tintColor={theme.secondary} />
           <ThemedText type="smallBold" color={theme.text}>{mealPlanStore.items.length}</ThemedText>
           <ThemedText type="caption" color={theme.textSecondary}>{t('profile.mealsPlanned')}</ThemedText>
         </View>
         <View style={styles.statCard}>
-          <SymbolView name="star" size={20} tintColor="#FFC107" />
+          <SymbolView name={{ ios: 'star', android: 'star', web: 'star' }} size={20} tintColor="#FFC107" />
           <ThemedText type="smallBold" color={theme.text}>{memberSinceLabel}</ThemedText>
           <ThemedText type="caption" color={theme.textSecondary}>{t('profile.memberSince')}</ThemedText>
         </View>
@@ -146,11 +146,11 @@ function ProfileScreen() {
       <View style={styles.card}>
         <View style={styles.cardHeaderRow}>
           <View style={styles.cardTitleRow}>
-            <SymbolView name="target" size={16} tintColor={LoginButtonGreen} />
+            <SymbolView name={{ ios: 'target', android: 'target', web: 'target' }} size={16} tintColor={LoginButtonGreen} />
             <ThemedText type="smallBold" color={theme.text}>{t('profile.personalGoals')}</ThemedText>
           </View>
           <Pressable onPress={() => showComingSoon(t('profile.personalGoals'))} hitSlop={8}>
-            <SymbolView name="pencil" size={16} tintColor={theme.textSecondary} />
+            <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={16} tintColor={theme.textSecondary} />
           </Pressable>
         </View>
         <View style={styles.infoList}>
@@ -166,12 +166,12 @@ function ProfileScreen() {
 
       <View style={styles.card}>
         <View style={styles.cardTitleRow}>
-          <SymbolView name="fork.knife" size={16} tintColor={LoginButtonGreen} />
+          <SymbolView name={{ ios: 'fork.knife', android: 'restaurant_menu', web: 'restaurant_menu' }} size={16} tintColor={LoginButtonGreen} />
           <ThemedText type="smallBold" color={theme.text}>{t('profile.dietPreferences')}</ThemedText>
         </View>
         <View style={styles.preferenceGroup}>
           <View style={styles.preferenceLabelRow}>
-            <SymbolView name="leaf.fill" size={13} tintColor={theme.textSecondary} />
+            <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={13} tintColor={theme.textSecondary} />
             <ThemedText type="caption" color={theme.textSecondary}>{t('profile.dietary')}</ThemedText>
           </View>
           <View style={styles.chipRow}>
@@ -184,7 +184,7 @@ function ProfileScreen() {
         </View>
         <View style={styles.preferenceGroup}>
           <View style={styles.preferenceLabelRow}>
-            <SymbolView name="exclamationmark.triangle.fill" size={13} tintColor={theme.textSecondary} />
+            <SymbolView name={{ ios: 'exclamationmark.triangle.fill', android: 'warning', web: 'warning' }} size={13} tintColor={theme.textSecondary} />
             <ThemedText type="caption" color={theme.textSecondary}>{t('profile.allergies')}</ThemedText>
           </View>
           <View style={styles.chipRow}>
@@ -199,18 +199,18 @@ function ProfileScreen() {
 
       <View style={styles.card}>
         <View style={styles.cardTitleRow}>
-          <SymbolView name="gearshape.fill" size={16} tintColor={LoginButtonGreen} />
+          <SymbolView name={{ ios: 'gearshape.fill', android: 'settings', web: 'settings' }} size={16} tintColor={LoginButtonGreen} />
           <ThemedText type="smallBold" color={theme.text}>{t('profile.settings')}</ThemedText>
         </View>
         <View style={styles.settingsList}>
-          <SettingsRow icon="bell.fill" label={t('profile.notifications')} onPress={() => showComingSoon(t('profile.notifications'))} />
-          <SettingsRow icon="moon.fill" label={t('profile.darkMode')} right={<Switch value={false} onValueChange={() => showComingSoon(t('profile.darkMode'))} trackColor={{
+          <SettingsRow icon={{ ios: 'bell.fill', android: 'notifications', web: 'notifications' }} label={t('profile.notifications')} onPress={() => showComingSoon(t('profile.notifications'))} />
+          <SettingsRow icon={{ ios: 'moon.fill', android: 'dark_mode', web: 'dark_mode' }} label={t('profile.darkMode')} right={<Switch value={false} onValueChange={() => showComingSoon(t('profile.darkMode'))} trackColor={{
           false: theme.border,
           true: LoginButtonGreen
         }} />} />
-          <SettingsRow icon="globe" label={t('profile.language')} onPress={() => showComingSoon(t('profile.language'))} />
-          <SettingsRow icon="lock.fill" label={t('profile.privacySecurity')} onPress={() => showComingSoon(t('profile.privacySecurity'))} />
-          <SettingsRow icon="questionmark.circle.fill" label={t('profile.helpSupport')} onPress={() => showComingSoon(t('profile.helpSupport'))} last />
+          <SettingsRow icon={{ ios: 'globe', android: 'language', web: 'language' }} label={t('profile.language')} onPress={() => showComingSoon(t('profile.language'))} />
+          <SettingsRow icon={{ ios: 'lock.fill', android: 'lock', web: 'lock' }} label={t('profile.privacySecurity')} onPress={() => showComingSoon(t('profile.privacySecurity'))} />
+          <SettingsRow icon={{ ios: 'questionmark.circle.fill', android: 'help', web: 'help' }} label={t('profile.helpSupport')} onPress={() => showComingSoon(t('profile.helpSupport'))} last />
         </View>
       </View>
 
@@ -228,7 +228,7 @@ function SettingsRow({ icon, label, onPress, right, last }) {
         <SymbolView name={icon} size={16} tintColor={theme.textSecondary} />
         <ThemedText type="small" color={theme.text}>{label}</ThemedText>
       </View>
-      {right ?? <SymbolView name="chevron.right" size={14} tintColor={theme.textSecondary} />}
+      {right ?? <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={14} tintColor={theme.textSecondary} />}
     </View>;
   if (!onPress) return content;
   return <Pressable onPress={onPress}>{content}</Pressable>;

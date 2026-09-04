@@ -11,7 +11,7 @@ export function RecipeImage({ uri, style, contentFit = 'cover', transition = 150
 
   if (!uri || failed) {
     return <View style={[styles.fallback, style]}>
-        <SymbolView name="fork.knife" size={iconSize} tintColor={theme.textSecondary} />
+        <SymbolView name={{ ios: 'fork.knife', android: 'restaurant_menu', web: 'restaurant_menu' }} size={iconSize} tintColor={theme.textSecondary} />
       </View>;
   }
 

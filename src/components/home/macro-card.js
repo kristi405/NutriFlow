@@ -20,7 +20,7 @@ export function MacroCard({ label, value, target, color, unit = 'g', detailed, t
           backgroundColor: color
         }]} />
           <ThemedText type="caption" color={theme.textSecondary}>{label}</ThemedText>
-          {goalReached && <SymbolView name="star.fill" size={12} tintColor="#FFC107" />}
+          {goalReached && <SymbolView name={{ ios: 'star.fill', android: 'star', web: 'star' }} size={12} tintColor="#FFC107" />}
         </View>
         <View style={styles.valueGroup}>
           <View style={styles.valueRow}>

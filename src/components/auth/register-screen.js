@@ -40,7 +40,7 @@ export function RegisterScreen({ onSwitchToLogin }) {
 
   return <View style={styles.container}>
       <Animated.View entering={ZoomIn.springify().duration(500)} style={styles.iconBadge}>
-        <SymbolView name="leaf.fill" size={24} tintColor="#ffffff" />
+        <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={24} tintColor="#ffffff" />
       </Animated.View>
 
       <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.header}>
@@ -52,7 +52,7 @@ export function RegisterScreen({ onSwitchToLogin }) {
 
       <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.fieldGroup}>
         <View style={styles.inputWrapper}>
-          <SymbolView name="envelope.fill" size={18} tintColor={theme.textSecondary} />
+          <SymbolView name={{ ios: 'envelope.fill', android: 'mail', web: 'mail' }} size={18} tintColor={theme.textSecondary} />
           <TextInput value={email} onChangeText={text => {
           setEmail(text);
           setError(null);
@@ -60,24 +60,24 @@ export function RegisterScreen({ onSwitchToLogin }) {
         </View>
 
         <View style={styles.inputWrapper}>
-          <SymbolView name="lock.fill" size={18} tintColor={theme.textSecondary} />
+          <SymbolView name={{ ios: 'lock.fill', android: 'lock', web: 'lock' }} size={18} tintColor={theme.textSecondary} />
           <TextInput value={password} onChangeText={text => {
           setPassword(text);
           setError(null);
         }} placeholder={t('auth.register.passwordPlaceholder')} placeholderTextColor={theme.textSecondary} secureTextEntry={!showPassword} autoComplete="password-new" style={styles.input} />
           <Pressable onPress={() => setShowPassword(prev => !prev)} hitSlop={8}>
-            <SymbolView name={showPassword ? 'eye.slash.fill' : 'eye.fill'} size={18} tintColor={theme.textSecondary} />
+            <SymbolView name={showPassword ? { ios: 'eye.slash.fill', android: 'visibility_off', web: 'visibility_off' } : { ios: 'eye.fill', android: 'visibility', web: 'visibility' }} size={18} tintColor={theme.textSecondary} />
           </Pressable>
         </View>
 
         <View style={styles.inputWrapper}>
-          <SymbolView name="lock.fill" size={18} tintColor={theme.textSecondary} />
+          <SymbolView name={{ ios: 'lock.fill', android: 'lock', web: 'lock' }} size={18} tintColor={theme.textSecondary} />
           <TextInput value={confirmPassword} onChangeText={text => {
           setConfirmPassword(text);
           setError(null);
         }} placeholder={t('auth.register.confirmPasswordPlaceholder')} placeholderTextColor={theme.textSecondary} secureTextEntry={!showConfirmPassword} autoComplete="password-new" style={styles.input} />
           <Pressable onPress={() => setShowConfirmPassword(prev => !prev)} hitSlop={8}>
-            <SymbolView name={showConfirmPassword ? 'eye.slash.fill' : 'eye.fill'} size={18} tintColor={theme.textSecondary} />
+            <SymbolView name={showConfirmPassword ? { ios: 'eye.slash.fill', android: 'visibility_off', web: 'visibility_off' } : { ios: 'eye.fill', android: 'visibility', web: 'visibility' }} size={18} tintColor={theme.textSecondary} />
           </Pressable>
         </View>
       </Animated.View>

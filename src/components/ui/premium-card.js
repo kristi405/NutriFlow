@@ -15,13 +15,13 @@ export function PremiumCard({ style }) {
 
   return <Pressable onPress={handlePress} style={[styles.card, style]}>
       <View style={styles.iconWrapper}>
-        <SymbolView name="crown.fill" size={20} tintColor="#ffffff" />
+        <SymbolView name={{ ios: 'crown.fill', android: 'workspace_premium', web: 'workspace_premium' }} size={20} tintColor="#ffffff" />
       </View>
       <View style={styles.textColumn}>
         <ThemedText type="smallBold" color="#ffffff">{t('profile.premiumTitle')}</ThemedText>
         <ThemedText type="caption" color="#ffffff">{t('profile.premiumSubtitle')}</ThemedText>
       </View>
-      <SymbolView name="chevron.right" size={16} tintColor="#ffffff" />
+      <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={16} tintColor="#ffffff" />
     </Pressable>;
 }
 

@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef, useState } from 'react';
 import { useColorScheme } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { AuthFlow } from '@/components/auth/auth-flow';
 import { CalculatingScreen } from '@/components/calculating-screen';
@@ -65,10 +66,12 @@ function TabLayout() {
         }} />
       </Stack>;
   }
-  return <QueryClientProvider client={queryClient}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        {showIntro ? <IntroScreen onFinish={() => setShowIntro(false)} /> : renderContent()}
-      </ThemeProvider>
-    </QueryClientProvider>;
+  return <SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          {showIntro ? <IntroScreen onFinish={() => setShowIntro(false)} /> : renderContent()}
+        </ThemeProvider>
+      </QueryClientProvider>
+    </SafeAreaProvider>;
 }
 export default observer(TabLayout);

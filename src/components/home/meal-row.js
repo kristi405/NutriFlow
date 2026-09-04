@@ -29,7 +29,7 @@ export function MealRow({
     }])}>
         {({ pressed }) => <View style={[styles.rowInner, pressed && styles.pressed]}>
             {onToggleEaten && <Pressable onPress={onToggleEaten} hitSlop={8}>
-                <SymbolView name={isEaten ? 'checkmark.circle.fill' : 'circle'} size={24} tintColor={isEaten ? LoginButtonGreen : theme.border} />
+                <SymbolView name={isEaten ? { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' } : { ios: 'circle', android: 'radio_button_unchecked', web: 'radio_button_unchecked' }} size={24} tintColor={isEaten ? LoginButtonGreen : theme.border} />
               </Pressable>}
             <RecipeImage uri={imageUrl} style={styles.image} iconSize={18} />
             <View style={styles.textWrapper}>

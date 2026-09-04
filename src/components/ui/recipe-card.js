@@ -32,7 +32,7 @@ function RecipeCardComponent({
                   </ThemedText>
                 </View>}
               <Pressable onPress={() => favoritesStore.toggleFavorite(recipe.id)} hitSlop={8} style={styles.bookmarkButton}>
-                <SymbolView name={isFavorite ? 'bookmark.fill' : 'bookmark'} size={18} tintColor={isFavorite ? theme.primary : theme.text} />
+                <SymbolView name={isFavorite ? { ios: 'bookmark.fill', android: 'bookmark', web: 'bookmark' } : { ios: 'bookmark', android: 'bookmark_border', web: 'bookmark_border' }} size={18} tintColor={isFavorite ? theme.primary : theme.text} />
               </Pressable>
             </View>
             <View style={styles.body}>
@@ -41,7 +41,7 @@ function RecipeCardComponent({
               </ThemedText>
               <View style={styles.metaRow}>
                 <View style={styles.metaItem}>
-                  <SymbolView name="clock" size={11} tintColor={theme.textSecondary} />
+                  <SymbolView name={{ ios: 'clock', android: 'schedule', web: 'schedule' }} size={11} tintColor={theme.textSecondary} />
                   <ThemedText type="caption" color={theme.textSecondary}>
                     {totalTime} {t('common.min')}
                   </ThemedText>

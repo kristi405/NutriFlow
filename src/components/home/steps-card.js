@@ -23,9 +23,9 @@ export function StepsCard() {
   }]}>
       <View style={styles.headerRow}>
         <View style={styles.titleRow}>
-          <SymbolView name="figure.walk" size={18} tintColor={theme.primary} />
+          <SymbolView name={{ ios: 'figure.walk', android: 'directions_walk', web: 'directions_walk' }} size={18} tintColor={theme.primary} />
           <ThemedText type="smallBold" color={theme.text}>{t('home.steps')}</ThemedText>
-          {goalReached && <SymbolView name="star.fill" size={14} tintColor="#FFC107" />}
+          {goalReached && <SymbolView name={{ ios: 'star.fill', android: 'star', web: 'star' }} size={14} tintColor="#FFC107" />}
         </View>
         <ThemedText type="small" color={theme.textSecondary}>
           {steps.toLocaleString()} / {DAILY_STEP_GOAL.toLocaleString()}

@@ -21,16 +21,16 @@ export function WaterCard({
   }]}>
       <View style={styles.headerRow}>
         <View style={styles.titleRow}>
-          <SymbolView name="drop.fill" size={16} tintColor={WATER_BLUE} />
+          <SymbolView name={{ ios: 'drop.fill', android: 'water_drop', web: 'water_drop' }} size={16} tintColor={WATER_BLUE} />
           <ThemedText type="smallBold" color={theme.text}>{t('nutrition.water')}</ThemedText>
-          {goalReached && <SymbolView name="star.fill" size={14} tintColor="#FFC107" />}
+          {goalReached && <SymbolView name={{ ios: 'star.fill', android: 'star', web: 'star' }} size={14} tintColor="#FFC107" />}
         </View>
         <View style={styles.headerRight}>
           <ThemedText type="small" color={theme.textSecondary}>
             {(consumedMl / 1000).toFixed(1)} / {(targetMl / 1000).toFixed(1)} L
           </ThemedText>
           <Pressable onPress={() => onAdd(-Math.min(100, consumedMl))} hitSlop={8} disabled={consumedMl <= 0}>
-            <SymbolView name="minus.circle" size={18} tintColor={consumedMl <= 0 ? theme.border : WATER_BLUE} />
+            <SymbolView name={{ ios: 'minus.circle', android: 'remove_circle', web: 'remove_circle' }} size={18} tintColor={consumedMl <= 0 ? theme.border : WATER_BLUE} />
           </Pressable>
         </View>
       </View>

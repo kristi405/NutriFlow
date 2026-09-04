@@ -47,7 +47,7 @@ function UnitDropdown({ value, options, onChange }) {
   return <>
       <Pressable onPress={() => setOpen(true)} style={styles.unitButton}>
         <ThemedText type="small" color={LoginButtonGreen} style={styles.modalOptionActiveText}>{value}</ThemedText>
-        <SymbolView name="chevron.down" size={10} tintColor={LoginButtonGreen} />
+        <SymbolView name={{ ios: 'chevron.down', android: 'expand_more', web: 'expand_more' }} size={10} tintColor={LoginButtonGreen} />
       </Pressable>
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Pressable style={styles.modalBackdrop} onPress={() => setOpen(false)}>
@@ -59,7 +59,7 @@ function UnitDropdown({ value, options, onChange }) {
                 <ThemedText type="default" color={option === value ? LoginButtonGreen : theme.text} style={option === value ? styles.modalOptionActiveText : undefined}>
                   {option}
                 </ThemedText>
-                {option === value && <SymbolView name="checkmark" size={16} tintColor={LoginButtonGreen} />}
+                {option === value && <SymbolView name={{ ios: 'checkmark', android: 'check', web: 'check' }} size={16} tintColor={LoginButtonGreen} />}
               </Pressable>)}
           </View>
         </Pressable>
