@@ -49,7 +49,8 @@
           "microphonePermission": "Allow NutriFlow to use the microphone for voice search.",
           "speechRecognitionPermission": "Allow NutriFlow to use speech recognition for voice search."
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "experiments": {
       "reactCompiler": false

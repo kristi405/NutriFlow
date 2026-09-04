@@ -6,8 +6,8 @@ const TOLERANCE_KCAL = 50;
 const MIN_DINNER_SERVINGS = 0.5;
 const MAX_DINNER_SERVINGS = 3;
 const SERVINGS_STEP = 0.25;
-// Lunch/dinner slots draw from any category except breakfast and snack — salad included.
-const LUNCH_DINNER_CATEGORIES = ['lunch', 'dinner', 'salad'];
+// Salad recipes are dinner-only — never eligible for the lunch slot.
+const DINNER_CATEGORIES = ['dinner', 'salad'];
 
 function shuffle(array) {
   const copy = [...array];
@@ -26,9 +26,9 @@ function toItems({ breakfast, lunch, dinner, dinnerServings = 1, snack }) {
 
 /**
  * Randomly picks breakfast/lunch/dinner(/snack) recipes whose combined
- * calories land within TOLERANCE_KCAL of the target. Breakfast always comes
- * from the "breakfast" category; lunch/dinner draw from the lunch, dinner and
- * salad categories. When includeSnack is true (default), one recipe from the
+ * calories land within TOLERANCE_KCAL of the target. Each meal draws from its
+ * matching category — breakfast, lunch, snack — except dinner, which also
+ * accepts salads. When includeSnack is true (default), one recipe from the
  * "snack" category is picked once and counted toward the calorie-fit target
  * along with the other three meals.
  *
@@ -43,8 +43,9 @@ function toItems({ breakfast, lunch, dinner, dinnerServings = 1, snack }) {
  */
 export function generateDailyMealPlan(targetCalories, { includeSnack = true } = {}) {
   const breakfastPool = RECIPES.filter(recipe => recipe.categoryId === 'breakfast');
-  const otherPool = RECIPES.filter(recipe => LUNCH_DINNER_CATEGORIES.includes(recipe.categoryId));
-  if (breakfastPool.length === 0 || otherPool.length < 2) return [];
+  const lunchPool = RECIPES.filter(recipe => recipe.categoryId === 'lunch');
+  const dinnerPool = RECIPES.filter(recipe => DINNER_CATEGORIES.includes(recipe.categoryId));
+  if (breakfastPool.length === 0 || lunchPool.length === 0 || dinnerPool.length === 0) return [];
 
   const snackPool = RECIPES.filter(recipe => recipe.categoryId === 'snack');
   const snack = includeSnack && snackPool.length > 0 ? shuffle(snackPool)[0] : undefined;
@@ -59,8 +60,8 @@ export function generateDailyMealPlan(targetCalories, { includeSnack = true } = 
   const snackCal = snack ? caloriesFor(snack) : 0;
 
   const breakfasts = shuffle(breakfastPool);
-  const lunches = shuffle(otherPool);
-  const dinners = shuffle(otherPool);
+  const lunches = shuffle(lunchPool);
+  const dinners = shuffle(dinnerPool);
 
   let bestFixed = null;
   let bestFlexed = null;
@@ -71,7 +72,6 @@ export function generateDailyMealPlan(targetCalories, { includeSnack = true } = 
       const lunchCal = caloriesFor(lunch);
       const remainingForDinner = targetCalories - breakfastCal - lunchCal - snackCal;
       for (const dinner of dinners) {
-        if (dinner.id === lunch.id) continue;
         const dinnerCal = caloriesFor(dinner);
 
         const fixedDiff = Math.abs(breakfastCal + lunchCal + dinnerCal + snackCal - targetCalories);

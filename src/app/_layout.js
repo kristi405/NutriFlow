@@ -54,6 +54,15 @@ function TabLayout() {
           headerTintColor: Colors.light.text,
           headerTitleStyle: { fontWeight: '700' }
         }} />
+        <Stack.Screen name="shopping-list" options={{
+          headerShown: true,
+          headerTitle: t('shoppingList.title'),
+          headerBackTitle: t('common.back'),
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: Colors.light.background },
+          headerTintColor: Colors.light.text,
+          headerTitleStyle: { fontWeight: '700' }
+        }} />
       </Stack>;
   }
   return <QueryClientProvider client={queryClient}>

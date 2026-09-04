@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
@@ -30,13 +31,19 @@ function shuffle(array) {
   return copy;
 }
 
+function isCategoryAllowedForMealType(categoryId, mealType) {
+  if (mealType === 'breakfast') return categoryId === 'breakfast';
+  if (mealType === 'snack') return categoryId === 'snack';
+  if (mealType === 'lunch') return categoryId === 'lunch';
+  return categoryId === 'dinner' || categoryId === 'salad';
+}
+
 function categoryPoolForMealType(mealType) {
-  if (mealType === 'breakfast') return RECIPES.filter(recipe => recipe.categoryId === 'breakfast');
-  if (mealType === 'snack') return RECIPES.filter(recipe => recipe.categoryId === 'snack');
-  return RECIPES.filter(recipe => recipe.categoryId === 'lunch' || recipe.categoryId === 'dinner' || recipe.categoryId === 'salad');
+  return RECIPES.filter(recipe => isCategoryAllowedForMealType(recipe.categoryId, mealType));
 }
 
 const theme = Colors.light;
+const CALORIE_MATCH_TOLERANCE = 100;
 const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'];
 const MEAL_TYPE_ICONS = {
   breakfast: 'sunrise.fill',
@@ -55,6 +62,29 @@ function MealPlanScreen() {
   const { total } = useDailyNutrition(date);
   const planItems = mealPlanStore.itemsForDate(date);
   const loggedEntries = foodLogStore.entriesForDate(date);
+  const menuCalories = planItems.reduce((sum, item) => {
+    const recipe = getRecipeById(item.recipeId);
+    if (!recipe) return sum;
+    return sum + scaleForServings(calculateRecipeNutrition(recipe, getIngredientById), item.servings).nutrition.calories;
+  }, 0);
+
+  // Repairs items left over from before recipes were split into
+  // breakfast/lunch/dinner/salad/snack categories, so a meal type never ends
+  // up showing a dish from the wrong category (e.g. a lunch dish in dinner).
+  useEffect(() => {
+    for (const item of planItems) {
+      const recipe = getRecipeById(item.recipeId);
+      if (recipe && isCategoryAllowedForMealType(recipe.categoryId, item.mealType)) continue;
+      const pool = categoryPoolForMealType(item.mealType);
+      if (pool.length === 0) continue;
+      const currentCalories = recipe ? calculateRecipeNutrition(recipe, getIngredientById).nutrition.calories : undefined;
+      const replacement = currentCalories === undefined ? shuffle(pool)[0] : pool.reduce((best, candidate) => {
+        const diff = Math.abs(calculateRecipeNutrition(candidate, getIngredientById).nutrition.calories - currentCalories);
+        return !best || diff < best.diff ? { candidate, diff } : best;
+      }, null).candidate;
+      mealPlanStore.updateRecipe(item.id, replacement.id);
+    }
+  }, [planItems]);
 
   if (!profile || !targets) return null;
 
@@ -79,10 +109,16 @@ function MealPlanScreen() {
 
   const swapCandidates = useMemo(() => {
     if (!swapMealType) return [];
+    const pool = categoryPoolForMealType(swapMealType);
     const currentItem = planItems.find(item => item.mealType === swapMealType);
     const currentRecipe = currentItem ? getRecipeById(currentItem.recipeId) : undefined;
-    const pool = currentRecipe ? RECIPES.filter(recipe => recipe.categoryId === currentRecipe.categoryId && recipe.id !== currentRecipe.id) : categoryPoolForMealType(swapMealType);
-    return shuffle(pool).slice(0, 5);
+    if (!currentRecipe) return shuffle(pool).slice(0, 5);
+
+    const currentCalories = calculateRecipeNutrition(currentRecipe, getIngredientById).nutrition.calories;
+    return pool.filter(recipe => recipe.id !== currentRecipe.id).map(recipe => {
+      const calories = calculateRecipeNutrition(recipe, getIngredientById).nutrition.calories;
+      return { recipe, calories, diff: Math.abs(calories - currentCalories) };
+    }).filter(entry => entry.diff <= CALORIE_MATCH_TOLERANCE).sort((a, b) => a.diff - b.diff).slice(0, 5).sort((a, b) => a.calories - b.calories).map(entry => entry.recipe);
   }, [swapMealType, planItems]);
 
   function handleSelectSwap(recipe) {
@@ -93,6 +129,10 @@ function MealPlanScreen() {
       mealPlanStore.addItem({ date, mealType: swapMealType, recipeId: recipe.id, servings: 1 });
     }
     setSwapMealType(null);
+  }
+
+  function handleGenerateShoppingList() {
+    router.push('/shopping-list');
   }
 
   function toggleEaten(item) {
@@ -128,8 +168,16 @@ function MealPlanScreen() {
       <ScreenScrollView gap={Spacing.three} contentContainerStyle={{
       paddingBottom: BottomTabInset + (hasFullWeekPlanned ? Spacing.four : Spacing.six)
     }}>
-      <View style={styles.progressCard}>
-        <MacroBar label={t('recipes.calories')} value={total.nutrition.calories} target={targets.calories} unit={t('common.kcal')} color={theme.primary} />
+      <View style={styles.topRow}>
+        <View style={styles.progressCard}>
+          <MacroBar label={t('recipes.calories')} value={total.nutrition.calories} target={menuCalories} unit={t('common.kcal')} color={theme.primary} />
+        </View>
+        <Pressable onPress={handleGenerateShoppingList} style={styles.shoppingListButton}>
+          <SymbolView name="cart.fill" size={20} tintColor="#ffffff" />
+          <ThemedText type="caption" style={styles.shoppingListButtonText} numberOfLines={2}>
+            {t('home.shoppingList')}
+          </ThemedText>
+        </Pressable>
       </View>
 
       {MEAL_TYPES.map(mealType => {
@@ -260,12 +308,30 @@ const styles = StyleSheet.create({
     fontSize: 32,
     lineHeight: 38
   },
+  topRow: {
+    flexDirection: 'row',
+    gap: Spacing.three
+  },
   progressCard: {
+    flex: 3,
     backgroundColor: theme.background,
     borderColor: theme.border,
     borderWidth: 1,
     borderRadius: 20,
     padding: Spacing.three
+  },
+  shoppingListButton: {
+    flex: 2,
+    backgroundColor: theme.secondary,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.one,
+    padding: Spacing.three
+  },
+  shoppingListButtonText: {
+    color: '#ffffff',
+    textAlign: 'center'
   },
   mealTypeCard: {
     gap: Spacing.two,

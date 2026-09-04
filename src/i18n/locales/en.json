@@ -282,6 +282,15 @@
     "progress": "Progress",
     "profile": "Profile"
   },
+  "shoppingList": {
+    "title": "Shopping List",
+    "subtitle": "Everything you need for today's menu",
+    "progress": "Purchased",
+    "items": "items",
+    "allDone": "All done — nothing left to buy",
+    "emptyTitle": "Nothing to shop for yet",
+    "emptyMessage": "Plan today's meals first, then come back to generate your shopping list."
+  },
   "aiAnalysis": {
     "title": "AI Analysis",
     "subtitle": "Upload lab results and get personalized nutrition advice",
