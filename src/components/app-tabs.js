@@ -1,18 +1,27 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useTranslation } from 'react-i18next';
 import { useColorScheme } from 'react-native';
-import { Colors } from '@/constants/theme';
+import { Colors, LoginButtonGreen } from '@/constants/theme';
+
+const INDICATOR_TINT = 'rgba(76, 175, 80, 0.16)';
+const RIPPLE_TINT = 'rgba(76, 175, 80, 0.12)';
+
 export default function AppTabs() {
   const { t } = useTranslation();
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
-  return <NativeTabs backgroundColor={colors.background} indicatorColor={colors.backgroundElement} labelStyle={{
+  return <NativeTabs backgroundColor={colors.background} indicatorColor={INDICATOR_TINT} rippleColor={RIPPLE_TINT} iconColor={{
+    default: colors.textSecondary,
+    selected: LoginButtonGreen
+  }} labelStyle={{
     default: {
-      fontSize: 9
+      fontSize: 9,
+      color: colors.textSecondary
     },
     selected: {
       fontSize: 9,
-      color: colors.text
+      fontWeight: '600',
+      color: LoginButtonGreen
     }
   }}>
       <NativeTabs.Trigger name="index">

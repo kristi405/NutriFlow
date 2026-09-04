@@ -37,6 +37,7 @@ export function ScreenScrollView({
       <ScrollView style={styles.scrollView} contentInset={insets} contentContainerStyle={[styles.contentContainer, platformStyle, contentContainerStyle]} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} {...rest}>
         <View style={[styles.container, { gap, paddingHorizontal: horizontalPadding }]}>{children}</View>
       </ScrollView>
+      {Platform.OS === 'android' && <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.10)']} style={styles.tabBarShadow} pointerEvents="none" />}
     </LinearGradient>;
 }
 const styles = StyleSheet.create({
@@ -55,5 +56,12 @@ const styles = StyleSheet.create({
     maxWidth: MaxContentWidth,
     paddingHorizontal: Spacing.four,
     gap: Spacing.five
+  },
+  tabBarShadow: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 14
   }
 });

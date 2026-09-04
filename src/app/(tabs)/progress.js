@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { SymbolView } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Polyline } from 'react-native-svg';
 import { ThemedText } from '@/components/themed-text';
 import { MacroBar } from '@/components/ui/macro-bar';
@@ -21,9 +21,7 @@ const CHART_HEIGHT = 120;
 const CHART_PADDING = 12;
 const TREND_POINTS = 7;
 
-const CONTAINER_PADDING = Spacing.four;
 const STAT_CARD_GAP = Spacing.two;
-const STAT_CARD_WIDTH = (Dimensions.get('window').width - CONTAINER_PADDING * 2 - STAT_CARD_GAP) / 2;
 
 const ACHIEVEMENTS = [{
   icon: { ios: 'flame.fill', android: 'local_fire_department', web: 'local_fire_department' },
@@ -176,7 +174,7 @@ const styles = StyleSheet.create({
     gap: STAT_CARD_GAP
   },
   statCard: {
-    width: STAT_CARD_WIDTH,
+    width: '48%',
     gap: Spacing.one,
     backgroundColor: theme.background,
     borderColor: theme.border,
