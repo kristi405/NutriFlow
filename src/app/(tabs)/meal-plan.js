@@ -2,16 +2,17 @@ import { useMemo, useState } from 'react';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DateStrip } from '@/components/home/date-strip';
 import { MealRow } from '@/components/home/meal-row';
 import { ThemedText } from '@/components/themed-text';
 import { MacroBar } from '@/components/ui/macro-bar';
+import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { BottomTabInset, Colors, LoginButtonGreen, LoginIconBackground, Spacing } from '@/constants/theme';
 import { getIngredientById } from '@/data/seed/ingredients';
-import { getRecipeById } from '@/data/seed/recipes';
+import { getRecipeById, RECIPES } from '@/data/seed/recipes';
 import { useDailyNutrition } from '@/hooks/useDailyNutrition';
 import { todayKey, weekContaining } from '@/lib/date';
 import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
@@ -19,6 +20,21 @@ import { calculateDailyTargets, calculateRecipeNutrition, scaleForServings } fro
 import { foodLogStore } from '@/store/foodLogStore';
 import { mealPlanStore } from '@/store/mealPlanStore';
 import { profileStore } from '@/store/profileStore';
+
+function shuffle(array) {
+  const copy = [...array];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function categoryPoolForMealType(mealType) {
+  if (mealType === 'breakfast') return RECIPES.filter(recipe => recipe.categoryId === 'breakfast');
+  if (mealType === 'snack') return RECIPES.filter(recipe => recipe.categoryId === 'snack');
+  return RECIPES.filter(recipe => recipe.categoryId === 'lunch' || recipe.categoryId === 'dinner' || recipe.categoryId === 'salad');
+}
 
 const theme = Colors.light;
 const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'];
@@ -33,6 +49,7 @@ function MealPlanScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [date, setDate] = useState(todayKey());
+  const [swapMealType, setSwapMealType] = useState(null);
   const profile = profileStore.profile;
   const targets = useMemo(() => profile ? calculateDailyTargets(profile) : undefined, [profile]);
   const { total } = useDailyNutrition(date);
@@ -58,6 +75,24 @@ function MealPlanScreen() {
       const generated = generateDailyMealPlan(targets.calories);
       generated.forEach(item => mealPlanStore.addItem({ date: day, ...item }));
     });
+  }
+
+  const swapCandidates = useMemo(() => {
+    if (!swapMealType) return [];
+    const currentItem = planItems.find(item => item.mealType === swapMealType);
+    const currentRecipe = currentItem ? getRecipeById(currentItem.recipeId) : undefined;
+    const pool = currentRecipe ? RECIPES.filter(recipe => recipe.categoryId === currentRecipe.categoryId && recipe.id !== currentRecipe.id) : categoryPoolForMealType(swapMealType);
+    return shuffle(pool).slice(0, 5);
+  }, [swapMealType, planItems]);
+
+  function handleSelectSwap(recipe) {
+    const currentItem = planItems.find(item => item.mealType === swapMealType);
+    if (currentItem) {
+      mealPlanStore.updateRecipe(currentItem.id, recipe.id);
+    } else {
+      mealPlanStore.addItem({ date, mealType: swapMealType, recipeId: recipe.id, servings: 1 });
+    }
+    setSwapMealType(null);
   }
 
   function toggleEaten(item) {
@@ -101,12 +136,17 @@ function MealPlanScreen() {
       const items = planItems.filter(item => item.mealType === mealType);
       return <View key={mealType} style={styles.mealTypeCard}>
             <View style={styles.mealTypeHeader}>
-              <View style={styles.iconWrapper}>
-                <SymbolView name={MEAL_TYPE_ICONS[mealType]} size={18} tintColor={LoginButtonGreen} />
+              <View style={styles.mealTypeHeaderLeft}>
+                <View style={styles.iconWrapper}>
+                  <SymbolView name={MEAL_TYPE_ICONS[mealType]} size={18} tintColor={LoginButtonGreen} />
+                </View>
+                <ThemedText type="smallBold" color={theme.text}>
+                  {t(`mealTypes.${mealType}`)}
+                </ThemedText>
               </View>
-              <ThemedText type="smallBold" color={theme.text}>
-                {t(`mealTypes.${mealType}`)}
-              </ThemedText>
+              <Pressable onPress={() => setSwapMealType(mealType)} hitSlop={8} style={styles.editButton}>
+                <SymbolView name="pencil" size={16} tintColor={LoginButtonGreen} />
+              </Pressable>
             </View>
             {items.length === 0 ? <ThemedText type="small" color={theme.textSecondary}>
                 {t('mealPlan.noMealPlanned')}
@@ -131,6 +171,36 @@ function MealPlanScreen() {
             {t('mealPlan.weeklyMenu')}
           </ThemedText>
         </Pressable>}
+
+      <Modal visible={!!swapMealType} transparent animationType="slide" onRequestClose={() => setSwapMealType(null)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setSwapMealType(null)}>
+          <Pressable style={styles.modalSheet} onPress={event => event.stopPropagation()}>
+            <View style={styles.modalHeader}>
+              <View>
+                <ThemedText type="smallBold" color={theme.text}>{t('mealPlan.swapTitle')}</ThemedText>
+                <ThemedText type="caption" color={theme.textSecondary}>{t('mealPlan.swapSubtitle')}</ThemedText>
+              </View>
+              <Pressable onPress={() => setSwapMealType(null)} hitSlop={8} style={styles.editButton}>
+                <SymbolView name="xmark" size={16} tintColor={LoginButtonGreen} />
+              </Pressable>
+            </View>
+
+            {swapCandidates.length === 0 ? <ThemedText type="small" color={theme.textSecondary}>{t('mealPlan.swapEmpty')}</ThemedText> : <View style={styles.swapList}>
+                {swapCandidates.map(recipe => {
+              const calories = calculateRecipeNutrition(recipe, getIngredientById).nutrition.calories;
+              return <Pressable key={recipe.id} onPress={() => handleSelectSwap(recipe)} style={styles.swapRow}>
+                      <RecipeImage uri={recipe.imageUrl} style={styles.swapImage} iconSize={18} />
+                      <View style={styles.swapTextWrapper}>
+                        <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{recipe.title}</ThemedText>
+                        <ThemedText type="small" color={theme.textSecondary}>{Math.round(calories)} {t('common.kcal')}</ThemedText>
+                      </View>
+                      <SymbolView name="chevron.right" size={16} tintColor={theme.textSecondary} />
+                    </Pressable>;
+            })}
+              </View>}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>;
 }
 
@@ -208,7 +278,20 @@ const styles = StyleSheet.create({
   mealTypeHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  mealTypeHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: Spacing.two
+  },
+  editButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: LoginIconBackground,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   iconWrapper: {
     width: 36,
@@ -220,5 +303,44 @@ const styles = StyleSheet.create({
   },
   mealList: {
     gap: Spacing.two
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end'
+  },
+  modalSheet: {
+    backgroundColor: theme.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: Spacing.four,
+    paddingBottom: Spacing.six,
+    gap: Spacing.three
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.two
+  },
+  swapList: {
+    gap: Spacing.two
+  },
+  swapRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    paddingVertical: Spacing.two,
+    borderBottomWidth: 1,
+    borderColor: theme.border
+  },
+  swapImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 12
+  },
+  swapTextWrapper: {
+    flex: 1,
+    gap: 2
   }
 });

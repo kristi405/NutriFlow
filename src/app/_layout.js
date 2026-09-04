@@ -17,7 +17,8 @@ import { authStore } from '@/store/authStore';
 import { profileStore } from '@/store/profileStore';
 SplashScreen.preventAutoHideAsync();
 const CALCULATING_DURATION = 5000;
-const SKIP_AUTH_FOR_TESTING = false;
+// TEMPORARY: skips the login screen for testing. Set back to false before shipping.
+const SKIP_AUTH_FOR_TESTING = true;
 function TabLayout() {
   const { t } = useTranslation();
   const colorScheme = useColorScheme();
@@ -43,6 +44,7 @@ function TabLayout() {
     if (showCalculating) return <CalculatingScreen key="calculating" />;
     return <Stack key="tabs" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="recipes/[id]" />
         <Stack.Screen name="profile" options={{
           headerShown: true,
           headerTitle: t('tabs.profile'),

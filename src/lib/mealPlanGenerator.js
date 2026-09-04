@@ -6,8 +6,8 @@ const TOLERANCE_KCAL = 50;
 const MIN_DINNER_SERVINGS = 0.5;
 const MAX_DINNER_SERVINGS = 3;
 const SERVINGS_STEP = 0.25;
-// These categories are snack-only — never eligible for lunch/dinner.
-const SNACK_ONLY_CATEGORIES = ['desserts', 'bread-baking', 'smoothies', 'drinks'];
+// Lunch/dinner slots draw from any category except breakfast and snack — salad included.
+const LUNCH_DINNER_CATEGORIES = ['lunch', 'dinner', 'salad'];
 
 function shuffle(array) {
   const copy = [...array];
@@ -27,11 +27,10 @@ function toItems({ breakfast, lunch, dinner, dinnerServings = 1, snack }) {
 /**
  * Randomly picks breakfast/lunch/dinner(/snack) recipes whose combined
  * calories land within TOLERANCE_KCAL of the target. Breakfast always comes
- * from the "breakfast" category; lunch/dinner can be any category except
- * breakfast and the snack-only ones (desserts, bread & baking, smoothies,
- * drinks). When includeSnack is true (default), one recipe from those
- * snack-only categories is picked once and counted toward the calorie-fit
- * target along with the other three meals.
+ * from the "breakfast" category; lunch/dinner draw from the lunch, dinner and
+ * salad categories. When includeSnack is true (default), one recipe from the
+ * "snack" category is picked once and counted toward the calorie-fit target
+ * along with the other three meals.
  *
  * The low-target "+50 kcal, rounded to the nearest ten" bump already lives in
  * calculateDailyTargets, so targetCalories here is expected to be the final
@@ -44,10 +43,10 @@ function toItems({ breakfast, lunch, dinner, dinnerServings = 1, snack }) {
  */
 export function generateDailyMealPlan(targetCalories, { includeSnack = true } = {}) {
   const breakfastPool = RECIPES.filter(recipe => recipe.categoryId === 'breakfast');
-  const otherPool = RECIPES.filter(recipe => recipe.categoryId !== 'breakfast' && !SNACK_ONLY_CATEGORIES.includes(recipe.categoryId));
+  const otherPool = RECIPES.filter(recipe => LUNCH_DINNER_CATEGORIES.includes(recipe.categoryId));
   if (breakfastPool.length === 0 || otherPool.length < 2) return [];
 
-  const snackPool = RECIPES.filter(recipe => SNACK_ONLY_CATEGORIES.includes(recipe.categoryId));
+  const snackPool = RECIPES.filter(recipe => recipe.categoryId === 'snack');
   const snack = includeSnack && snackPool.length > 0 ? shuffle(snackPool)[0] : undefined;
 
   const caloriesById = new Map();

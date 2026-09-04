@@ -5,7 +5,8 @@ function ing(input) {
   return {
     id: input.id,
     name: input.name,
-    category: input.category,
+    categoryId: input.categoryId,
+    subcategoryId: input.subcategoryId,
     gramsPerUnit: input.gramsPerUnit ?? {},
     per100g: {
       nutrition: {
@@ -33,7 +34,8 @@ export const INGREDIENTS = [
 ing({
   id: 'egg',
   name: 'Egg',
-  category: 'other',
+  categoryId: 'other',
+  subcategoryId: 'eggs',
   gramsPerUnit: {
     piece: 50
   },
@@ -63,7 +65,8 @@ ing({
 }), ing({
   id: 'chicken-breast',
   name: 'Chicken breast',
-  category: 'meat',
+  categoryId: 'meat',
+  subcategoryId: 'poultry',
   nutrition: {
     calories: 165,
     protein: 31,
@@ -86,7 +89,8 @@ ing({
 }), ing({
   id: 'chicken-thigh',
   name: 'Chicken thigh',
-  category: 'meat',
+  categoryId: 'meat',
+  subcategoryId: 'poultry',
   nutrition: {
     calories: 209,
     protein: 26,
@@ -108,7 +112,8 @@ ing({
 }), ing({
   id: 'ground-beef',
   name: 'Ground beef (85/15)',
-  category: 'meat',
+  categoryId: 'meat',
+  subcategoryId: 'beef',
   nutrition: {
     calories: 215,
     protein: 26,
@@ -130,7 +135,8 @@ ing({
 }), ing({
   id: 'ground-turkey',
   name: 'Ground turkey',
-  category: 'meat',
+  categoryId: 'meat',
+  subcategoryId: 'poultry',
   nutrition: {
     calories: 149,
     protein: 24,
@@ -152,7 +158,8 @@ ing({
 }), ing({
   id: 'turkey-breast',
   name: 'Turkey breast',
-  category: 'meat',
+  categoryId: 'meat',
+  subcategoryId: 'poultry',
   nutrition: {
     calories: 135,
     protein: 30,
@@ -173,7 +180,8 @@ ing({
 }), ing({
   id: 'beef-sirloin',
   name: 'Beef sirloin',
-  category: 'meat',
+  categoryId: 'meat',
+  subcategoryId: 'beef',
   nutrition: {
     calories: 183,
     protein: 27,
@@ -195,7 +203,8 @@ ing({
 }), ing({
   id: 'bacon',
   name: 'Bacon',
-  category: 'meat',
+  categoryId: 'meat',
+  subcategoryId: 'pork',
   gramsPerUnit: {
     slice: 8
   },
@@ -216,7 +225,8 @@ ing({
 }), ing({
   id: 'canadian-bacon',
   name: 'Canadian bacon',
-  category: 'meat',
+  categoryId: 'meat',
+  subcategoryId: 'pork',
   gramsPerUnit: {
     slice: 28
   },
@@ -236,7 +246,8 @@ ing({
 }), ing({
   id: 'smoked-salmon',
   name: 'Smoked salmon',
-  category: 'fish',
+  categoryId: 'fish',
+  subcategoryId: 'fin-fish',
   nutrition: {
     calories: 117,
     protein: 18.3,
@@ -258,7 +269,8 @@ ing({
 }), ing({
   id: 'salmon-fillet',
   name: 'Salmon fillet',
-  category: 'fish',
+  categoryId: 'fish',
+  subcategoryId: 'fin-fish',
   nutrition: {
     calories: 208,
     protein: 20,
@@ -281,7 +293,8 @@ ing({
 }), ing({
   id: 'cod-fillet',
   name: 'Cod fillet',
-  category: 'fish',
+  categoryId: 'fish',
+  subcategoryId: 'fin-fish',
   nutrition: {
     calories: 82,
     protein: 18,
@@ -304,7 +317,8 @@ ing({
 }), ing({
   id: 'tuna-steak',
   name: 'Tuna steak',
-  category: 'fish',
+  categoryId: 'fish',
+  subcategoryId: 'fin-fish',
   nutrition: {
     calories: 144,
     protein: 23.3,
@@ -327,7 +341,8 @@ ing({
 }), ing({
   id: 'canned-tuna',
   name: 'Canned tuna (in water)',
-  category: 'fish',
+  categoryId: 'fish',
+  subcategoryId: 'fin-fish',
   nutrition: {
     calories: 116,
     protein: 26,
@@ -349,7 +364,8 @@ ing({
 }), ing({
   id: 'shrimp',
   name: 'Shrimp',
-  category: 'fish',
+  categoryId: 'fish',
+  subcategoryId: 'shellfish',
   nutrition: {
     calories: 99,
     protein: 24,
@@ -372,7 +388,8 @@ ing({
 ing({
   id: 'greek-yogurt',
   name: 'Greek yogurt (plain)',
-  category: 'dairy',
+  categoryId: 'dairy',
+  subcategoryId: 'cultured',
   nutrition: {
     calories: 97,
     protein: 9,
@@ -395,7 +412,8 @@ ing({
 }), ing({
   id: 'milk',
   name: 'Milk (2%)',
-  category: 'dairy',
+  categoryId: 'dairy',
+  subcategoryId: 'milk',
   nutrition: {
     calories: 50,
     protein: 3.4,
@@ -419,7 +437,8 @@ ing({
 }), ing({
   id: 'almond-milk',
   name: 'Almond milk (unsweetened)',
-  category: 'dairy',
+  categoryId: 'dairy',
+  subcategoryId: 'milk',
   nutrition: {
     calories: 15,
     protein: 0.6,
@@ -439,7 +458,8 @@ ing({
 }), ing({
   id: 'heavy-cream',
   name: 'Heavy cream',
-  category: 'dairy',
+  categoryId: 'dairy',
+  subcategoryId: 'milk',
   nutrition: {
     calories: 340,
     protein: 2.1,
@@ -460,7 +480,8 @@ ing({
 }), ing({
   id: 'butter',
   name: 'Butter',
-  category: 'dairy',
+  categoryId: 'dairy',
+  subcategoryId: 'butter',
   gramsPerUnit: {
     tbsp: 14
   },
@@ -481,7 +502,8 @@ ing({
 }), ing({
   id: 'cream-cheese',
   name: 'Cream cheese',
-  category: 'dairy',
+  categoryId: 'dairy',
+  subcategoryId: 'cheese',
   gramsPerUnit: {
     tbsp: 14.5
   },
@@ -504,7 +526,8 @@ ing({
 }), ing({
   id: 'feta-cheese',
   name: 'Feta cheese',
-  category: 'dairy',
+  categoryId: 'dairy',
+  subcategoryId: 'cheese',
   nutrition: {
     calories: 264,
     protein: 14,
@@ -526,7 +549,8 @@ ing({
 }), ing({
   id: 'parmesan-cheese',
   name: 'Parmesan cheese',
-  category: 'dairy',
+  categoryId: 'dairy',
+  subcategoryId: 'cheese',
   nutrition: {
     calories: 431,
     protein: 38,
@@ -549,7 +573,8 @@ ing({
 }), ing({
   id: 'cheddar-cheese',
   name: 'Cheddar cheese',
-  category: 'dairy',
+  categoryId: 'dairy',
+  subcategoryId: 'cheese',
   nutrition: {
     calories: 403,
     protein: 25,
@@ -571,7 +596,8 @@ ing({
 }), ing({
   id: 'mozzarella-fresh',
   name: 'Fresh mozzarella',
-  category: 'dairy',
+  categoryId: 'dairy',
+  subcategoryId: 'cheese',
   nutrition: {
     calories: 280,
     protein: 22,
@@ -589,7 +615,8 @@ ing({
 }), ing({
   id: 'ricotta-cheese',
   name: 'Ricotta cheese',
-  category: 'dairy',
+  categoryId: 'dairy',
+  subcategoryId: 'cheese',
   nutrition: {
     calories: 174,
     protein: 11.3,
@@ -607,7 +634,8 @@ ing({
 }), ing({
   id: 'cottage-cheese',
   name: 'Cottage cheese',
-  category: 'dairy',
+  categoryId: 'dairy',
+  subcategoryId: 'cheese',
   nutrition: {
     calories: 98,
     protein: 11,
@@ -627,7 +655,8 @@ ing({
 }), ing({
   id: 'sour-cream',
   name: 'Sour cream',
-  category: 'dairy',
+  categoryId: 'dairy',
+  subcategoryId: 'cultured',
   nutrition: {
     calories: 198,
     protein: 2.4,
@@ -647,7 +676,8 @@ ing({
 ing({
   id: 'sourdough-bread',
   name: 'Sourdough bread',
-  category: 'bakery',
+  categoryId: 'bakery',
+  subcategoryId: 'bread',
   gramsPerUnit: {
     slice: 30
   },
@@ -668,7 +698,8 @@ ing({
 }), ing({
   id: 'bread',
   name: 'Sandwich bread',
-  category: 'bakery',
+  categoryId: 'bakery',
+  subcategoryId: 'bread',
   gramsPerUnit: {
     slice: 30
   },
@@ -688,7 +719,8 @@ ing({
 }), ing({
   id: 'baguette',
   name: 'Baguette',
-  category: 'bakery',
+  categoryId: 'bakery',
+  subcategoryId: 'bread',
   gramsPerUnit: {
     slice: 25
   },
@@ -705,7 +737,8 @@ ing({
 }), ing({
   id: 'bagel',
   name: 'Bagel',
-  category: 'bakery',
+  categoryId: 'bakery',
+  subcategoryId: 'bread',
   gramsPerUnit: {
     piece: 95
   },
@@ -725,7 +758,8 @@ ing({
 }), ing({
   id: 'english-muffin',
   name: 'English muffin',
-  category: 'bakery',
+  categoryId: 'bakery',
+  subcategoryId: 'bread',
   gramsPerUnit: {
     piece: 57
   },
@@ -742,7 +776,8 @@ ing({
 }), ing({
   id: 'tortilla-wrap',
   name: 'Flour tortilla wrap',
-  category: 'bakery',
+  categoryId: 'bakery',
+  subcategoryId: 'tortillas',
   gramsPerUnit: {
     piece: 45
   },
@@ -759,7 +794,8 @@ ing({
 }), ing({
   id: 'corn-tortilla',
   name: 'Corn tortilla',
-  category: 'bakery',
+  categoryId: 'bakery',
+  subcategoryId: 'tortillas',
   gramsPerUnit: {
     piece: 24
   },
@@ -775,7 +811,8 @@ ing({
 }), ing({
   id: 'rolled-oats',
   name: 'Rolled oats',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'grains',
   gramsPerUnit: {
     cup: 90
   },
@@ -799,7 +836,8 @@ ing({
 }), ing({
   id: 'white-rice-dry',
   name: 'White rice (uncooked)',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'grains',
   gramsPerUnit: {
     cup: 185
   },
@@ -818,7 +856,8 @@ ing({
 }), ing({
   id: 'quinoa-dry',
   name: 'Quinoa (uncooked)',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'grains',
   gramsPerUnit: {
     cup: 170
   },
@@ -842,7 +881,8 @@ ing({
 }), ing({
   id: 'pasta-dry',
   name: 'Pasta (uncooked)',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'grains',
   nutrition: {
     calories: 371,
     protein: 13,
@@ -859,7 +899,8 @@ ing({
 }), ing({
   id: 'egg-noodles-dry',
   name: 'Egg noodles (uncooked)',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'grains',
   nutrition: {
     calories: 384,
     protein: 14,
@@ -873,7 +914,8 @@ ing({
 }), ing({
   id: 'breadcrumbs',
   name: 'Breadcrumbs',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'bread',
   gramsPerUnit: {
     cup: 108
   },
@@ -890,7 +932,8 @@ ing({
 }), ing({
   id: 'flour',
   name: 'All-purpose flour',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'grains',
   nutrition: {
     calories: 364,
     protein: 10.3,
@@ -906,7 +949,8 @@ ing({
 }), ing({
   id: 'granola',
   name: 'Granola',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'grains',
   gramsPerUnit: {
     cup: 100
   },
@@ -927,7 +971,8 @@ ing({
 }), ing({
   id: 'croutons',
   name: 'Croutons',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'bread',
   nutrition: {
     calories: 407,
     protein: 10,
@@ -943,7 +988,8 @@ ing({
 ing({
   id: 'chickpeas-canned',
   name: 'Chickpeas (canned)',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'legumes',
   nutrition: {
     calories: 139,
     protein: 7.5,
@@ -964,7 +1010,8 @@ ing({
 }), ing({
   id: 'red-lentils-dry',
   name: 'Red lentils (uncooked)',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'legumes',
   nutrition: {
     calories: 352,
     protein: 24.6,
@@ -984,7 +1031,8 @@ ing({
 }), ing({
   id: 'honey',
   name: 'Honey',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'oils-condiments',
   gramsPerUnit: {
     tbsp: 21,
     tsp: 7
@@ -1002,7 +1050,8 @@ ing({
 }), ing({
   id: 'peanut-butter',
   name: 'Peanut butter',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'nuts-seeds',
   gramsPerUnit: {
     tbsp: 16
   },
@@ -1027,7 +1076,8 @@ ing({
 }), ing({
   id: 'dark-chocolate',
   name: 'Dark chocolate (70%)',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'other',
   nutrition: {
     calories: 598,
     protein: 7.8,
@@ -1045,7 +1095,8 @@ ing({
 }), ing({
   id: 'chia-seeds',
   name: 'Chia seeds',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'nuts-seeds',
   gramsPerUnit: {
     tbsp: 12
   },
@@ -1066,7 +1117,8 @@ ing({
 }), ing({
   id: 'walnuts',
   name: 'Walnuts',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'nuts-seeds',
   nutrition: {
     calories: 654,
     protein: 15.2,
@@ -1091,7 +1143,8 @@ ing({
 }), ing({
   id: 'pine-nuts',
   name: 'Pine nuts',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'nuts-seeds',
   nutrition: {
     calories: 673,
     protein: 13.7,
@@ -1114,7 +1167,8 @@ ing({
 }), ing({
   id: 'sesame-seeds',
   name: 'Sesame seeds',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'nuts-seeds',
   nutrition: {
     calories: 573,
     protein: 17.7,
@@ -1133,7 +1187,8 @@ ing({
 }), ing({
   id: 'baking-powder',
   name: 'Baking powder',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'spices',
   gramsPerUnit: {
     tsp: 4.6
   },
@@ -1147,7 +1202,8 @@ ing({
 }), ing({
   id: 'soy-sauce',
   name: 'Soy sauce',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'oils-condiments',
   gramsPerUnit: {
     tbsp: 18
   },
@@ -1162,7 +1218,8 @@ ing({
 }), ing({
   id: 'balsamic-vinegar',
   name: 'Balsamic vinegar',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'oils-condiments',
   gramsPerUnit: {
     tbsp: 16
   },
@@ -1176,7 +1233,8 @@ ing({
 }), ing({
   id: 'olive-oil',
   name: 'Olive oil',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'oils-condiments',
   gramsPerUnit: {
     tbsp: 13.5,
     tsp: 4.5
@@ -1196,7 +1254,8 @@ ing({
 }), ing({
   id: 'sesame-oil',
   name: 'Sesame oil',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'oils-condiments',
   gramsPerUnit: {
     tsp: 4.5
   },
@@ -1216,7 +1275,8 @@ ing({
 }), ing({
   id: 'mayonnaise',
   name: 'Mayonnaise',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'oils-condiments',
   gramsPerUnit: {
     tbsp: 13
   },
@@ -1233,7 +1293,8 @@ ing({
 }), ing({
   id: 'caesar-dressing',
   name: 'Caesar dressing',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'oils-condiments',
   gramsPerUnit: {
     tbsp: 15
   },
@@ -1250,7 +1311,8 @@ ing({
 }), ing({
   id: 'curry-powder',
   name: 'Curry powder',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'spices',
   gramsPerUnit: {
     tsp: 2,
     tbsp: 6
@@ -1270,7 +1332,8 @@ ing({
 }), ing({
   id: 'cumin',
   name: 'Cumin',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'spices',
   gramsPerUnit: {
     tsp: 2
   },
@@ -1289,7 +1352,8 @@ ing({
 }), ing({
   id: 'cinnamon',
   name: 'Cinnamon',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'spices',
   gramsPerUnit: {
     tsp: 2.6
   },
@@ -1308,7 +1372,8 @@ ing({
 }), ing({
   id: 'nutmeg',
   name: 'Nutmeg',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'spices',
   gramsPerUnit: {
     tsp: 2.2
   },
@@ -1327,7 +1392,8 @@ ing({
 }), ing({
   id: 'chili-flakes',
   name: 'Chili flakes',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'spices',
   gramsPerUnit: {
     tsp: 1.8
   },
@@ -1346,7 +1412,8 @@ ing({
 }), ing({
   id: 'matcha-powder',
   name: 'Matcha powder',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'other',
   gramsPerUnit: {
     tsp: 2
   },
@@ -1367,7 +1434,8 @@ ing({
 }), ing({
   id: 'coconut-milk',
   name: 'Coconut milk (canned)',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'canned-broths',
   nutrition: {
     calories: 230,
     protein: 2.3,
@@ -1384,7 +1452,8 @@ ing({
 }), ing({
   id: 'vegetable-broth',
   name: 'Vegetable broth',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'canned-broths',
   nutrition: {
     calories: 5,
     protein: 0.3,
@@ -1395,7 +1464,8 @@ ing({
 }), ing({
   id: 'chicken-broth',
   name: 'Chicken broth',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'canned-broths',
   nutrition: {
     calories: 8,
     protein: 1.2,
@@ -1406,7 +1476,8 @@ ing({
 }), ing({
   id: 'tomato-canned',
   name: 'Canned tomatoes',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'canned-broths',
   nutrition: {
     calories: 24,
     protein: 1.1,
@@ -1426,7 +1497,8 @@ ing({
 }), ing({
   id: 'tomato-sauce',
   name: 'Tomato sauce',
-  category: 'pantry',
+  categoryId: 'pantry',
+  subcategoryId: 'canned-broths',
   nutrition: {
     calories: 29,
     protein: 1.3,
@@ -1448,7 +1520,8 @@ ing({
 ing({
   id: 'avocado',
   name: 'Avocado',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   gramsPerUnit: {
     piece: 150
   },
@@ -1474,7 +1547,8 @@ ing({
 }), ing({
   id: 'lemon',
   name: 'Lemon',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'fruits',
   gramsPerUnit: {
     piece: 58
   },
@@ -1495,7 +1569,8 @@ ing({
 }), ing({
   id: 'lemon-juice',
   name: 'Lemon juice',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'fruits',
   gramsPerUnit: {
     tbsp: 15,
     tsp: 5
@@ -1513,7 +1588,8 @@ ing({
 }), ing({
   id: 'lime',
   name: 'Lime',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'fruits',
   gramsPerUnit: {
     piece: 67
   },
@@ -1531,7 +1607,8 @@ ing({
 }), ing({
   id: 'tomato',
   name: 'Tomato',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   gramsPerUnit: {
     piece: 123
   },
@@ -1554,7 +1631,8 @@ ing({
 }), ing({
   id: 'cherry-tomato',
   name: 'Cherry tomatoes',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   nutrition: {
     calories: 18,
     protein: 0.9,
@@ -1573,7 +1651,8 @@ ing({
 }), ing({
   id: 'cucumber',
   name: 'Cucumber',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   gramsPerUnit: {
     piece: 200
   },
@@ -1595,7 +1674,8 @@ ing({
 }), ing({
   id: 'red-onion',
   name: 'Red onion',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   gramsPerUnit: {
     piece: 110
   },
@@ -1617,7 +1697,8 @@ ing({
 }), ing({
   id: 'onion',
   name: 'Onion',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   gramsPerUnit: {
     piece: 110
   },
@@ -1639,7 +1720,8 @@ ing({
 }), ing({
   id: 'garlic',
   name: 'Garlic',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   gramsPerUnit: {
     clove: 3
   },
@@ -1662,7 +1744,8 @@ ing({
 }), ing({
   id: 'ginger',
   name: 'Ginger',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'herbs',
   nutrition: {
     calories: 80,
     protein: 1.8,
@@ -1683,7 +1766,8 @@ ing({
 }), ing({
   id: 'spinach',
   name: 'Spinach',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   gramsPerUnit: {
     cup: 30
   },
@@ -1710,7 +1794,8 @@ ing({
 }), ing({
   id: 'romaine-lettuce',
   name: 'Romaine lettuce',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   nutrition: {
     calories: 17,
     protein: 1.2,
@@ -1730,7 +1815,8 @@ ing({
 }), ing({
   id: 'mixed-greens',
   name: 'Mixed greens',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   gramsPerUnit: {
     cup: 30
   },
@@ -1753,7 +1839,8 @@ ing({
 }), ing({
   id: 'broccoli',
   name: 'Broccoli',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   nutrition: {
     calories: 34,
     protein: 2.8,
@@ -1774,7 +1861,8 @@ ing({
 }), ing({
   id: 'asparagus',
   name: 'Asparagus',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   nutrition: {
     calories: 20,
     protein: 2.2,
@@ -1794,7 +1882,8 @@ ing({
 }), ing({
   id: 'bell-pepper',
   name: 'Bell pepper',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   gramsPerUnit: {
     piece: 119
   },
@@ -1816,7 +1905,8 @@ ing({
 }), ing({
   id: 'carrot',
   name: 'Carrot',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   gramsPerUnit: {
     piece: 61
   },
@@ -1839,7 +1929,8 @@ ing({
 }), ing({
   id: 'celery',
   name: 'Celery',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   gramsPerUnit: {
     piece: 40
   },
@@ -1861,7 +1952,8 @@ ing({
 }), ing({
   id: 'mushroom',
   name: 'Mushroom',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   nutrition: {
     calories: 22,
     protein: 3.1,
@@ -1882,7 +1974,8 @@ ing({
 }), ing({
   id: 'portobello-mushroom',
   name: 'Portobello mushroom',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   gramsPerUnit: {
     piece: 84
   },
@@ -1906,7 +1999,8 @@ ing({
 }), ing({
   id: 'kalamata-olives',
   name: 'Kalamata olives',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   nutrition: {
     calories: 115,
     protein: 0.8,
@@ -1923,7 +2017,8 @@ ing({
 }), ing({
   id: 'basil',
   name: 'Basil',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'herbs',
   nutrition: {
     calories: 23,
     protein: 3.2,
@@ -1945,7 +2040,8 @@ ing({
 }), ing({
   id: 'parsley',
   name: 'Parsley',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'herbs',
   nutrition: {
     calories: 36,
     protein: 3,
@@ -1965,7 +2061,8 @@ ing({
 }), ing({
   id: 'dill',
   name: 'Dill',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'herbs',
   nutrition: {
     calories: 43,
     protein: 3.5,
@@ -1985,7 +2082,8 @@ ing({
 }), ing({
   id: 'chives',
   name: 'Chives',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'herbs',
   nutrition: {
     calories: 30,
     protein: 3.3,
@@ -2002,7 +2100,8 @@ ing({
 }), ing({
   id: 'cilantro',
   name: 'Cilantro',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'herbs',
   nutrition: {
     calories: 23,
     protein: 2.1,
@@ -2019,7 +2118,8 @@ ing({
 }), ing({
   id: 'spring-onion',
   name: 'Spring onion',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   nutrition: {
     calories: 32,
     protein: 1.8,
@@ -2036,7 +2136,8 @@ ing({
 }), ing({
   id: 'banana',
   name: 'Banana',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'fruits',
   gramsPerUnit: {
     piece: 118
   },
@@ -2058,7 +2159,8 @@ ing({
 }), ing({
   id: 'mixed-berries',
   name: 'Mixed berries',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'berries',
   gramsPerUnit: {
     cup: 150
   },
@@ -2079,7 +2181,8 @@ ing({
 }), ing({
   id: 'blueberry',
   name: 'Blueberries',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'berries',
   gramsPerUnit: {
     cup: 148
   },
@@ -2101,7 +2204,8 @@ ing({
 }), ing({
   id: 'strawberry',
   name: 'Strawberries',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'berries',
   gramsPerUnit: {
     cup: 152
   },
@@ -2122,7 +2226,8 @@ ing({
 }), ing({
   id: 'apple',
   name: 'Apple',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'fruits',
   gramsPerUnit: {
     piece: 182
   },
@@ -2143,7 +2248,8 @@ ing({
 }), ing({
   id: 'mango',
   name: 'Mango',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'fruits',
   gramsPerUnit: {
     piece: 200
   },
@@ -2165,7 +2271,8 @@ ing({
 }), ing({
   id: 'pumpkin',
   name: 'Pumpkin',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   nutrition: {
     calories: 26,
     protein: 1,
@@ -2184,7 +2291,8 @@ ing({
 }), ing({
   id: 'cabbage',
   name: 'Cabbage',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   nutrition: {
     calories: 25,
     protein: 1.3,
@@ -2203,7 +2311,8 @@ ing({
 }), ing({
   id: 'capers',
   name: 'Capers',
-  category: 'produce',
+  categoryId: 'produce',
+  subcategoryId: 'vegetables',
   gramsPerUnit: {
     tsp: 4
   },

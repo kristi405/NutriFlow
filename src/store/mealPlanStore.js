@@ -31,6 +31,11 @@ class MealPlanStore {
     if (item) item.servings = servings;
   }
 
+  updateRecipe(id, recipeId) {
+    const item = this.items.find(item => item.id === id);
+    if (item) item.recipeId = recipeId;
+  }
+
   moveItem(id, date, mealType) {
     const item = this.items.find(item => item.id === id);
     if (item) {
