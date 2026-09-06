@@ -12,28 +12,25 @@ const theme = Colors.light;
 export function ForgotPasswordScreen({ onBackToLogin }) {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [done, setDone] = useState(false);
-  const canSubmit = email.trim().length > 0 && newPassword.length > 0 && confirmPassword.length > 0;
+  const canSubmit = email.trim().length > 0;
 
-  function handleSubmit() {
+  async function handleSubmit() {
     setError(null);
     if (!canSubmit) {
       setError(t('auth.forgotPassword.validationEmpty'));
       return;
     }
-    if (newPassword !== confirmPassword) {
-      setError(t('auth.forgotPassword.passwordsDontMatch'));
-      return;
-    }
+    setIsSubmitting(true);
     try {
-      authStore.resetPassword(email, newPassword);
+      await authStore.requestPasswordReset(email);
       setDone(true);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -70,36 +67,18 @@ export function ForgotPasswordScreen({ onBackToLogin }) {
           setError(null);
         }} placeholder={t('auth.forgotPassword.emailPlaceholder')} placeholderTextColor={theme.textSecondary} autoCapitalize="none" autoComplete="email" keyboardType="email-address" style={styles.input} />
         </View>
-
-        <View style={styles.inputWrapper}>
-          <SymbolView name={{ ios: 'lock.fill', android: 'lock', web: 'lock' }} size={18} tintColor={theme.textSecondary} />
-          <TextInput value={newPassword} onChangeText={text => {
-          setNewPassword(text);
-          setError(null);
-        }} placeholder={t('auth.forgotPassword.newPasswordPlaceholder')} placeholderTextColor={theme.textSecondary} secureTextEntry={!showPassword} autoComplete="password-new" style={styles.input} />
-          <Pressable onPress={() => setShowPassword(prev => !prev)} hitSlop={8}>
-            <SymbolView name={showPassword ? { ios: 'eye.slash.fill', android: 'visibility_off', web: 'visibility_off' } : { ios: 'eye.fill', android: 'visibility', web: 'visibility' }} size={18} tintColor={theme.textSecondary} />
-          </Pressable>
-        </View>
-
-        <View style={styles.inputWrapper}>
-          <SymbolView name={{ ios: 'lock.fill', android: 'lock', web: 'lock' }} size={18} tintColor={theme.textSecondary} />
-          <TextInput value={confirmPassword} onChangeText={text => {
-          setConfirmPassword(text);
-          setError(null);
-        }} placeholder={t('auth.forgotPassword.confirmPasswordPlaceholder')} placeholderTextColor={theme.textSecondary} secureTextEntry={!showPassword} autoComplete="password-new" style={styles.input} />
-        </View>
       </Animated.View>
 
       {error && <ThemedText type="small" color={theme.error} style={{ marginTop: -Spacing.three }}>{error}</ThemedText>}
 
       <View style={styles.actions}>
-        <Pressable onPress={handleSubmit} style={({ pressed }) => [styles.button, styles.buttonSpacing, styles.buttonShadow, {
+        <Pressable onPress={handleSubmit} disabled={isSubmitting} style={({ pressed }) => [styles.button, styles.buttonSpacing, styles.buttonShadow, {
         backgroundColor: LoginButtonGreen,
+        opacity: isSubmitting ? 0.6 : 1,
         transform: [{ scale: pressed ? 0.97 : 1 }]
       }]}>
           <ThemedText type="smallBold" style={styles.buttonTextActive}>
-            {t('auth.forgotPassword.submit')}
+            {isSubmitting ? t('auth.forgotPassword.submitting') : t('auth.forgotPassword.submit')}
           </ThemedText>
         </Pressable>
 

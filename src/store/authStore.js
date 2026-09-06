@@ -1,68 +1,142 @@
 import { makeAutoObservable } from 'mobx';
 import i18next from '@/i18n';
-import { persistStore } from './persist';
+import { apiRequest } from '@/lib/api';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Backend error messages are plain English strings (see AuthService.js), and the
+// same message can mean different things depending on which endpoint sent it —
+// e.g. "email is invalid" means "bad format" on register but "no such account" on
+// login (login intentionally doesn't reveal which part was wrong).
+function mapRegisterError(message) {
+  switch (message) {
+    case 'email is invalid':
+      return i18next.t('auth.errors.invalidEmail');
+    case 'password must be at least 6 characters':
+      return i18next.t('auth.errors.passwordTooShort');
+    case 'email is already registered':
+      return i18next.t('auth.errors.emailTaken');
+    default:
+      return message;
+  }
+}
 
-function normalizeEmail(email) {
-  return email.trim().toLowerCase();
+function mapLoginError(message) {
+  switch (message) {
+    case 'email is invalid':
+    case 'password is invalid':
+    case 'password is null':
+      return i18next.t('auth.errors.incorrectCredentials');
+    case 'user is blocked':
+      return i18next.t('auth.errors.accountBlocked');
+    default:
+      return message;
+  }
 }
 
 class AuthStore {
-  accounts = [];
-  currentUserId = null;
-  hasHydrated = false;
+  currentUser = null;
+  token = null;
+  // Set once the user explicitly signs out — lets _layout.js's SKIP_AUTH_FOR_TESTING
+  // bypass be overridden so logout actually lands on the login screen during dev.
+  hasLoggedOut = false;
+  // Auth state is intentionally never persisted to disk — every app launch starts
+  // at the login screen. hasHydrated stays true from the start so _layout.js can
+  // gate rendering on it the same way it does for the other (persisted) stores.
+  hasHydrated = true;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
-    // Only accounts persist — currentUserId is intentionally not saved, so every
-    // app launch starts at the login screen instead of resuming a session.
-    persistStore(this, 'nutriflow.auth', ['accounts']);
   }
 
   get isAuthenticated() {
-    return this.currentUserId !== null;
+    return this.currentUser !== null;
   }
 
-  register(email, password) {
-    const normalized = normalizeEmail(email);
-    if (!EMAIL_PATTERN.test(normalized)) throw new Error(i18next.t('auth.errors.invalidEmail'));
-    if (password.length < 6) throw new Error(i18next.t('auth.errors.passwordTooShort'));
-    if (this.accounts.some(account => account.id === normalized)) {
-      throw new Error(i18next.t('auth.errors.emailTaken'));
+  async register(email, password) {
+    let data;
+    try {
+      data = await apiRequest('/auth/register', { method: 'POST', body: { email: email.trim(), password } });
+    } catch (error) {
+      throw new Error(mapRegisterError(error.message));
     }
-    this.accounts.push({ id: normalized, email: normalized, password, createdAt: new Date().toISOString() });
-    this.currentUserId = normalized;
+    this.token = data.session.token;
+    this.currentUser = data.user;
+    this.hasLoggedOut = false;
   }
 
-  login(email, password) {
-    const normalized = normalizeEmail(email);
-    const account = this.accounts.find(account => account.id === normalized);
-    if (!account || account.password !== password) throw new Error(i18next.t('auth.errors.incorrectCredentials'));
-    this.currentUserId = normalized;
+  async login(email, password) {
+    let data;
+    try {
+      data = await apiRequest('/auth/login', { method: 'POST', body: { email: email.trim(), password } });
+    } catch (error) {
+      throw new Error(mapLoginError(error.message));
+    }
+    this.token = data.session.token;
+    this.currentUser = data.user;
+    this.hasLoggedOut = false;
   }
 
-  resetPassword(email, newPassword) {
-    const normalized = normalizeEmail(email);
-    const account = this.accounts.find(account => account.id === normalized);
-    if (!account) throw new Error(i18next.t('auth.errors.noAccountFound'));
-    if (newPassword.length < 6) throw new Error(i18next.t('auth.errors.passwordTooShort'));
-    account.password = newPassword;
+  async requestPasswordReset(email) {
+    await apiRequest('/auth/forgot-password', { method: 'POST', body: { email: email.trim() } });
+  }
+
+  // Pushes the local (camelCase) onboarding profile to the backend user record.
+  // Silently does nothing without a real session — the SKIP_AUTH_FOR_TESTING guest
+  // path has no backend account to sync to.
+  async syncProfile(profile) {
+    if (!this.token) return;
+    const body = {
+      name: profile.name,
+      sex: profile.sex,
+      age: profile.age,
+      height_cm: profile.heightCm,
+      weight_kg: profile.weightKg,
+      target_weight_kg: profile.targetWeightKg,
+      activity_level: profile.activityLevel,
+      goal_type: profile.goal?.type,
+      manual_calorie_target: profile.goal?.manualCalorieTarget,
+      manual_macro_split: profile.goal?.manualMacroSplit,
+      preferences: profile.preferences
+    };
+    try {
+      this.currentUser = await apiRequest('/users/me', { method: 'PUT', token: this.token, body });
+    } catch {
+      // Best-effort — the onboarding flow already moved on locally; the next
+      // successful sync (or a future explicit retry) will catch this up.
+    }
+  }
+
+  async loginWithGoogle(idToken) {
+    let data;
+    try {
+      data = await apiRequest('/auth/google', { method: 'POST', body: { idToken } });
+    } catch (error) {
+      throw new Error(error.message);
+    }
+    this.token = data.session.token;
+    this.currentUser = data.user;
+    this.hasLoggedOut = false;
   }
 
   loginWithApple({ userId, email }) {
-    let account = this.accounts.find(account => account.id === userId);
-    if (!account) {
-      account = { id: userId, email: email ?? null, password: null, createdAt: new Date().toISOString() };
-      this.accounts.push(account);
-    } else if (email && !account.email) {
-      account.email = email;
-    }
-    this.currentUserId = userId;
+    // Backend-side Apple identity token verification isn't wired up yet — this
+    // preserves the button's previous local-only behavior until that lands.
+    this.currentUser = { id: userId, email: email ?? null };
   }
 
-  logout() {
-    this.currentUserId = null;
+  async logout() {
+    const token = this.token;
+    this.currentUser = null;
+    this.token = null;
+    this.hasLoggedOut = true;
+
+    if (!token) return;
+    // Best-effort: revoke the session server-side so the token can't be reused.
+    // The user is logged out locally either way, even if this fails (e.g. offline).
+    try {
+      await apiRequest('/auth/sessions/revoke', { method: 'POST', token, body: { token } });
+    } catch {
+      // ignore — local state is already cleared above
+    }
   }
 }
 

@@ -52,7 +52,7 @@ const ALLERGEN_TAG_KEYS = {
 function ProfileScreen() {
   const { t } = useTranslation();
   const profile = profileStore.profile;
-  const account = authStore.accounts.find(item => item.id === authStore.currentUserId);
+  const account = authStore.currentUser;
 
   if (!profile) return null;
 
@@ -60,7 +60,15 @@ function ProfileScreen() {
     Alert.alert(feature, t('home.comingSoon'));
   }
 
-  const memberSinceLabel = account?.createdAt ? new Date(account.createdAt).toLocaleDateString(undefined, {
+  function handleSignOut() {
+    Alert.alert(t('profile.signOutConfirmTitle'), t('profile.signOutConfirmMessage'), [{ text: t('common.cancel'), style: 'cancel' }, {
+      text: t('profile.signOut'),
+      style: 'destructive',
+      onPress: () => authStore.logout()
+    }]);
+  }
+
+  const memberSinceLabel = account?.ctime ? new Date(account.ctime).toLocaleDateString(undefined, {
     month: 'short',
     year: 'numeric'
   }) : '—';
@@ -216,7 +224,7 @@ function ProfileScreen() {
 
       <PremiumCard />
 
-      <Pressable onPress={() => authStore.logout()} style={styles.signOutButton}>
+      <Pressable onPress={handleSignOut} style={styles.signOutButton}>
         <ThemedText type="smallBold" color={theme.error}>{t('profile.signOut')}</ThemedText>
       </Pressable>
     </ScreenScrollView>;

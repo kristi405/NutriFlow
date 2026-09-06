@@ -2,10 +2,13 @@ import { Colors, LoginGradientAccent, MaxContentWidth, Spacing } from '@/constan
 import { useTheme } from '@/hooks/use-theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Keyboard, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ThemedText } from '@/components/themed-text';
 // import { AppleSignInButton } from './apple-sign-in-button';
 import { ForgotPasswordScreen } from './forgot-password-screen';
+import { GoogleSignInButton } from './google-sign-in-button';
 import { LoginScreen } from './login-screen';
 import { RegisterScreen } from './register-screen';
 
@@ -13,9 +16,10 @@ import { RegisterScreen } from './register-screen';
 // const APPLE_SIGN_IN_ENABLED = false;
 
 export function AuthFlow() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const [mode, setMode] = useState('login');
-  const [appleError, setAppleError] = useState(null);
+  const [googleError, setGoogleError] = useState(null);
 
   return <LinearGradient colors={[Colors.light.background, Colors.light.primarySoft, LoginGradientAccent]} style={styles.flex1}>
       <SafeAreaView style={styles.flex1}>
@@ -24,12 +28,18 @@ export function AuthFlow() {
             {mode === 'register' && <RegisterScreen onSwitchToLogin={() => setMode('login')} />}
             {mode === 'forgot' && <ForgotPasswordScreen onBackToLogin={() => setMode('login')} />}
 
-            {/* {APPLE_SIGN_IN_ENABLED && Platform.OS === 'ios' && <View style={styles.appleSection}>
+            {mode !== 'forgot' && <View style={styles.googleSection}>
                 <View style={styles.divider}>
                   <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
-                  <ThemedText type="small" themeColor="textSecondary">or</ThemedText>
+                  <ThemedText type="small" color={theme.textSecondary}>{t('common.or')}</ThemedText>
                   <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
                 </View>
+                <GoogleSignInButton onError={setGoogleError} />
+                {googleError && <ThemedText type="small" color={theme.error}>{googleError}</ThemedText>}
+              </View>}
+
+            {/* {APPLE_SIGN_IN_ENABLED && Platform.OS === 'ios' && <View style={styles.appleSection}>
+                <AppleSignInButton onError={setAppleError} />
                 {appleError && <ThemedText type="small" themeColor="error">{appleError}</ThemedText>}
               </View>} */}
         </Pressable>
@@ -49,6 +59,10 @@ const styles = StyleSheet.create({
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
     width: '100%'
+  },
+  googleSection: {
+    gap: Spacing.three,
+    marginTop: Spacing.four
   },
   appleSection: {
     gap: Spacing.three,

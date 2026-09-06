@@ -26,11 +26,14 @@ function TabLayout() {
   const [showIntro, setShowIntro] = useState(true);
   const [showCalculating, setShowCalculating] = useState(false);
   const hasHydrated = profileStore.hasHydrated && authStore.hasHydrated;
-  const isAuthenticated = SKIP_AUTH_FOR_TESTING || authStore.isAuthenticated;
+  const isAuthenticated = authStore.isAuthenticated || (SKIP_AUTH_FOR_TESTING && !authStore.hasLoggedOut);
   const hasOnboarded = profileStore.hasOnboarded;
   const prevHasOnboardedRef = useRef(hasOnboarded);
   useEffect(() => {
-    if (SKIP_AUTH_FOR_TESTING && hasHydrated && !hasOnboarded) {
+    // Only auto-fills onboarding for the SKIP_AUTH_FOR_TESTING dev shortcut (no real
+    // account at all). A genuinely registered/logged-in user must go through the
+    // real OnboardingFlow instead of having it silently overwritten with guest data.
+    if (SKIP_AUTH_FOR_TESTING && !authStore.isAuthenticated && hasHydrated && !hasOnboarded) {
       profileStore.completeOnboarding({
         name: t('onboarding.guestName'),
         sex: 'female',
@@ -49,7 +52,7 @@ function TabLayout() {
       });
       prevHasOnboardedRef.current = true;
     }
-  }, [hasHydrated, hasOnboarded]);
+  }, [hasHydrated, hasOnboarded, authStore.isAuthenticated]);
   useEffect(() => {
     if (!prevHasOnboardedRef.current && hasOnboarded) {
       setShowCalculating(true);

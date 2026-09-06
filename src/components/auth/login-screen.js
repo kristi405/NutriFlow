@@ -16,20 +16,24 @@ export function LoginScreen({ onSwitchToRegister, onForgotPassword }) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const canSubmit = email.trim().length > 0 && password.length > 0;
 
-  function handleSubmit() {
+  async function handleSubmit() {
     setError(null);
     if (!canSubmit) {
       setError(t('auth.login.validationEmpty'));
       return;
     }
+    setIsSubmitting(true);
     try {
-      authStore.login(email, password);
+      await authStore.login(email, password);
       // Temporary: always route through onboarding for now while the tabs/native-tabs flow is being worked out.
       profileStore.resetOnboarding();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -73,12 +77,13 @@ export function LoginScreen({ onSwitchToRegister, onForgotPassword }) {
       {error && <ThemedText type="small" color={theme.error} style={{ marginTop: -Spacing.three }}>{error}</ThemedText>}
 
       <View style={styles.actions}>
-        <Pressable onPress={handleSubmit} style={({ pressed }) => [styles.button, styles.buttonSpacing, styles.buttonShadow, {
+        <Pressable onPress={handleSubmit} disabled={isSubmitting} style={({ pressed }) => [styles.button, styles.buttonSpacing, styles.buttonShadow, {
         backgroundColor: LoginButtonGreen,
+        opacity: isSubmitting ? 0.6 : 1,
         transform: [{ scale: pressed ? 0.97 : 1 }]
       }]}>
           <ThemedText type="smallBold" style={styles.buttonTextActive}>
-            {t('auth.login.submit')}
+            {isSubmitting ? t('auth.login.submitting') : t('auth.login.submit')}
           </ThemedText>
         </Pressable>
 

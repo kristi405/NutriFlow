@@ -17,7 +17,9 @@
     "clear": "Clear",
     "close": "Close",
     "add": "Add",
-    "save": "Save"
+    "save": "Save",
+    "cancel": "Cancel",
+    "or": "or"
   },
   "auth": {
     "login": {
@@ -29,7 +31,8 @@
       "submit": "Log In",
       "noAccount": "Don't have an account?",
       "register": "Register",
-      "validationEmpty": "Enter your email and password."
+      "validationEmpty": "Enter your email and password.",
+      "submitting": "Logging in…"
     },
     "register": {
       "title": "Create account",
@@ -41,21 +44,20 @@
       "haveAccount": "Already have an account?",
       "login": "Log in",
       "passwordsDontMatch": "Passwords do not match.",
-      "validationEmpty": "Fill in all fields."
+      "validationEmpty": "Fill in all fields.",
+      "submitting": "Creating account…"
     },
     "forgotPassword": {
       "title": "Reset password",
-      "subtitle": "Enter your email and choose a new password.",
+      "subtitle": "Enter your email and we will send you a link to reset your password.",
       "emailPlaceholder": "Email",
-      "newPasswordPlaceholder": "New password",
-      "confirmPasswordPlaceholder": "Confirm new password",
-      "submit": "Reset password",
+      "submit": "Send reset link",
+      "submitting": "Sending…",
       "rememberedIt": "Remembered it?",
       "login": "Log in",
-      "validationEmpty": "Fill in all fields.",
-      "passwordsDontMatch": "Passwords do not match.",
-      "doneTitle": "Password updated",
-      "doneSubtitle": "You can now log in with your new password.",
+      "validationEmpty": "Enter your email.",
+      "doneTitle": "Check your email",
+      "doneSubtitle": "If an account exists for that email, we sent a link to reset your password.",
       "backToLogin": "Back to log in"
     },
     "errors": {
@@ -64,7 +66,12 @@
       "emailTaken": "An account with this email already exists.",
       "incorrectCredentials": "Incorrect email or password.",
       "noAccountFound": "No account found with that email.",
-      "appleSignInFailed": "Apple sign in failed. Please try again."
+      "appleSignInFailed": "Apple sign in failed. Please try again.",
+      "accountBlocked": "This account has been blocked.",
+      "googleSignInFailed": "Google sign-in failed. Please try again."
+    },
+    "google": {
+      "signIn": "Continue with Google"
     }
   },
   "onboarding": {
@@ -194,7 +201,9 @@
     "premiumTitle": "Upgrade to Premium",
     "premiumSubtitle": "Unlock AI recipes, advanced insights and more",
     "premiumCta": "Join Premium Plan",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "signOutConfirmTitle": "Sign out?",
+    "signOutConfirmMessage": "You will need to log in again to access your account."
   },
   "progress": {
     "title": "Progress",

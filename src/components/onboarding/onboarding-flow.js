@@ -6,6 +6,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, LoginButtonGreen, LoginGradientAccent, MaxContentWidth, Spacing } from '@/constants/theme';
+import { authStore } from '@/store/authStore';
 import { profileStore } from '@/store/profileStore';
 import { ActivityStep } from './activity-step';
 import { GoalStep } from './goal-step';
@@ -66,9 +67,10 @@ export function OnboardingFlow() {
       }
     };
     completeOnboarding(profile);
+    authStore.syncProfile(profile);
   }
   function handleSkip() {
-    completeOnboarding({
+    const profile = {
       name: t('onboarding.guestName'),
       sex: 'female',
       age: 30,
@@ -85,7 +87,9 @@ export function OnboardingFlow() {
         favoriteCuisines: [],
         units: 'metric'
       }
-    });
+    };
+    completeOnboarding(profile);
+    authStore.syncProfile(profile);
   }
   return <LinearGradient colors={[Colors.light.background, Colors.light.primarySoft, LoginGradientAccent]} style={styles.flex1}>
       <SafeAreaView style={styles.flex1}>

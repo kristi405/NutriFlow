@@ -18,9 +18,10 @@ export function RegisterScreen({ onSwitchToLogin }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const canSubmit = email.trim().length > 0 && password.length > 0 && confirmPassword.length > 0;
 
-  function handleSubmit() {
+  async function handleSubmit() {
     setError(null);
     if (!canSubmit) {
       setError(t('auth.register.validationEmpty'));
@@ -30,11 +31,14 @@ export function RegisterScreen({ onSwitchToLogin }) {
       setError(t('auth.register.passwordsDontMatch'));
       return;
     }
+    setIsSubmitting(true);
     try {
-      authStore.register(email, password);
+      await authStore.register(email, password);
       profileStore.resetOnboarding();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -85,12 +89,13 @@ export function RegisterScreen({ onSwitchToLogin }) {
       {error && <ThemedText type="small" color={theme.error} style={{ marginTop: -Spacing.four }}>{error}</ThemedText>}
 
       <View style={styles.actions}>
-        <Pressable onPress={handleSubmit} style={({ pressed }) => [styles.button, styles.buttonSpacing, styles.buttonShadow, {
+        <Pressable onPress={handleSubmit} disabled={isSubmitting} style={({ pressed }) => [styles.button, styles.buttonSpacing, styles.buttonShadow, {
         backgroundColor: LoginButtonGreen,
+        opacity: isSubmitting ? 0.6 : 1,
         transform: [{ scale: pressed ? 0.97 : 1 }]
       }]}>
           <ThemedText type="smallBold" style={styles.buttonTextActive}>
-            {t('auth.register.submit')}
+            {isSubmitting ? t('auth.register.submitting') : t('auth.register.submit')}
           </ThemedText>
         </Pressable>
 
