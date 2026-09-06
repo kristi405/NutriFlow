@@ -1,25 +1,45 @@
-import { useMemo } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { SymbolView } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
-import Svg, { Circle, Polyline } from 'react-native-svg';
+import { Pressable, StyleSheet, View } from 'react-native';
+import Svg, { Circle, Line, Polyline, Text as SvgText } from 'react-native-svg';
 import { ThemedText } from '@/components/themed-text';
 import { MacroBar } from '@/components/ui/macro-bar';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Colors, LoginButtonGreen, LoginIconBackground, Spacing } from '@/constants/theme';
-import { todayKey } from '@/lib/date';
+import { addDays, todayKey } from '@/lib/date';
 import { calculateBMI, calculateDailyTargets } from '@/lib/nutrition';
+import { displayWeight, weightUnitLabel } from '@/lib/units';
 import { useDailyNutrition } from '@/hooks/useDailyNutrition';
 import { profileStore } from '@/store/profileStore';
 import { waterStore } from '@/store/waterStore';
+import { weightLogStore } from '@/store/weightLogStore';
 
 const theme = Colors.light;
 
 const CHART_WIDTH = 300;
-const CHART_HEIGHT = 120;
-const CHART_PADDING = 12;
-const TREND_POINTS = 7;
+const CHART_HEIGHT = 170;
+const CHART_LEFT_PADDING = 32;
+const CHART_RIGHT_PADDING = 8;
+const CHART_TOP_PADDING = 16;
+const CHART_BOTTOM_PADDING = 22;
+const Y_TICK_COUNT = 4;
+const MAX_X_TICKS = 5;
+
+const RANGE_OPTIONS = [{
+  key: '6m',
+  labelKey: 'progress.range6m',
+  days: 182
+}, {
+  key: '1y',
+  labelKey: 'progress.range1y',
+  days: 365
+}, {
+  key: 'all',
+  labelKey: 'progress.rangeAll',
+  days: undefined
+}];
 
 const STAT_CARD_GAP = Spacing.two;
 
@@ -41,30 +61,76 @@ const ACHIEVEMENTS = [{
   subtitleKey: 'progress.achievementFirstRecipeSubtitle'
 }];
 
-function buildWeightTrend(startKg, currentKg) {
-  return Array.from({
-    length: TREND_POINTS
-  }, (_, index) => startKg + (currentKg - startKg) * (index / (TREND_POINTS - 1)));
+function formatChartDate(dateKey) {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric'
+  });
 }
 
-function WeightChart({ points }) {
-  const min = Math.min(...points);
-  const max = Math.max(...points);
+function WeightChart({ entries, unitLabel }) {
+  if (entries.length === 0) return null;
+
+  const weights = entries.map(entry => entry.weight);
+  const rawMin = Math.min(...weights);
+  const rawMax = Math.max(...weights);
+  const padding = Math.max((rawMax - rawMin) * 0.2, 1);
+  const min = rawMin - padding;
+  const max = rawMax + padding;
   const range = max - min || 1;
-  const stepX = (CHART_WIDTH - CHART_PADDING * 2) / (points.length - 1);
-  const coords = points.map((value, index) => {
-    const x = CHART_PADDING + index * stepX;
-    const y = CHART_PADDING + (1 - (value - min) / range) * (CHART_HEIGHT - CHART_PADDING * 2);
-    return {
-      x,
-      y
-    };
-  });
+
+  const plotLeft = CHART_LEFT_PADDING;
+  const plotRight = CHART_WIDTH - CHART_RIGHT_PADDING;
+  const plotTop = CHART_TOP_PADDING;
+  const plotBottom = CHART_HEIGHT - CHART_BOTTOM_PADDING;
+  const plotWidth = plotRight - plotLeft;
+  const plotHeight = plotBottom - plotTop;
+
+  const stepX = entries.length > 1 ? plotWidth / (entries.length - 1) : 0;
+  const coords = entries.map((entry, index) => ({
+    x: plotLeft + index * stepX,
+    y: plotTop + (1 - (entry.weight - min) / range) * plotHeight
+  }));
   const polylinePoints = coords.map(point => `${point.x},${point.y}`).join(' ');
   const last = coords[coords.length - 1];
+
+  const yTicks = Array.from({
+    length: Y_TICK_COUNT
+  }, (_, index) => {
+    const value = min + range * (index / (Y_TICK_COUNT - 1));
+    return {
+      value,
+      y: plotTop + (1 - index / (Y_TICK_COUNT - 1)) * plotHeight
+    };
+  });
+
+  const xTickCount = Math.min(entries.length, MAX_X_TICKS);
+  const xTicks = Array.from({
+    length: xTickCount
+  }, (_, index) => {
+    const pointIndex = xTickCount === 1 ? 0 : Math.round((entries.length - 1) * (index / (xTickCount - 1)));
+    return {
+      label: formatChartDate(entries[pointIndex].date),
+      x: coords[pointIndex].x
+    };
+  });
+
   return <Svg width={CHART_WIDTH} height={CHART_HEIGHT}>
+      {yTicks.map(tick => <Fragment key={tick.y}>
+          <Line x1={plotLeft} x2={plotRight} y1={tick.y} y2={tick.y} stroke={theme.border} strokeWidth={1} />
+          <SvgText x={plotLeft - 6} y={tick.y + 3} fontSize={9} fill={theme.textSecondary} textAnchor="end">
+            {Math.round(tick.value)}
+          </SvgText>
+        </Fragment>)}
+      <SvgText x={2} y={plotTop - 4} fontSize={9} fill={theme.textSecondary}>
+        {unitLabel}
+      </SvgText>
       <Polyline points={polylinePoints} fill="none" stroke={theme.primary} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
       <Circle cx={last.x} cy={last.y} r={5} fill={theme.primary} />
+      {xTicks.map(tick => <SvgText key={`${tick.label}-${tick.x}`} x={tick.x} y={CHART_HEIGHT - 6} fontSize={9} fill={theme.textSecondary} textAnchor="middle">
+          {tick.label}
+        </SvgText>)}
     </Svg>;
 }
 
@@ -86,13 +152,26 @@ function ProgressScreen() {
   const { total } = useDailyNutrition(todayKey());
   const waterMl = waterStore.totalForDate(todayKey());
   const targets = useMemo(() => profile ? calculateDailyTargets(profile) : undefined, [profile]);
+  const [rangeKey, setRangeKey] = useState(null);
 
   const currentWeightKg = profile?.weightKg;
   const targetWeightKg = profile?.targetWeightKg;
   const bmi = profile ? calculateBMI(profile.weightKg, profile.heightCm) : undefined;
-  const startWeightKg = currentWeightKg !== undefined ? currentWeightKg + (profile.goal?.type === 'gain-weight' ? -3 : 3) : undefined;
-  const weightLostKg = startWeightKg !== undefined ? Math.abs(startWeightKg - currentWeightKg) : undefined;
-  const trend = useMemo(() => startWeightKg !== undefined ? buildWeightTrend(startWeightKg, currentWeightKg) : [], [startWeightKg, currentWeightKg]);
+  const unitLabel = weightUnitLabel(profile?.preferences?.units);
+
+  useEffect(() => {
+    weightLogStore.ensureSeeded(currentWeightKg, profile?.goal?.type);
+  }, [currentWeightKg, profile?.goal?.type]);
+
+  const activeRange = RANGE_OPTIONS.find(option => option.key === rangeKey);
+  const historyEntries = activeRange?.days !== undefined ? weightLogStore.entriesSince(addDays(todayKey(), -activeRange.days)) : activeRange?.key === 'all' ? weightLogStore.sortedEntries : weightLogStore.entriesSince(addDays(todayKey(), -30));
+  const chartEntries = useMemo(() => historyEntries.map(entry => ({
+    date: entry.date,
+    weight: displayWeight(entry.weightKg, profile?.preferences?.units)
+  })), [historyEntries, profile?.preferences?.units]);
+
+  const startWeightKg = weightLogStore.sortedEntries[0]?.weightKg ?? currentWeightKg;
+  const weightLostKg = startWeightKg !== undefined && currentWeightKg !== undefined ? Math.abs(startWeightKg - currentWeightKg) : undefined;
 
   if (!profile || !targets) return null;
 
@@ -107,18 +186,30 @@ function ProgressScreen() {
       </View>
 
       <View style={styles.statsGrid}>
-        <StatCard icon={{ ios: 'scalemass.fill', android: 'monitor_weight', web: 'monitor_weight' }} label={t('progress.currentWeight')} value={Math.round(currentWeightKg * 10) / 10} unit={t('common.kg')} />
-        <StatCard icon={{ ios: 'arrow.down.right', android: 'south_east', web: 'south_east' }} label={t('progress.weightLost')} value={Math.round(weightLostKg * 10) / 10} unit={t('common.kg')} />
+        <StatCard icon={{ ios: 'scalemass.fill', android: 'monitor_weight', web: 'monitor_weight' }} label={t('progress.currentWeight')} value={displayWeight(currentWeightKg, profile.preferences?.units)} unit={unitLabel} />
+        <StatCard icon={{ ios: 'arrow.down.right', android: 'south_east', web: 'south_east' }} label={t('progress.weightLost')} value={weightLostKg !== undefined ? displayWeight(weightLostKg, profile.preferences?.units) : '—'} unit={weightLostKg !== undefined ? unitLabel : undefined} />
         <StatCard icon={{ ios: 'figure', android: 'accessibility_new', web: 'accessibility_new' }} label={t('progress.bmi')} value={Math.round(bmi * 10) / 10} />
-        <StatCard icon={{ ios: 'target', android: 'target', web: 'target' }} label={t('progress.targetWeight')} value={targetWeightKg !== undefined ? Math.round(targetWeightKg * 10) / 10 : '—'} unit={targetWeightKg !== undefined ? t('common.kg') : undefined} />
+        <StatCard icon={{ ios: 'target', android: 'target', web: 'target' }} label={t('progress.targetWeight')} value={targetWeightKg !== undefined ? displayWeight(targetWeightKg, profile.preferences?.units) : '—'} unit={targetWeightKg !== undefined ? unitLabel : undefined} />
       </View>
 
       <View style={styles.card}>
-        <ThemedText type="smallBold" color={theme.text}>
-          {t('progress.weightProgress')}
-        </ThemedText>
+        <View style={styles.chartHeaderRow}>
+          <ThemedText type="smallBold" color={theme.text}>
+            {t('progress.weightProgress')}
+          </ThemedText>
+          <View style={styles.rangeRow}>
+            {RANGE_OPTIONS.map(option => {
+            const isActive = rangeKey === option.key;
+            return <Pressable key={option.key} onPress={() => setRangeKey(isActive ? null : option.key)} style={[styles.rangeButton, isActive && styles.rangeButtonActive]}>
+                  <ThemedText type="caption" color={isActive ? '#ffffff' : theme.textSecondary}>
+                    {t(option.labelKey)}
+                  </ThemedText>
+                </Pressable>;
+          })}
+          </View>
+        </View>
         <View style={styles.chartWrapper}>
-          <WeightChart points={trend} />
+          <WeightChart entries={chartEntries} unitLabel={unitLabel} />
         </View>
       </View>
 
@@ -194,6 +285,26 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 20,
     padding: Spacing.three
+  },
+  chartHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: Spacing.two
+  },
+  rangeRow: {
+    flexDirection: 'row',
+    gap: 6
+  },
+  rangeButton: {
+    paddingHorizontal: Spacing.two,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: theme.backgroundElement
+  },
+  rangeButtonActive: {
+    backgroundColor: LoginButtonGreen
   },
   chartWrapper: {
     alignItems: 'center'

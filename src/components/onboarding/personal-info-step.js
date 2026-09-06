@@ -4,11 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, LoginButtonGreen, Spacing } from '@/constants/theme';
+import { KG_PER_LB } from '@/lib/units';
 
 const theme = Colors.light;
 
 const CM_PER_INCH = 2.54;
-const KG_PER_LB = 0.453592;
 
 function round1(number) {
   return Math.round(number * 10) / 10;
@@ -74,7 +74,7 @@ export function PersonalInfoStep({
 }) {
   const { t } = useTranslation();
   const [heightUnit, setHeightUnit] = useState('in');
-  const [weightUnit, setWeightUnit] = useState('lb');
+  const [weightUnit, setWeightUnit] = useState(value.weightUnit ?? 'lb');
   const [heightText, setHeightText] = useState(() => cmToDisplay(value.heightCm, 'in'));
   const [weightText, setWeightText] = useState(() => kgToDisplay(value.weightKg, 'lb'));
   const [targetWeightText, setTargetWeightText] = useState(() => kgToDisplay(value.targetWeightKg, 'lb'));
@@ -118,6 +118,7 @@ export function PersonalInfoStep({
     setWeightUnit(newUnit);
     setWeightText(kgToDisplay(value.weightKg, newUnit));
     setTargetWeightText(kgToDisplay(value.targetWeightKg, newUnit));
+    onChange({ weightUnit: newUnit });
   }
   return <View style={styles.container}>
       <View style={styles.header}>

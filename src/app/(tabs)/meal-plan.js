@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DateStrip } from '@/components/home/date-strip';
 import { MealRow } from '@/components/home/meal-row';
@@ -51,12 +51,17 @@ const MEAL_TYPE_ICONS = {
   dinner: { ios: 'moon.stars.fill', android: 'bedtime', web: 'bedtime' },
   snack: { ios: 'leaf.fill', android: 'eco', web: 'eco' }
 };
+const QUICK_SNACK_ICON = { ios: 'flame.fill', android: 'local_fire_department', web: 'local_fire_department' };
+const QUICK_SNACKS = [{ id: 'coffee', nameKey: 'mealPlan.quickSnackNames.coffee', calories: 40 }, { id: 'tea-with-honey', nameKey: 'mealPlan.quickSnackNames.teaWithHoney', calories: 30 }, { id: 'ice-cream', nameKey: 'mealPlan.quickSnackNames.iceCream', calories: 137 }, { id: 'candy', nameKey: 'mealPlan.quickSnackNames.candy', calories: 25 }, { id: 'chocolate-bar', nameKey: 'mealPlan.quickSnackNames.chocolateBar', calories: 230 }, { id: 'chips', nameKey: 'mealPlan.quickSnackNames.chips', calories: 160 }, { id: 'cookies', nameKey: 'mealPlan.quickSnackNames.cookies', calories: 140 }, { id: 'soda', nameKey: 'mealPlan.quickSnackNames.soda', calories: 140 }, { id: 'protein-bar', nameKey: 'mealPlan.quickSnackNames.proteinBar', calories: 200 }, { id: 'nuts-handful', nameKey: 'mealPlan.quickSnackNames.nutsHandful', calories: 170 }];
 
 function MealPlanScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [date, setDate] = useState(todayKey());
   const [swapMealType, setSwapMealType] = useState(null);
+  const [isAddSnackModalOpen, setIsAddSnackModalOpen] = useState(false);
+  const [customSnackCalories, setCustomSnackCalories] = useState('');
+  const [editingSnackId, setEditingSnackId] = useState(null);
   const profile = profileStore.profile;
   const targets = useMemo(() => profile ? calculateDailyTargets(profile) : undefined, [profile]);
   const { total } = useDailyNutrition(date);
@@ -67,6 +72,8 @@ function MealPlanScreen() {
     if (!recipe) return sum;
     return sum + scaleForServings(calculateRecipeNutrition(recipe, getIngredientById), item.servings).nutrition.calories;
   }, 0);
+  const allMealsEaten = planItems.length > 0 && planItems.every(item => loggedEntries.some(entry => entry.mealType === item.mealType && entry.recipeId === item.recipeId));
+  const quickSnackEntries = loggedEntries.filter(entry => entry.mealType === 'snack' && entry.manualCalories !== undefined);
 
   // Repairs items left over from before recipes were split into
   // breakfast/lunch/dinner/salad/snack categories, so a meal type never ends
@@ -144,6 +151,40 @@ function MealPlanScreen() {
     }
   }
 
+  function closeSnackModal() {
+    setIsAddSnackModalOpen(false);
+    setEditingSnackId(null);
+    setCustomSnackCalories('');
+  }
+
+  function handleOpenAddSnack() {
+    setEditingSnackId(null);
+    setCustomSnackCalories('');
+    setIsAddSnackModalOpen(true);
+  }
+
+  function handleOpenEditSnack(entry) {
+    setEditingSnackId(entry.id);
+    setCustomSnackCalories(String(entry.manualCalories));
+    setIsAddSnackModalOpen(true);
+  }
+
+  function commitSnack(label, calories) {
+    if (editingSnackId) {
+      foodLogStore.updateEntry(editingSnackId, { label, manualCalories: calories });
+    } else {
+      foodLogStore.logMeal({ date, mealType: 'snack', label, manualCalories: calories });
+    }
+    closeSnackModal();
+  }
+
+  function handleLogCustomSnack() {
+    const calories = Math.round(Number(customSnackCalories));
+    if (!Number.isFinite(calories) || calories <= 0) return;
+    const editingEntry = editingSnackId ? quickSnackEntries.find(entry => entry.id === editingSnackId) : undefined;
+    commitSnack(editingEntry?.label ?? t('mealPlan.customSnackLabel'), calories);
+  }
+
   return <View style={styles.flex1}>
       <View style={[styles.fixedTop, {
       paddingTop: insets.top + Spacing.two
@@ -169,7 +210,7 @@ function MealPlanScreen() {
       paddingBottom: BottomTabInset + (hasFullWeekPlanned ? Spacing.four : Spacing.six)
     }}>
       <View style={styles.topRow}>
-        <View style={styles.progressCard}>
+        <View style={[styles.progressCard, allMealsEaten && styles.progressCardEaten]}>
           <MacroBar label={t('recipes.calories')} value={total.nutrition.calories} target={menuCalories} unit={t('common.kcal')} color={theme.primary} />
         </View>
         <Pressable onPress={handleGenerateShoppingList} style={styles.shoppingListButton}>
@@ -180,35 +221,65 @@ function MealPlanScreen() {
         </Pressable>
       </View>
 
-      {MEAL_TYPES.map(mealType => {
-      const items = planItems.filter(item => item.mealType === mealType);
-      return <View key={mealType} style={styles.mealTypeCard}>
+      <View style={styles.mealTypesList}>
+        {MEAL_TYPES.map(mealType => {
+        const items = planItems.filter(item => item.mealType === mealType);
+        const isMealTypeEaten = items.length > 0 && items.every(item => loggedEntries.some(entry => entry.mealType === item.mealType && entry.recipeId === item.recipeId));
+        return <View key={mealType} style={[styles.mealTypeCard, isMealTypeEaten && styles.mealTypeCardEaten]}>
+              <View style={styles.mealTypeHeader}>
+                <View style={styles.mealTypeHeaderLeft}>
+                  <View style={styles.iconWrapper}>
+                    <SymbolView name={MEAL_TYPE_ICONS[mealType]} size={18} tintColor={LoginButtonGreen} />
+                  </View>
+                  <ThemedText type="smallBold" color={theme.text}>
+                    {t(`mealTypes.${mealType}`)}
+                  </ThemedText>
+                </View>
+                <Pressable onPress={() => setSwapMealType(mealType)} hitSlop={8} style={styles.editButton}>
+                  <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={16} tintColor={LoginButtonGreen} />
+                </Pressable>
+              </View>
+              {items.length === 0 ? <ThemedText type="small" color={theme.textSecondary}>
+                  {t('mealPlan.noMealPlanned')}
+                </ThemedText> : <View style={styles.mealList}>
+                  {items.map(item => {
+                const recipe = getRecipeById(item.recipeId);
+                if (!recipe) return null;
+                const calories = scaleForServings(calculateRecipeNutrition(recipe, getIngredientById), item.servings).nutrition.calories;
+                const isEaten = loggedEntries.some(entry => entry.mealType === item.mealType && entry.recipeId === item.recipeId);
+                return <MealRow key={item.id} recipeId={item.recipeId} mealType={item.mealType} title={recipe.title} imageUrl={recipe.imageUrl} calories={calories} isEaten={isEaten} onToggleEaten={() => toggleEaten(item)} />;
+              })}
+                </View>}
+            </View>;
+      })}
+
+        {quickSnackEntries.map(entry => <View key={entry.id} style={styles.mealTypeCard}>
             <View style={styles.mealTypeHeader}>
               <View style={styles.mealTypeHeaderLeft}>
                 <View style={styles.iconWrapper}>
-                  <SymbolView name={MEAL_TYPE_ICONS[mealType]} size={18} tintColor={LoginButtonGreen} />
+                  <SymbolView name={QUICK_SNACK_ICON} size={18} tintColor={LoginButtonGreen} />
                 </View>
-                <ThemedText type="smallBold" color={theme.text}>
-                  {t(`mealTypes.${mealType}`)}
-                </ThemedText>
+                <View>
+                  <ThemedText type="smallBold" color={theme.text}>{entry.label}</ThemedText>
+                  <ThemedText type="small" color={theme.textSecondary}>{entry.manualCalories} {t('common.kcal')}</ThemedText>
+                </View>
               </View>
-              <Pressable onPress={() => setSwapMealType(mealType)} hitSlop={8} style={styles.editButton}>
-                <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={16} tintColor={LoginButtonGreen} />
-              </Pressable>
+              <View style={styles.quickSnackActions}>
+                <Pressable onPress={() => handleOpenEditSnack(entry)} hitSlop={8} style={styles.editButton}>
+                  <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={16} tintColor={LoginButtonGreen} />
+                </Pressable>
+                <Pressable onPress={() => foodLogStore.removeEntry(entry.id)} hitSlop={8} style={styles.deleteButton}>
+                  <SymbolView name={{ ios: 'trash', android: 'delete', web: 'delete' }} size={16} tintColor={theme.error} />
+                </Pressable>
+              </View>
             </View>
-            {items.length === 0 ? <ThemedText type="small" color={theme.textSecondary}>
-                {t('mealPlan.noMealPlanned')}
-              </ThemedText> : <View style={styles.mealList}>
-                {items.map(item => {
-              const recipe = getRecipeById(item.recipeId);
-              if (!recipe) return null;
-              const calories = scaleForServings(calculateRecipeNutrition(recipe, getIngredientById), item.servings).nutrition.calories;
-              const isEaten = loggedEntries.some(entry => entry.mealType === item.mealType && entry.recipeId === item.recipeId);
-              return <MealRow key={item.id} recipeId={item.recipeId} mealType={item.mealType} title={recipe.title} imageUrl={recipe.imageUrl} calories={calories} isEaten={isEaten} onToggleEaten={() => toggleEaten(item)} />;
-            })}
-              </View>}
-          </View>;
-    })}
+          </View>)}
+
+        <Pressable onPress={handleOpenAddSnack} style={styles.addSnackButton}>
+          <SymbolView name={{ ios: 'plus.circle.fill', android: 'add_circle', web: 'add_circle' }} size={20} tintColor={LoginButtonGreen} />
+          <ThemedText type="smallBold" color={LoginButtonGreen}>{t('mealPlan.addSnack')}</ThemedText>
+        </Pressable>
+      </View>
       </ScreenScrollView>
 
       {!hasFullWeekPlanned && <Pressable onPress={handleGenerateWeek} style={[styles.weekButton, {
@@ -246,6 +317,41 @@ function MealPlanScreen() {
                     </Pressable>;
             })}
               </View>}
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <Modal visible={isAddSnackModalOpen} transparent animationType="slide" onRequestClose={closeSnackModal}>
+        <Pressable style={styles.modalBackdrop} onPress={closeSnackModal}>
+          <Pressable style={styles.modalSheet} onPress={event => event.stopPropagation()}>
+            <View style={styles.modalHeader}>
+              <View>
+                <ThemedText type="smallBold" color={theme.text}>{t(editingSnackId ? 'mealPlan.editSnackTitle' : 'mealPlan.addSnackTitle')}</ThemedText>
+                <ThemedText type="caption" color={theme.textSecondary}>{t('mealPlan.addSnackSubtitle')}</ThemedText>
+              </View>
+              <Pressable onPress={closeSnackModal} hitSlop={8} style={styles.editButton}>
+                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={LoginButtonGreen} />
+              </Pressable>
+            </View>
+
+            <ScrollView style={styles.quickSnackScroll}>
+              <View style={styles.swapList}>
+                {QUICK_SNACKS.map(snack => <Pressable key={snack.id} onPress={() => commitSnack(t(snack.nameKey), snack.calories)} style={styles.swapRow}>
+                    <View style={styles.quickSnackIconWrapper}>
+                      <SymbolView name={QUICK_SNACK_ICON} size={16} tintColor={LoginButtonGreen} />
+                    </View>
+                    <ThemedText type="smallBold" color={theme.text} style={styles.flex1}>{t(snack.nameKey)}</ThemedText>
+                    <ThemedText type="small" color={theme.textSecondary}>{snack.calories} {t('common.kcal')}</ThemedText>
+                  </Pressable>)}
+              </View>
+            </ScrollView>
+
+            <View style={styles.customSnackRow}>
+              <TextInput value={customSnackCalories} onChangeText={setCustomSnackCalories} keyboardType="number-pad" placeholder={t('mealPlan.customSnackPlaceholder')} placeholderTextColor={theme.textSecondary} style={styles.customSnackInput} />
+              <Pressable onPress={handleLogCustomSnack} style={styles.customSnackButton}>
+                <ThemedText type="smallBold" color="#ffffff">{t(editingSnackId ? 'common.save' : 'common.add')}</ThemedText>
+              </Pressable>
+            </View>
           </Pressable>
         </Pressable>
       </Modal>
@@ -320,6 +426,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: Spacing.three
   },
+  progressCardEaten: {
+    borderColor: LoginButtonGreen
+  },
   shoppingListButton: {
     flex: 2,
     backgroundColor: theme.secondary,
@@ -333,13 +442,20 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     textAlign: 'center'
   },
+  mealTypesList: {
+    gap: Spacing.two
+  },
   mealTypeCard: {
     gap: Spacing.two,
     backgroundColor: theme.background,
     borderColor: theme.border,
     borderWidth: 1,
     borderRadius: 16,
-    padding: Spacing.three
+    paddingHorizontal: Spacing.three,
+    paddingVertical: 12
+  },
+  mealTypeCardEaten: {
+    borderColor: LoginButtonGreen
   },
   mealTypeHeader: {
     flexDirection: 'row',
@@ -369,6 +485,66 @@ const styles = StyleSheet.create({
   },
   mealList: {
     gap: Spacing.two
+  },
+  quickSnackIconWrapper: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: LoginIconBackground,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  quickSnackActions: {
+    flexDirection: 'row',
+    gap: Spacing.two
+  },
+  deleteButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: theme.backgroundElement,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  flex1: {
+    flex: 1
+  },
+  addSnackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.one,
+    backgroundColor: theme.background,
+    borderColor: theme.border,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderRadius: 16,
+    paddingVertical: Spacing.three
+  },
+  quickSnackScroll: {
+    maxHeight: 320
+  },
+  customSnackRow: {
+    flexDirection: 'row',
+    gap: Spacing.two,
+    alignItems: 'center'
+  },
+  customSnackInput: {
+    flex: 1,
+    borderColor: theme.border,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    color: theme.text
+  },
+  customSnackButton: {
+    backgroundColor: LoginButtonGreen,
+    borderRadius: 12,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.two,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   modalBackdrop: {
     flex: 1,

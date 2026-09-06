@@ -27,7 +27,8 @@ export function OnboardingFlow() {
     age: '',
     heightCm: '',
     weightKg: '',
-    targetWeightKg: ''
+    targetWeightKg: '',
+    weightUnit: 'lb'
   });
   const [activityLevel, setActivityLevel] = useState();
   const [dietaryTags, setDietaryTags] = useState([]);
@@ -61,7 +62,7 @@ export function OnboardingFlow() {
         allergies,
         dislikedIngredientIds: [],
         favoriteCuisines: [],
-        units: 'metric'
+        units: personalInfo.weightUnit === 'kg' ? 'metric' : 'imperial'
       }
     };
     completeOnboarding(profile);

@@ -18,6 +18,11 @@ class FoodLogStore {
     });
   }
 
+  updateEntry(id, patch) {
+    const entry = this.entries.find(entry => entry.id === id);
+    if (entry) Object.assign(entry, patch);
+  }
+
   removeEntry(id) {
     this.entries = this.entries.filter(entry => entry.id !== id);
   }

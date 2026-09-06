@@ -30,6 +30,27 @@ function TabLayout() {
   const hasOnboarded = profileStore.hasOnboarded;
   const prevHasOnboardedRef = useRef(hasOnboarded);
   useEffect(() => {
+    if (SKIP_AUTH_FOR_TESTING && hasHydrated && !hasOnboarded) {
+      profileStore.completeOnboarding({
+        name: t('onboarding.guestName'),
+        sex: 'female',
+        age: 30,
+        heightCm: 170,
+        weightKg: 70,
+        activityLevel: 'moderate',
+        goal: { type: 'maintain-weight' },
+        preferences: {
+          dietaryTags: [],
+          allergies: [],
+          dislikedIngredientIds: [],
+          favoriteCuisines: [],
+          units: 'metric'
+        }
+      });
+      prevHasOnboardedRef.current = true;
+    }
+  }, [hasHydrated, hasOnboarded]);
+  useEffect(() => {
     if (!prevHasOnboardedRef.current && hasOnboarded) {
       setShowCalculating(true);
       const timer = setTimeout(() => setShowCalculating(false), CALCULATING_DURATION);

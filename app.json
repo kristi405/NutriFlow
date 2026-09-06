@@ -8,9 +8,13 @@
     "scheme": "nutriflow",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/images/icon.png",
       "bundleIdentifier": "com.nutriFlow",
-      "appleTeamId": "CFTJPS6ZYY"
+      "appleTeamId": "CFTJPS6ZYY",
+      "buildNumber": "2",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "NutriFlow uses your photo library so you can set a profile photo and attach lab result images for AI analysis."
+      }
     },
     "android": {
       "adaptiveIcon": {
