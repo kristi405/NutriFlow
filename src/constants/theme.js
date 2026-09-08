@@ -18,7 +18,9 @@ export const Colors = {
     border: '#E4E4E8',
     success: '#3FA66B',
     warning: '#C9821F',
-    error: '#D2483C'
+    error: '#D2483C',
+    accent: '#4CAF50',
+    accentSoft: '#E8F5E9'
   },
   dark: {
     text: '#ffffff',
@@ -32,7 +34,9 @@ export const Colors = {
     border: '#295C40',
     success: '#57C486',
     warning: '#E0A24B',
-    error: '#E5695D'
+    error: '#E5695D',
+    accent: '#57C486',
+    accentSoft: '#1D4A32'
   }
 };
 export const Fonts = Platform.select({
@@ -73,6 +77,9 @@ export const BottomTabInset = Platform.select({
   android: 80
 }) ?? 0;
 export const MaxContentWidth = 800;
+/** @deprecated Use theme.accent (from useAppTheme) so the color follows dark mode. */
 export const LoginButtonGreen = '#4CAF50';
+/** @deprecated Use theme.accentSoft (from useAppTheme) so the color follows dark mode. */
 export const LoginGradientAccent = '#E8F5E9';
+/** @deprecated Use theme.accentSoft (from useAppTheme) so the color follows dark mode. */
 export const LoginIconBackground = '#E8F5E9';

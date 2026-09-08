@@ -1,7 +1,8 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors, LoginGradientAccent, MaxContentWidth, Spacing } from '@/constants/theme';
+import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 /** Shared scroll container matching the scaffold's insets pattern (see explore.tsx). */
 export function ScreenScrollView({
@@ -11,6 +12,7 @@ export function ScreenScrollView({
   horizontalPadding = Spacing.four,
   ...rest
 }) {
+  const theme = useTheme();
   const safeAreaInsets = useSafeAreaInsets();
   // NativeTabs reserves safe-area space for its content on iOS, but on Android
   // (edge-to-edge by default) it does not pad the top for the status bar / camera
@@ -33,7 +35,7 @@ export function ScreenScrollView({
       paddingBottom: Spacing.four
     }
   });
-  return <LinearGradient colors={[Colors.light.background, Colors.light.primarySoft, LoginGradientAccent]} style={styles.flex1}>
+  return <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
       <ScrollView style={styles.scrollView} contentInset={insets} contentContainerStyle={[styles.contentContainer, platformStyle, contentContainerStyle]} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} {...rest}>
         <View style={[styles.container, { gap, paddingHorizontal: horizontalPadding }]}>{children}</View>
       </ScrollView>

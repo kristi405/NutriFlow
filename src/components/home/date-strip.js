@@ -1,11 +1,11 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, LoginButtonGreen, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { todayKey, weekContaining, weekdayLabel } from '@/lib/date';
 
-const theme = Colors.light;
-
 export function DateStrip({ selectedDate, onSelectDate, style }) {
+  const theme = useTheme();
   const days = weekContaining(todayKey());
   return <View style={[styles.row, style]}>
       {days.map(dateKey => {
@@ -13,8 +13,8 @@ export function DateStrip({ selectedDate, onSelectDate, style }) {
       const isSelected = dateKey === selectedDate;
       const isToday = dateKey === todayKey();
       return <Pressable key={dateKey} onPress={() => onSelectDate(dateKey)} style={[styles.day, {
-        backgroundColor: isSelected ? LoginButtonGreen : 'transparent',
-        borderColor: !isSelected && isToday ? LoginButtonGreen : 'transparent'
+        backgroundColor: isSelected ? theme.accent : 'transparent',
+        borderColor: !isSelected && isToday ? theme.accent : 'transparent'
       }]}>
             <ThemedText type="caption" color={isSelected ? '#ffffff' : theme.textSecondary}>
               {weekdayLabel(dateKey)}

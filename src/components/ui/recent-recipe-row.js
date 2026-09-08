@@ -1,13 +1,16 @@
+import { useMemo } from 'react';
 import { Link } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { RecipeImage } from '@/components/ui/recipe-image';
-import { Colors, Spacing } from '@/constants/theme';
-const theme = Colors.light;
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 export function RecentRecipeRow({ recipe, calories, style }) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   return <Link href={{
     pathname: '/recipes/[id]',
     params: {
@@ -30,7 +33,7 @@ export function RecentRecipeRow({ recipe, calories, style }) {
       </Pressable>
     </Link>;
 }
-const styles = StyleSheet.create({
+const createStyles = theme => StyleSheet.create({
   row: {
     backgroundColor: theme.background,
     borderColor: theme.border,

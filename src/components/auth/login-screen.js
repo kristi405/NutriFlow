@@ -1,17 +1,18 @@
 import { SymbolView } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Fonts, LoginButtonGreen, Spacing } from '@/constants/theme';
+import { Fonts, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { authStore } from '@/store/authStore';
 import { profileStore } from '@/store/profileStore';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 
-const theme = Colors.light;
-
 export function LoginScreen({ onSwitchToRegister, onForgotPassword }) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -70,7 +71,7 @@ export function LoginScreen({ onSwitchToRegister, onForgotPassword }) {
         </View>
 
         <Pressable onPress={onForgotPassword} hitSlop={8} style={styles.forgotPassword}>
-          <ThemedText type="link" style={{ color: LoginButtonGreen, fontWeight: '600' }}>{t('auth.login.forgotPassword')}</ThemedText>
+          <ThemedText type="link" style={{ color: theme.accent, fontWeight: '600' }}>{t('auth.login.forgotPassword')}</ThemedText>
         </Pressable>
       </Animated.View>
 
@@ -78,7 +79,7 @@ export function LoginScreen({ onSwitchToRegister, onForgotPassword }) {
 
       <View style={styles.actions}>
         <Pressable onPress={handleSubmit} disabled={isSubmitting} style={({ pressed }) => [styles.button, styles.buttonSpacing, styles.buttonShadow, {
-        backgroundColor: LoginButtonGreen,
+        backgroundColor: theme.accent,
         opacity: isSubmitting ? 0.6 : 1,
         transform: [{ scale: pressed ? 0.97 : 1 }]
       }]}>
@@ -89,14 +90,14 @@ export function LoginScreen({ onSwitchToRegister, onForgotPassword }) {
 
         <Pressable onPress={onSwitchToRegister} hitSlop={8} style={styles.switchLink}>
           <ThemedText type="link" color={theme.textSecondary}>
-            {t('auth.login.noAccount')} <ThemedText type="linkPrimary" style={{ color: LoginButtonGreen, fontWeight: '600' }}>{t('auth.login.register')}</ThemedText>
+            {t('auth.login.noAccount')} <ThemedText type="linkPrimary" style={{ color: theme.accent, fontWeight: '600' }}>{t('auth.login.register')}</ThemedText>
           </ThemedText>
         </Pressable>
       </View>
     </View>;
 }
 
-const styles = StyleSheet.create({
+const createStyles = theme => StyleSheet.create({
   container: {
     gap: Spacing.four,
   },
@@ -107,10 +108,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: LoginButtonGreen,
+    backgroundColor: theme.accent,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: LoginButtonGreen,
+    shadowColor: theme.accent,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.two
   },
   buttonShadow: {
-    shadowColor: LoginButtonGreen,
+    shadowColor: theme.accent,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 10,

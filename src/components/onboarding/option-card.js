@@ -1,9 +1,8 @@
 import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, LoginButtonGreen, LoginIconBackground, Spacing } from '@/constants/theme';
-
-const theme = Colors.light;
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 export function OptionCard({
   title,
@@ -12,6 +11,7 @@ export function OptionCard({
   selected,
   onPress
 }) {
+  const theme = useTheme();
   return <Pressable onPress={onPress} style={({
     pressed
   }) => [styles.card, {
@@ -20,9 +20,9 @@ export function OptionCard({
     borderWidth: selected ? 2 : 1
   }, pressed && styles.pressed]}>
       {icon && <View style={[styles.iconWrapper, {
-      backgroundColor: LoginIconBackground
+      backgroundColor: theme.accentSoft
     }]}>
-          <SymbolView name={icon} size={20} tintColor={LoginButtonGreen} />
+          <SymbolView name={icon} size={20} tintColor={theme.accent} />
         </View>}
       <View style={styles.textWrapper}>
         <ThemedText type="smallBold" color={theme.text}>{title}</ThemedText>

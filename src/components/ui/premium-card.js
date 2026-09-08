@@ -1,13 +1,15 @@
+import { useMemo } from 'react';
 import { SymbolView } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
-
-const theme = Colors.light;
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 export function PremiumCard({ style }) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   function handlePress() {
     Alert.alert(t('profile.premiumCta'), t('home.comingSoon'));
@@ -25,7 +27,7 @@ export function PremiumCard({ style }) {
     </Pressable>;
 }
 
-const styles = StyleSheet.create({
+const createStyles = theme => StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -1,8 +1,8 @@
 import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
-const theme = Colors.light;
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 export function EmptyState({
   icon,
   title,
@@ -10,6 +10,7 @@ export function EmptyState({
   actionLabel,
   onAction
 }) {
+  const theme = useTheme();
   return <View style={styles.container}>
       {icon && <SymbolView name={icon} size={40} tintColor={theme.textSecondary} />}
       <ThemedText type="headline" style={styles.centerText} color={theme.text}>

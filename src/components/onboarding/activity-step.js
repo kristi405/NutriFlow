@@ -1,10 +1,9 @@
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { OptionCard } from './option-card';
-
-const theme = Colors.light;
 
 export function ActivityStep({
   value,
@@ -12,6 +11,7 @@ export function ActivityStep({
   showError
 }) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const ACTIVITY_OPTIONS = [{
     level: 'sedentary',
     title: t('onboarding.activity.sedentary'),

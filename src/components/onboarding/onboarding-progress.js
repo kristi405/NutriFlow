@@ -1,12 +1,12 @@
 import { StyleSheet, View } from 'react-native';
-import { Colors, Spacing } from '@/constants/theme';
-
-const theme = Colors.light;
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 export function OnboardingProgress({
   step,
   totalSteps
 }) {
+  const theme = useTheme();
   return <View style={styles.row}>
       {Array.from({
       length: totalSteps

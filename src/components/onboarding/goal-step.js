@@ -1,10 +1,9 @@
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { OptionCard } from './option-card';
-
-const theme = Colors.light;
 
 export function GoalStep({
   value,
@@ -12,6 +11,7 @@ export function GoalStep({
   showError
 }) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const GOAL_OPTIONS = [{
     type: 'lose-weight',
     title: t('onboarding.goal.loseWeight'),

@@ -1,13 +1,14 @@
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
-const theme = Colors.light;
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 export function NutritionScoreCard({
   score,
   explanation
 }) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const color = score >= 80 ? theme.success : score >= 50 ? theme.warning : theme.error;
   return <View style={[styles.card, {
     backgroundColor: theme.background,

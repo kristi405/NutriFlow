@@ -10,7 +10,8 @@ import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MacroBar } from '@/components/ui/macro-bar';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
-import { Colors, LoginButtonGreen, LoginIconBackground, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { todayKey } from '@/lib/date';
 import { buildShoppingList } from '@/lib/shoppingList';
 import { mealPlanStore } from '@/store/mealPlanStore';
@@ -36,8 +37,6 @@ function buildShoppingListHtml(title, groups) {
   </body></html>`;
 }
 
-const theme = Colors.light;
-
 const CATEGORY_ICONS = {
   meat: 'fork.knife',
   fish: 'fish.fill',
@@ -50,6 +49,8 @@ const CATEGORY_ICONS = {
 
 function ShoppingListScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [checkedIds, setCheckedIds] = useState(() => new Set());
   const planItems = mealPlanStore.itemsForDate(todayKey());
   const groups = buildShoppingList(planItems);
@@ -94,18 +95,18 @@ function ShoppingListScreen() {
 
       {groups.length === 0 ? <EmptyState icon="cart" title={t('shoppingList.emptyTitle')} message={t('shoppingList.emptyMessage')} /> : <>
           <View style={styles.progressCard}>
-            <MacroBar label={t('shoppingList.progress')} value={checkedIds.size} target={totalCount} unit={t('shoppingList.items')} color={LoginButtonGreen} />
+            <MacroBar label={t('shoppingList.progress')} value={checkedIds.size} target={totalCount} unit={t('shoppingList.items')} color={theme.accent} />
           </View>
 
           {checkedIds.size === totalCount && <View style={styles.allDoneBanner}>
-              <SymbolView name="checkmark.circle.fill" size={18} tintColor={LoginButtonGreen} />
-              <ThemedText type="smallBold" color={LoginButtonGreen}>{t('shoppingList.allDone')}</ThemedText>
+              <SymbolView name="checkmark.circle.fill" size={18} tintColor={theme.accent} />
+              <ThemedText type="smallBold" color={theme.accent}>{t('shoppingList.allDone')}</ThemedText>
             </View>}
 
           {groups.map(group => <View key={group.categoryId} style={styles.section}>
               <View style={styles.sectionHeader}>
                 <View style={styles.categoryIconWrapper}>
-                  <SymbolView name={CATEGORY_ICONS[group.categoryId] ?? 'cart.fill'} size={16} tintColor={LoginButtonGreen} />
+                  <SymbolView name={CATEGORY_ICONS[group.categoryId] ?? 'cart.fill'} size={16} tintColor={theme.accent} />
                 </View>
                 <ThemedText type="smallBold" color={theme.text} style={styles.sectionTitle}>{group.categoryName}</ThemedText>
                 <View style={styles.countBadge}>
@@ -116,7 +117,7 @@ function ShoppingListScreen() {
                 {group.items.map((item, index) => {
               const isChecked = checkedIds.has(item.ingredientId);
               return <Pressable key={item.ingredientId} onPress={() => toggleChecked(item.ingredientId)} style={[styles.row, index === group.items.length - 1 && styles.rowLast]}>
-                      <SymbolView name={isChecked ? 'checkmark.circle.fill' : 'circle'} size={22} tintColor={isChecked ? LoginButtonGreen : theme.border} />
+                      <SymbolView name={isChecked ? 'checkmark.circle.fill' : 'circle'} size={22} tintColor={isChecked ? theme.accent : theme.border} />
                       <ThemedText type="default" color={isChecked ? theme.textSecondary : theme.text} style={isChecked && styles.checkedText}>
                         {item.name}
                       </ThemedText>
@@ -130,7 +131,7 @@ function ShoppingListScreen() {
 
 export default observer(ShoppingListScreen);
 
-const styles = StyleSheet.create({
+const createStyles = theme => StyleSheet.create({
   progressCard: {
     backgroundColor: theme.background,
     borderColor: theme.secondary,
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.two,
-    backgroundColor: LoginIconBackground,
+    backgroundColor: theme.accentSoft,
     borderRadius: 16,
     padding: Spacing.three
   },
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: LoginIconBackground,
+    backgroundColor: theme.accentSoft,
     alignItems: 'center',
     justifyContent: 'center'
   },

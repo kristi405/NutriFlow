@@ -5,7 +5,8 @@ import { Keyboard, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, LoginButtonGreen, LoginGradientAccent, MaxContentWidth, Spacing } from '@/constants/theme';
+import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { authStore } from '@/store/authStore';
 import { profileStore } from '@/store/profileStore';
 import { ActivityStep } from './activity-step';
@@ -14,11 +15,11 @@ import { OnboardingProgress } from './onboarding-progress';
 import { PersonalInfoStep } from './personal-info-step';
 import { PreferencesStep } from './preferences-step';
 
-const theme = Colors.light;
 const TOTAL_STEPS = 4;
 
 export function OnboardingFlow() {
   const { t } = useTranslation();
+  const theme = useTheme();
   const completeOnboarding = profileStore.completeOnboarding;
   const [step, setStep] = useState(0);
   const [goal, setGoal] = useState();
@@ -91,7 +92,7 @@ export function OnboardingFlow() {
     completeOnboarding(profile);
     authStore.syncProfile(profile);
   }
-  return <LinearGradient colors={[Colors.light.background, Colors.light.primarySoft, LoginGradientAccent]} style={styles.flex1}>
+  return <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
       <SafeAreaView style={styles.flex1}>
         <View style={styles.flex1}>
         <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
@@ -99,9 +100,9 @@ export function OnboardingFlow() {
           setStep(step - 1);
           setShowValidation(false);
         }} hitSlop={8}>
-              <ThemedText type="link" color={LoginButtonGreen} style={{ fontWeight: '600' }}>{t('onboarding.back')}</ThemedText>
+              <ThemedText type="link" color={theme.accent} style={{ fontWeight: '600' }}>{t('onboarding.back')}</ThemedText>
             </Pressable> : <Pressable onPress={handleSkip} hitSlop={8}>
-              <ThemedText type="link" color={LoginButtonGreen} style={{ fontWeight: '600' }}>{t('onboarding.skip')}</ThemedText>
+              <ThemedText type="link" color={theme.accent} style={{ fontWeight: '600' }}>{t('onboarding.skip')}</ThemedText>
             </Pressable>}
           <View style={styles.progressWrapper}>
             <OnboardingProgress step={step} totalSteps={TOTAL_STEPS} />
@@ -125,7 +126,7 @@ export function OnboardingFlow() {
 
         <View style={styles.footer}>
           <Pressable onPress={handleNext} style={({ pressed }) => [styles.button, {
-          backgroundColor: LoginButtonGreen,
+          backgroundColor: theme.accent,
           transform: [{ scale: pressed ? 0.97 : 1 }]
         }]}>
             <ThemedText type="smallBold" color="#ffffff">

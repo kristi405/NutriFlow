@@ -1,12 +1,13 @@
+import { useMemo } from 'react';
 import { SymbolView } from 'expo-symbols';
+import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
-import { Colors, LoginButtonGreen, LoginIconBackground, Spacing } from '@/constants/theme';
-
-const theme = Colors.light;
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 const STEPS = [
   { icon: { ios: 'doc.badge.plus', android: 'note_add', web: 'note_add' }, titleKey: 'aiAnalysis.step1Title', subtitleKey: 'aiAnalysis.step1Subtitle' },
@@ -14,8 +15,10 @@ const STEPS = [
   { icon: { ios: 'heart.text.square.fill', android: 'favorite', web: 'favorite' }, titleKey: 'aiAnalysis.step3Title', subtitleKey: 'aiAnalysis.step3Subtitle' }
 ];
 
-export default function AiAnalysisScreen() {
+function AiAnalysisScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   function handleUpload() {
     Alert.alert(t('aiAnalysis.uploadButton'), t('home.comingSoon'));
@@ -33,7 +36,7 @@ export default function AiAnalysisScreen() {
 
       <View style={styles.uploadCard}>
         <View style={styles.uploadIconWrapper}>
-          <SymbolView name={{ ios: 'doc.badge.plus', android: 'note_add', web: 'note_add' }} size={28} tintColor={LoginButtonGreen} />
+          <SymbolView name={{ ios: 'doc.badge.plus', android: 'note_add', web: 'note_add' }} size={28} tintColor={theme.accent} />
         </View>
         <ThemedText type="headline" color={theme.text} style={styles.centerText}>
           {t('aiAnalysis.uploadTitle')}
@@ -56,7 +59,7 @@ export default function AiAnalysisScreen() {
         <View style={styles.stepsList}>
           {STEPS.map((step, index) => <View key={step.titleKey} style={styles.stepRow}>
               <View style={styles.stepIconWrapper}>
-                <SymbolView name={step.icon} size={18} tintColor={LoginButtonGreen} />
+                <SymbolView name={step.icon} size={18} tintColor={theme.accent} />
               </View>
               <View style={styles.stepText}>
                 <ThemedText type="smallBold" color={theme.text}>
@@ -79,7 +82,9 @@ export default function AiAnalysisScreen() {
     </ScreenScrollView>;
 }
 
-const styles = StyleSheet.create({
+export default observer(AiAnalysisScreen);
+
+const createStyles = theme => StyleSheet.create({
   header: {
     gap: Spacing.half
   },
@@ -105,7 +110,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: LoginIconBackground,
+    backgroundColor: theme.accentSoft,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.one
@@ -114,7 +119,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: LoginButtonGreen,
+    backgroundColor: theme.accent,
     borderRadius: 999,
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two,
@@ -146,7 +151,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: LoginIconBackground,
+    backgroundColor: theme.accentSoft,
     alignItems: 'center',
     justifyContent: 'center'
   },

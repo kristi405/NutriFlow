@@ -1,11 +1,12 @@
 import { SymbolView } from 'expo-symbols';
 import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
-const theme = Colors.light;
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 export function AiInsightCard({
   insight
 }) {
+  const theme = useTheme();
   return <View style={[styles.card, {
     backgroundColor: theme.background,
     borderColor: theme.border

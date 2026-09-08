@@ -26,8 +26,8 @@ import { useStepCount } from '@/hooks/useStepCount';
 import { calculateDailyTargets, calculateRecipeNutrition, scaleForServings } from '@/lib/nutrition';
 import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
 import { todayKey } from '@/lib/date';
-import { Colors, LoginButtonGreen, LoginGradientAccent, Spacing } from '@/constants/theme';
-const theme = Colors.light;
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { insightService } from '@/services/ai/insightService';
 import { foodLogStore } from '@/store/foodLogStore';
 import { mealPlanStore } from '@/store/mealPlanStore';
@@ -43,6 +43,8 @@ function greetingKey() {
 }
 function HomeScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   function showComingSoon(feature) {
     Alert.alert(feature, t('home.comingSoon'));
   }
@@ -87,7 +89,7 @@ function HomeScreen() {
   return <ScreenScrollView gap={Spacing.three}>
       <Pressable onPress={() => router.push('/profile')} style={styles.headerRow}>
         <View style={styles.avatar}>
-          <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={22} tintColor={LoginButtonGreen} />
+          <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={22} tintColor={theme.accent} />
         </View>
         <View style={styles.headerTextColumn}>
           <View style={styles.greetingRow}>
@@ -183,7 +185,7 @@ function HomeScreen() {
           ios: 'plus.circle.fill',
           android: 'add_circle',
           web: 'add_circle'
-        }} label={t('home.addMeal')} color={LoginButtonGreen} onPress={() => router.push('/recipes')} />
+        }} label={t('home.addMeal')} color={theme.accent} onPress={() => router.push('/recipes')} />
           <QuickAction icon={{
           ios: 'camera.fill',
           android: 'photo_camera',
@@ -214,7 +216,7 @@ function HomeScreen() {
     </ScreenScrollView>;
 }
 export default observer(HomeScreen);
-const styles = StyleSheet.create({
+const createStyles = theme => StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -226,7 +228,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     backgroundColor: theme.background,
     borderWidth: 2,
-    borderColor: LoginButtonGreen,
+    borderColor: theme.accent,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -267,7 +269,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   calorieBadge: {
-    backgroundColor: LoginGradientAccent,
+    backgroundColor: theme.accentSoft,
     borderRadius: 999,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one

@@ -1,9 +1,8 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, LoginButtonGreen, Spacing } from '@/constants/theme';
-
-const theme = Colors.light;
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 const ALLERGEN_TAGS = [{
   tag: 'gluten',
@@ -39,9 +38,10 @@ function Chip({
   selected,
   onPress
 }) {
+  const theme = useTheme();
   return <Pressable onPress={onPress} style={[styles.chip, {
-    backgroundColor: selected ? LoginButtonGreen : theme.background,
-    borderColor: selected ? LoginButtonGreen : theme.border
+    backgroundColor: selected ? theme.accent : theme.background,
+    borderColor: selected ? theme.accent : theme.border
   }]}>
       <ThemedText type="small" color={selected ? '#ffffff' : theme.text}>
         {label}
@@ -58,6 +58,7 @@ export function PreferencesStep({
   onChangeAllergies
 }) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const DIETARY_OPTIONS = [{
     tag: 'vegetarian',
     label: t('onboarding.preferences.vegetarian')
@@ -96,14 +97,14 @@ export function PreferencesStep({
       </ThemedText>
 
       <View style={styles.section}>
-        <ThemedText type="smallBold" color={LoginButtonGreen}>{t('onboarding.preferences.dietary')}</ThemedText>
+        <ThemedText type="smallBold" color={theme.accent}>{t('onboarding.preferences.dietary')}</ThemedText>
         <View style={styles.chipRow}>
           {DIETARY_OPTIONS.map(option => <Chip key={option.tag} label={option.label} selected={dietaryTags.includes(option.tag)} onPress={() => onChangeDietaryTags(toggle(dietaryTags, option.tag))} />)}
         </View>
       </View>
 
       <View style={styles.section}>
-        <ThemedText type="smallBold" color={LoginButtonGreen}>{t('onboarding.preferences.allergies')}</ThemedText>
+        <ThemedText type="smallBold" color={theme.accent}>{t('onboarding.preferences.allergies')}</ThemedText>
         <View style={styles.chipRow}>
           {ALLERGEN_OPTIONS.map(option => <Chip key={option.tag} label={option.label} selected={allergies.includes(option.tag)} onPress={() => onChangeAllergies(toggle(allergies, option.tag))} />)}
         </View>

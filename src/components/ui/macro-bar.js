@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
-const theme = Colors.light;
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 export function MacroBar({
   label,
   value,
@@ -9,6 +9,7 @@ export function MacroBar({
   unit = 'g',
   color
 }) {
+  const theme = useTheme();
   const progress = target > 0 ? Math.min(1, value / target) : 0;
   const barColor = color ?? theme.primary;
   return <View style={styles.container}>

@@ -1,12 +1,11 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { SymbolView } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, LoginButtonGreen, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { KG_PER_LB } from '@/lib/units';
-
-const theme = Colors.light;
 
 const CM_PER_INCH = 2.54;
 
@@ -42,12 +41,12 @@ function displayToKg(text, unit) {
   return unit === 'kg' ? text : String(round1(parsed * KG_PER_LB));
 }
 
-function UnitDropdown({ value, options, onChange }) {
+function UnitDropdown({ theme, styles, value, options, onChange }) {
   const [open, setOpen] = useState(false);
   return <>
       <Pressable onPress={() => setOpen(true)} style={styles.unitButton}>
-        <ThemedText type="small" color={LoginButtonGreen} style={styles.modalOptionActiveText}>{value}</ThemedText>
-        <SymbolView name={{ ios: 'chevron.down', android: 'expand_more', web: 'expand_more' }} size={10} tintColor={LoginButtonGreen} />
+        <ThemedText type="small" color={theme.accent} style={styles.modalOptionActiveText}>{value}</ThemedText>
+        <SymbolView name={{ ios: 'chevron.down', android: 'expand_more', web: 'expand_more' }} size={10} tintColor={theme.accent} />
       </Pressable>
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Pressable style={styles.modalBackdrop} onPress={() => setOpen(false)}>
@@ -56,10 +55,10 @@ function UnitDropdown({ value, options, onChange }) {
             onChange(option);
             setOpen(false);
           }} style={styles.modalOption}>
-                <ThemedText type="default" color={option === value ? LoginButtonGreen : theme.text} style={option === value ? styles.modalOptionActiveText : undefined}>
+                <ThemedText type="default" color={option === value ? theme.accent : theme.text} style={option === value ? styles.modalOptionActiveText : undefined}>
                   {option}
                 </ThemedText>
-                {option === value && <SymbolView name={{ ios: 'checkmark', android: 'check', web: 'check' }} size={16} tintColor={LoginButtonGreen} />}
+                {option === value && <SymbolView name={{ ios: 'checkmark', android: 'check', web: 'check' }} size={16} tintColor={theme.accent} />}
               </Pressable>)}
           </View>
         </Pressable>
@@ -73,6 +72,8 @@ export function PersonalInfoStep({
   showValidation
 }) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [heightUnit, setHeightUnit] = useState('in');
   const [weightUnit, setWeightUnit] = useState(value.weightUnit ?? 'lb');
   const [heightText, setHeightText] = useState(() => cmToDisplay(value.heightCm, 'in'));
@@ -143,8 +144,8 @@ export function PersonalInfoStep({
           {['female', 'male'].map(sex => <Pressable key={sex} onPress={() => onChange({
           sex
         })} style={[styles.segment, {
-          backgroundColor: value.sex === sex ? LoginButtonGreen : theme.background,
-          borderColor: value.sex === sex ? LoginButtonGreen : theme.border
+          backgroundColor: value.sex === sex ? theme.accent : theme.background,
+          borderColor: value.sex === sex ? theme.accent : theme.border
         }]}>
               <ThemedText type="smallBold" color={value.sex === sex ? '#ffffff' : theme.text}>
                 {sex === 'female' ? t('onboarding.personalInfo.female') : t('onboarding.personalInfo.male')}
@@ -165,14 +166,14 @@ export function PersonalInfoStep({
         <View style={[styles.field, styles.flex1]}>
           <View style={styles.labelRow}>
             <ThemedText type="small" color={theme.text}>{t('onboarding.personalInfo.height')}</ThemedText>
-            <UnitDropdown value={heightUnit} options={['cm', 'in']} onChange={handleHeightUnitChange} />
+            <UnitDropdown theme={theme} styles={styles} value={heightUnit} options={['cm', 'in']} onChange={handleHeightUnitChange} />
           </View>
           <TextInput value={heightText} onChangeText={handleHeightChange} keyboardType="decimal-pad" placeholder={heightUnit === 'cm' ? '170' : '67'} placeholderTextColor={theme.textSecondary} style={fieldStyle(heightInvalid)} />
         </View>
         <View style={[styles.field, styles.flex1]}>
           <View style={styles.labelRow}>
             <ThemedText type="small" color={theme.text}>{t('onboarding.personalInfo.weight')}</ThemedText>
-            <UnitDropdown value={weightUnit} options={['kg', 'lb']} onChange={handleWeightUnitChange} />
+            <UnitDropdown theme={theme} styles={styles} value={weightUnit} options={['kg', 'lb']} onChange={handleWeightUnitChange} />
           </View>
           <TextInput value={weightText} onChangeText={handleWeightChange} keyboardType="decimal-pad" placeholder={weightUnit === 'kg' ? '68' : '150'} placeholderTextColor={theme.textSecondary} style={fieldStyle(weightInvalid)} />
         </View>
@@ -184,7 +185,7 @@ export function PersonalInfoStep({
       </View>
     </View>;
 }
-const styles = StyleSheet.create({
+const createStyles = theme => StyleSheet.create({
   container: {
     gap: Spacing.three
   },

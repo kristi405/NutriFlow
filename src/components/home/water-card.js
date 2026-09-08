@@ -2,8 +2,8 @@ import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
-const theme = Colors.light;
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 const WATER_BLUE = '#2F80ED';
 const WATER_TRACK = '#DCEBFC';
 const QUICK_AMOUNTS_ML = [100, 250, 500];
@@ -13,6 +13,7 @@ export function WaterCard({
   onAdd
 }) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const progress = targetMl > 0 ? Math.min(1, consumedMl / targetMl) : 0;
   const goalReached = targetMl > 0 && consumedMl >= targetMl;
   return <View style={[styles.card, {

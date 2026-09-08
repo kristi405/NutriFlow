@@ -7,7 +7,8 @@ import Svg, { Circle, Line, Polyline, Text as SvgText } from 'react-native-svg';
 import { ThemedText } from '@/components/themed-text';
 import { MacroBar } from '@/components/ui/macro-bar';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
-import { Colors, LoginButtonGreen, LoginIconBackground, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { addDays, todayKey } from '@/lib/date';
 import { calculateBMI, calculateDailyTargets } from '@/lib/nutrition';
 import { displayWeight, weightUnitLabel } from '@/lib/units';
@@ -15,8 +16,6 @@ import { useDailyNutrition } from '@/hooks/useDailyNutrition';
 import { profileStore } from '@/store/profileStore';
 import { waterStore } from '@/store/waterStore';
 import { weightLogStore } from '@/store/weightLogStore';
-
-const theme = Colors.light;
 
 const CHART_WIDTH = 300;
 const CHART_HEIGHT = 170;
@@ -69,7 +68,7 @@ function formatChartDate(dateKey) {
   });
 }
 
-function WeightChart({ entries, unitLabel }) {
+function WeightChart({ entries, unitLabel, theme }) {
   if (entries.length === 0) return null;
 
   const weights = entries.map(entry => entry.weight);
@@ -134,10 +133,10 @@ function WeightChart({ entries, unitLabel }) {
     </Svg>;
 }
 
-function StatCard({ icon, label, value, unit }) {
+function StatCard({ icon, label, value, unit, theme, styles }) {
   return <View style={styles.statCard}>
       <View style={styles.statHeader}>
-        <SymbolView name={icon} size={14} tintColor={LoginButtonGreen} />
+        <SymbolView name={icon} size={14} tintColor={theme.accent} />
         <ThemedText type="caption" color={theme.textSecondary}>{label}</ThemedText>
       </View>
       <ThemedText type="smallBold" color={theme.text}>
@@ -148,6 +147,8 @@ function StatCard({ icon, label, value, unit }) {
 
 function ProgressScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const profile = profileStore.profile;
   const { total } = useDailyNutrition(todayKey());
   const waterMl = waterStore.totalForDate(todayKey());
@@ -186,10 +187,10 @@ function ProgressScreen() {
       </View>
 
       <View style={styles.statsGrid}>
-        <StatCard icon={{ ios: 'scalemass.fill', android: 'monitor_weight', web: 'monitor_weight' }} label={t('progress.currentWeight')} value={displayWeight(currentWeightKg, profile.preferences?.units)} unit={unitLabel} />
-        <StatCard icon={{ ios: 'arrow.down.right', android: 'south_east', web: 'south_east' }} label={t('progress.weightLost')} value={weightLostKg !== undefined ? displayWeight(weightLostKg, profile.preferences?.units) : '—'} unit={weightLostKg !== undefined ? unitLabel : undefined} />
-        <StatCard icon={{ ios: 'figure', android: 'accessibility_new', web: 'accessibility_new' }} label={t('progress.bmi')} value={Math.round(bmi * 10) / 10} />
-        <StatCard icon={{ ios: 'target', android: 'target', web: 'target' }} label={t('progress.targetWeight')} value={targetWeightKg !== undefined ? displayWeight(targetWeightKg, profile.preferences?.units) : '—'} unit={targetWeightKg !== undefined ? unitLabel : undefined} />
+        <StatCard theme={theme} styles={styles} icon={{ ios: 'scalemass.fill', android: 'monitor_weight', web: 'monitor_weight' }} label={t('progress.currentWeight')} value={displayWeight(currentWeightKg, profile.preferences?.units)} unit={unitLabel} />
+        <StatCard theme={theme} styles={styles} icon={{ ios: 'arrow.down.right', android: 'south_east', web: 'south_east' }} label={t('progress.weightLost')} value={weightLostKg !== undefined ? displayWeight(weightLostKg, profile.preferences?.units) : '—'} unit={weightLostKg !== undefined ? unitLabel : undefined} />
+        <StatCard theme={theme} styles={styles} icon={{ ios: 'figure', android: 'accessibility_new', web: 'accessibility_new' }} label={t('progress.bmi')} value={Math.round(bmi * 10) / 10} />
+        <StatCard theme={theme} styles={styles} icon={{ ios: 'target', android: 'target', web: 'target' }} label={t('progress.targetWeight')} value={targetWeightKg !== undefined ? displayWeight(targetWeightKg, profile.preferences?.units) : '—'} unit={targetWeightKg !== undefined ? unitLabel : undefined} />
       </View>
 
       <View style={styles.card}>
@@ -209,7 +210,7 @@ function ProgressScreen() {
           </View>
         </View>
         <View style={styles.chartWrapper}>
-          <WeightChart entries={chartEntries} unitLabel={unitLabel} />
+          <WeightChart entries={chartEntries} unitLabel={unitLabel} theme={theme} />
         </View>
       </View>
 
@@ -233,7 +234,7 @@ function ProgressScreen() {
         <View style={styles.achievementsList}>
           {ACHIEVEMENTS.map(achievement => <View key={achievement.titleKey} style={styles.achievementRow}>
               <View style={styles.iconWrapper}>
-                <SymbolView name={achievement.icon} size={18} tintColor={LoginButtonGreen} />
+                <SymbolView name={achievement.icon} size={18} tintColor={theme.accent} />
               </View>
               <View style={styles.achievementText}>
                 <ThemedText type="smallBold" color={theme.text}>
@@ -251,7 +252,7 @@ function ProgressScreen() {
 
 export default observer(ProgressScreen);
 
-const styles = StyleSheet.create({
+const createStyles = theme => StyleSheet.create({
   header: {
     gap: Spacing.half
   },
@@ -304,7 +305,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.backgroundElement
   },
   rangeButtonActive: {
-    backgroundColor: LoginButtonGreen
+    backgroundColor: theme.accent
   },
   chartWrapper: {
     alignItems: 'center'
@@ -324,7 +325,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: LoginIconBackground,
+    backgroundColor: theme.accentSoft,
     alignItems: 'center',
     justifyContent: 'center'
   },

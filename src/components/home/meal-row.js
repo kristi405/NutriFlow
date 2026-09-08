@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { RecipeImage } from '@/components/ui/recipe-image';
-import { Colors, LoginButtonGreen, Spacing } from '@/constants/theme';
-const theme = Colors.light;
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 export function MealRow({
   recipeId,
   mealType,
@@ -16,6 +16,7 @@ export function MealRow({
   onToggleEaten
 }) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const mealTypeLabel = t(`mealTypes.${mealType}`, { defaultValue: mealType });
   return <Link href={{
     pathname: '/recipes/[id]',
@@ -25,11 +26,11 @@ export function MealRow({
   }} asChild>
       <Pressable style={StyleSheet.flatten([styles.row, {
       backgroundColor: theme.background,
-      borderColor: isEaten ? LoginButtonGreen : theme.border
+      borderColor: isEaten ? theme.accent : theme.border
     }])}>
         {({ pressed }) => <View style={[styles.rowInner, pressed && styles.pressed]}>
             {onToggleEaten && <Pressable onPress={onToggleEaten} hitSlop={8}>
-                <SymbolView name={isEaten ? { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' } : { ios: 'circle', android: 'radio_button_unchecked', web: 'radio_button_unchecked' }} size={24} tintColor={isEaten ? LoginButtonGreen : theme.border} />
+                <SymbolView name={isEaten ? { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' } : { ios: 'circle', android: 'radio_button_unchecked', web: 'radio_button_unchecked' }} size={24} tintColor={isEaten ? theme.accent : theme.border} />
               </Pressable>}
             <RecipeImage uri={imageUrl} style={styles.image} iconSize={18} />
             <View style={styles.textWrapper}>

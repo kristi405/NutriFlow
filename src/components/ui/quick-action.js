@@ -1,22 +1,24 @@
 import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
-const theme = Colors.light;
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 export function QuickAction({
   icon,
   label,
   onPress,
-  color = theme.primary
+  color
 }) {
+  const theme = useTheme();
+  const resolvedColor = color ?? theme.primary;
   return <Pressable onPress={onPress} style={({
     pressed
   }) => [styles.container, pressed && styles.pressed]}>
       <View style={[styles.iconWrapper, {
-      backgroundColor: `${color}1F`,
-      borderColor: `${color}66`
+      backgroundColor: `${resolvedColor}1F`,
+      borderColor: `${resolvedColor}66`
     }]}>
-        <SymbolView name={icon} size={26} tintColor={color} />
+        <SymbolView name={icon} size={26} tintColor={resolvedColor} />
       </View>
       <ThemedText type="caption" style={styles.label} color={theme.text} numberOfLines={2}>
         {label}

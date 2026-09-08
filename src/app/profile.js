@@ -1,18 +1,20 @@
+import { useMemo, useState } from 'react';
 import { ThemedText } from '@/components/themed-text';
 import { PremiumCard } from '@/components/ui/premium-card';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
-import { Colors, LoginButtonGreen, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { authStore } from '@/store/authStore';
 import { foodLogStore } from '@/store/foodLogStore';
 import { mealPlanStore } from '@/store/mealPlanStore';
 import { profileStore } from '@/store/profileStore';
-import { LinearGradient } from 'expo-linear-gradient';
+import { notificationsStore } from '@/store/notificationsStore';
+import { themeStore } from '@/store/themeStore';
+import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, StyleSheet, Switch, View } from 'react-native';
-
-const theme = Colors.light;
+import { Alert, Linking, Modal, Pressable, StyleSheet, Switch, TextInput, View } from 'react-native';
 
 const GOAL_LABEL_KEYS = {
   'lose-weight': 'onboarding.goal.loseWeight',
@@ -49,15 +51,41 @@ const ALLERGEN_TAG_KEYS = {
   sesame: 'sesame'
 };
 
+const SUPPORT_EMAIL = '5507151kr@gmail.com';
+
+// No real destinations wired up yet — tapping shows a "coming soon" alert until real links are provided.
+const CONTACT_LINKS = [{ key: 'website', labelKey: 'profile.contactWebsite', icon: { ios: 'globe', android: 'public', web: 'public' } }, { key: 'linkedin', labelKey: 'profile.contactLinkedIn', icon: { ios: 'briefcase.fill', android: 'work', web: 'work' } }, { key: 'instagram', labelKey: 'profile.contactInstagram', icon: { ios: 'camera.fill', android: 'photo_camera', web: 'photo_camera' } }, { key: 'tiktok', labelKey: 'profile.contactTikTok', icon: { ios: 'music.note', android: 'music_note', web: 'music_note' } }];
+
 function ProfileScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const profile = profileStore.profile;
   const account = authStore.currentUser;
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [helpMessage, setHelpMessage] = useState('');
 
   if (!profile) return null;
 
   function showComingSoon(feature) {
     Alert.alert(feature, t('home.comingSoon'));
+  }
+
+  function handleSendHelp() {
+    const body = helpMessage.trim();
+    if (!body) return;
+    const url = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(t('profile.helpEmailSubject'))}&body=${encodeURIComponent(body)}`;
+    Linking.canOpenURL(url).then(supported => {
+      if (!supported) {
+        Alert.alert(t('common.errorTitle'), t('common.errorDefault'));
+        return;
+      }
+      Linking.openURL(url);
+      setIsHelpModalOpen(false);
+      setHelpMessage('');
+    }).catch(() => {
+      Alert.alert(t('common.errorTitle'), t('common.errorDefault'));
+    });
   }
 
   function handleSignOut() {
@@ -107,58 +135,44 @@ function ProfileScreen() {
   const allergies = profile.preferences?.allergies ?? [];
 
   return <ScreenScrollView gap={Spacing.three}>
-      <LinearGradient colors={[LoginButtonGreen, '#81C784']} start={{
-      x: 0,
-      y: 0
-    }} end={{
-      x: 1,
-      y: 0
-    }} style={styles.heroCard}>
+      <View style={styles.heroSection}>
         <View style={styles.avatarWrapper}>
           <View style={styles.avatar}>
-            <ThemedText type="headline" color={LoginButtonGreen}>
-              {profile.name.trim().charAt(0).toUpperCase()}
-            </ThemedText>
+            <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={44} tintColor={theme.accent} />
           </View>
           <Pressable onPress={() => showComingSoon(t('profile.editPhoto'))} hitSlop={8} style={styles.avatarEditBadge}>
-            <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={11} tintColor="#ffffff" />
+            <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={15} tintColor="#ffffff" />
           </Pressable>
         </View>
-        <View style={styles.heroTextColumn}>
-          <ThemedText type="headline" color="#ffffff">{profile.name}</ThemedText>
-          <ThemedText type="caption" color="#ffffff">{account?.email ?? ''}</ThemedText>
-        </View>
-        <Pressable onPress={() => showComingSoon(t('profile.editProfile'))} hitSlop={8} style={styles.editButton}>
-          <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={20} tintColor="#ffffff" />
-        </Pressable>
-      </LinearGradient>
+        <ThemedText type="headline" color={theme.text}>{profile.name}</ThemedText>
+      </View>
 
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
-          <SymbolView name={{ ios: 'fork.knife', android: 'restaurant_menu', web: 'restaurant_menu' }} size={20} tintColor={LoginButtonGreen} />
-          <ThemedText type="smallBold" color={theme.text}>{foodLogStore.entries.length}</ThemedText>
-          <ThemedText type="caption" color={theme.textSecondary}>{t('profile.mealsLogged')}</ThemedText>
+          <SymbolView name={{ ios: 'fork.knife', android: 'restaurant_menu', web: 'restaurant_menu' }} size={20} tintColor={theme.accent} />
+          <ThemedText type="smallBold" color={theme.text} style={styles.statValue}>{foodLogStore.entries.length}</ThemedText>
+          <ThemedText type="caption" color={theme.textSecondary} style={styles.statLabel}>{t('profile.mealsLogged')}</ThemedText>
         </View>
         <View style={styles.statCard}>
           <SymbolView name={{ ios: 'calendar', android: 'calendar_month', web: 'calendar_month' }} size={20} tintColor={theme.secondary} />
-          <ThemedText type="smallBold" color={theme.text}>{mealPlanStore.items.length}</ThemedText>
-          <ThemedText type="caption" color={theme.textSecondary}>{t('profile.mealsPlanned')}</ThemedText>
+          <ThemedText type="smallBold" color={theme.text} style={styles.statValue}>{mealPlanStore.items.length}</ThemedText>
+          <ThemedText type="caption" color={theme.textSecondary} style={styles.statLabel}>{t('profile.mealsPlanned')}</ThemedText>
         </View>
         <View style={styles.statCard}>
           <SymbolView name={{ ios: 'star', android: 'star', web: 'star' }} size={20} tintColor="#FFC107" />
-          <ThemedText type="smallBold" color={theme.text}>{memberSinceLabel}</ThemedText>
-          <ThemedText type="caption" color={theme.textSecondary}>{t('profile.memberSince')}</ThemedText>
+          <ThemedText type="smallBold" color={theme.text} style={styles.statValue}>{memberSinceLabel}</ThemedText>
+          <ThemedText type="caption" color={theme.textSecondary} style={styles.statLabel}>{t('profile.memberSince')}</ThemedText>
         </View>
       </View>
 
       <View style={styles.card}>
         <View style={styles.cardHeaderRow}>
           <View style={styles.cardTitleRow}>
-            <SymbolView name={{ ios: 'target', android: 'target', web: 'target' }} size={16} tintColor={LoginButtonGreen} />
+            <SymbolView name={{ ios: 'target', android: 'target', web: 'target' }} size={16} tintColor={theme.accent} />
             <ThemedText type="smallBold" color={theme.text}>{t('profile.personalGoals')}</ThemedText>
           </View>
-          <Pressable onPress={() => showComingSoon(t('profile.personalGoals'))} hitSlop={8}>
-            <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={16} tintColor={theme.textSecondary} />
+          <Pressable onPress={() => router.push('/edit-personal-goals')} hitSlop={8} style={styles.personalGoalsEditButton}>
+            <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={15} tintColor={theme.accent} />
           </Pressable>
         </View>
         <View style={styles.infoList}>
@@ -173,9 +187,14 @@ function ProfileScreen() {
       </View>
 
       <View style={styles.card}>
-        <View style={styles.cardTitleRow}>
-          <SymbolView name={{ ios: 'fork.knife', android: 'restaurant_menu', web: 'restaurant_menu' }} size={16} tintColor={LoginButtonGreen} />
-          <ThemedText type="smallBold" color={theme.text}>{t('profile.dietPreferences')}</ThemedText>
+        <View style={styles.cardHeaderRow}>
+          <View style={styles.cardTitleRow}>
+            <SymbolView name={{ ios: 'fork.knife', android: 'restaurant_menu', web: 'restaurant_menu' }} size={16} tintColor={theme.accent} />
+            <ThemedText type="smallBold" color={theme.text}>{t('profile.dietPreferences')}</ThemedText>
+          </View>
+          <Pressable onPress={() => router.push('/edit-diet-preferences')} hitSlop={8} style={styles.personalGoalsEditButton}>
+            <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={15} tintColor={theme.accent} />
+          </Pressable>
         </View>
         <View style={styles.preferenceGroup}>
           <View style={styles.preferenceLabelRow}>
@@ -207,18 +226,21 @@ function ProfileScreen() {
 
       <View style={styles.card}>
         <View style={styles.cardTitleRow}>
-          <SymbolView name={{ ios: 'gearshape.fill', android: 'settings', web: 'settings' }} size={16} tintColor={LoginButtonGreen} />
+          <SymbolView name={{ ios: 'gearshape.fill', android: 'settings', web: 'settings' }} size={16} tintColor={theme.accent} />
           <ThemedText type="smallBold" color={theme.text}>{t('profile.settings')}</ThemedText>
         </View>
         <View style={styles.settingsList}>
-          <SettingsRow icon={{ ios: 'bell.fill', android: 'notifications', web: 'notifications' }} label={t('profile.notifications')} onPress={() => showComingSoon(t('profile.notifications'))} />
-          <SettingsRow icon={{ ios: 'moon.fill', android: 'dark_mode', web: 'dark_mode' }} label={t('profile.darkMode')} right={<Switch value={false} onValueChange={() => showComingSoon(t('profile.darkMode'))} trackColor={{
-          false: theme.border,
-          true: LoginButtonGreen
-        }} />} />
-          <SettingsRow icon={{ ios: 'globe', android: 'language', web: 'language' }} label={t('profile.language')} onPress={() => showComingSoon(t('profile.language'))} />
-          <SettingsRow icon={{ ios: 'lock.fill', android: 'lock', web: 'lock' }} label={t('profile.privacySecurity')} onPress={() => showComingSoon(t('profile.privacySecurity'))} />
-          <SettingsRow icon={{ ios: 'questionmark.circle.fill', android: 'help', web: 'help' }} label={t('profile.helpSupport')} onPress={() => showComingSoon(t('profile.helpSupport'))} last />
+          <SettingsRow styles={styles} theme={theme} icon={{ ios: 'bell.fill', android: 'notifications', web: 'notifications' }} label={t('profile.notifications')} right={<Switch value={notificationsStore.isEnabled} onValueChange={value => notificationsStore.setEnabled(value)} trackColor={{
+          false: theme.textSecondary,
+          true: theme.accent
+        }} ios_backgroundColor={theme.textSecondary} thumbColor="#ffffff" />} />
+          <SettingsRow styles={styles} theme={theme} icon={{ ios: 'moon.fill', android: 'dark_mode', web: 'dark_mode' }} label={t('profile.darkMode')} right={<Switch value={themeStore.isDarkMode} onValueChange={value => themeStore.setDarkMode(value)} trackColor={{
+          false: theme.textSecondary,
+          true: theme.accent
+        }} ios_backgroundColor={theme.textSecondary} thumbColor="#ffffff" />} />
+          <SettingsRow styles={styles} theme={theme} icon={{ ios: 'globe', android: 'language', web: 'language' }} label={t('profile.language')} onPress={() => router.push('/select-language')} />
+          <SettingsRow styles={styles} theme={theme} icon={{ ios: 'lock.fill', android: 'lock', web: 'lock' }} label={t('profile.privacySecurity')} onPress={() => router.push('/privacy-policy')} />
+          <SettingsRow styles={styles} theme={theme} icon={{ ios: 'questionmark.circle.fill', android: 'help', web: 'help' }} label={t('profile.helpSupport')} onPress={() => setIsHelpModalOpen(true)} last />
         </View>
       </View>
 
@@ -227,10 +249,41 @@ function ProfileScreen() {
       <Pressable onPress={handleSignOut} style={styles.signOutButton}>
         <ThemedText type="smallBold" color={theme.error}>{t('profile.signOut')}</ThemedText>
       </Pressable>
+
+      <Modal visible={isHelpModalOpen} transparent animationType="slide" onRequestClose={() => setIsHelpModalOpen(false)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setIsHelpModalOpen(false)}>
+          <Pressable style={styles.modalSheet} onPress={event => event.stopPropagation()}>
+            <View style={styles.modalHeader}>
+              <View>
+                <ThemedText type="smallBold" color={theme.text}>{t('profile.helpModalTitle')}</ThemedText>
+                <ThemedText type="caption" color={theme.textSecondary}>{t('profile.helpModalSubtitle')}</ThemedText>
+              </View>
+              <Pressable onPress={() => setIsHelpModalOpen(false)} hitSlop={8} style={styles.personalGoalsEditButton}>
+                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={theme.accent} />
+              </Pressable>
+            </View>
+
+            <View style={styles.contactsRow}>
+              {CONTACT_LINKS.map(contact => <Pressable key={contact.key} onPress={() => showComingSoon(t(contact.labelKey))} style={styles.contactButton}>
+                  <View style={styles.contactIconWrapper}>
+                    <SymbolView name={contact.icon} size={18} tintColor={theme.accent} />
+                  </View>
+                  <ThemedText type="caption" color={theme.textSecondary}>{t(contact.labelKey)}</ThemedText>
+                </Pressable>)}
+            </View>
+
+            <TextInput value={helpMessage} onChangeText={setHelpMessage} placeholder={t('profile.helpMessagePlaceholder')} placeholderTextColor={theme.textSecondary} multiline numberOfLines={5} style={styles.helpInput} />
+
+            <Pressable onPress={handleSendHelp} style={styles.helpSendButton}>
+              <ThemedText type="default" color="#ffffff" style={styles.helpSendButtonText}>{t('common.send')}</ThemedText>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </ScreenScrollView>;
 }
 
-function SettingsRow({ icon, label, onPress, right, last }) {
+function SettingsRow({ styles, theme, icon, label, onPress, right, last }) {
   const content = <View style={[styles.settingsRow, !last && styles.settingsRowBorder]}>
       <View style={styles.settingsRowLeft}>
         <SymbolView name={icon} size={16} tintColor={theme.textSecondary} />
@@ -244,35 +297,22 @@ function SettingsRow({ icon, label, onPress, right, last }) {
 
 export default observer(ProfileScreen);
 
-const styles = StyleSheet.create({
-  heroCard: {
-    flexDirection: 'row',
+const createStyles = theme => StyleSheet.create({
+  heroSection: {
     alignItems: 'center',
-    gap: Spacing.three,
-    borderRadius: 20,
-    padding: Spacing.four
-  },
-  heroTextColumn: {
-    flex: 1,
-    gap: Spacing.half
-  },
-  editButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    alignItems: 'center',
-    justifyContent: 'center'
+    gap: Spacing.two,
+    paddingVertical: Spacing.two
   },
   avatarWrapper: {
-    width: 76,
-    height: 76
+    width: 112,
+    height: 112
   },
   avatar: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
-    backgroundColor: '#ffffff',
+    width: 112,
+    height: 112,
+    borderRadius: 56,
+    // Always a light mint backdrop (not theme.primarySoft) so the icon stays visible in dark mode too.
+    backgroundColor: '#E3F4EA',
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -280,12 +320,20 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -2,
     right: -2,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: LoginButtonGreen,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.accent,
     borderWidth: 2,
     borderColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  personalGoalsEditButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: theme.accentSoft,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -301,7 +349,16 @@ const styles = StyleSheet.create({
     borderColor: theme.border,
     borderWidth: 1,
     borderRadius: 16,
-    paddingVertical: Spacing.three
+    paddingVertical: Spacing.three,
+    paddingHorizontal: Spacing.one
+  },
+  statValue: {
+    width: '100%',
+    textAlign: 'center'
+  },
+  statLabel: {
+    width: '100%',
+    textAlign: 'center'
   },
   card: {
     gap: Spacing.three,
@@ -348,7 +405,7 @@ const styles = StyleSheet.create({
     gap: Spacing.one
   },
   chip: {
-    backgroundColor: LoginButtonGreen,
+    backgroundColor: theme.accent,
     borderRadius: 999,
     paddingHorizontal: Spacing.two,
     paddingVertical: 4
@@ -377,6 +434,63 @@ const styles = StyleSheet.create({
     borderColor: theme.error,
     borderWidth: 1,
     borderRadius: 16,
+    paddingVertical: Spacing.three,
+    marginBottom: Spacing.four
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end'
+  },
+  modalSheet: {
+    backgroundColor: theme.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: Spacing.four,
+    paddingBottom: Spacing.six,
+    gap: Spacing.three
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.two
+  },
+  contactsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+  contactButton: {
+    alignItems: 'center',
+    gap: Spacing.one
+  },
+  contactIconWrapper: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  helpInput: {
+    borderColor: theme.border,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.three,
+    fontSize: 16,
+    color: theme.text,
+    minHeight: 120,
+    textAlignVertical: 'top'
+  },
+  helpSendButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.accent,
+    borderRadius: 16,
     paddingVertical: Spacing.three
+  },
+  helpSendButtonText: {
+    fontWeight: '700'
   }
 });

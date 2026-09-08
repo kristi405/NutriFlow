@@ -2,12 +2,12 @@ import { SymbolView } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
-
-const theme = Colors.light;
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
 export function MacroCard({ label, value, target, color, unit = 'g', detailed, trackColor }) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const progress = target > 0 ? Math.min(1, value / target) : 0;
   const goalReached = target > 0 && value >= target;
   if (detailed) {

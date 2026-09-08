@@ -11,9 +11,10 @@ import { ThemedText } from '@/components/themed-text';
 import { MacroBar } from '@/components/ui/macro-bar';
 import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
-import { BottomTabInset, Colors, LoginButtonGreen, LoginIconBackground, Spacing } from '@/constants/theme';
+import { BottomTabInset, Spacing } from '@/constants/theme';
 import { getIngredientById } from '@/data/seed/ingredients';
 import { getRecipeById, RECIPES } from '@/data/seed/recipes';
+import { useTheme } from '@/hooks/use-theme';
 import { useDailyNutrition } from '@/hooks/useDailyNutrition';
 import { todayKey, weekContaining } from '@/lib/date';
 import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
@@ -42,7 +43,6 @@ function categoryPoolForMealType(mealType) {
   return RECIPES.filter(recipe => isCategoryAllowedForMealType(recipe.categoryId, mealType));
 }
 
-const theme = Colors.light;
 const CALORIE_MATCH_TOLERANCE = 100;
 const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'];
 const MEAL_TYPE_ICONS = {
@@ -56,6 +56,8 @@ const QUICK_SNACKS = [{ id: 'coffee', nameKey: 'mealPlan.quickSnackNames.coffee'
 
 function MealPlanScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
   const [date, setDate] = useState(todayKey());
   const [swapMealType, setSwapMealType] = useState(null);
@@ -199,7 +201,7 @@ function MealPlanScreen() {
             </ThemedText>
           </View>
           <Pressable onPress={handleRegenerateToday} hitSlop={8} style={styles.regenerateButton}>
-            <SymbolView name={{ ios: 'arrow.clockwise', android: 'refresh', web: 'refresh' }} size={18} tintColor={LoginButtonGreen} />
+            <SymbolView name={{ ios: 'arrow.clockwise', android: 'refresh', web: 'refresh' }} size={18} tintColor={theme.accent} />
           </Pressable>
         </View>
 
@@ -229,14 +231,14 @@ function MealPlanScreen() {
               <View style={styles.mealTypeHeader}>
                 <View style={styles.mealTypeHeaderLeft}>
                   <View style={styles.iconWrapper}>
-                    <SymbolView name={MEAL_TYPE_ICONS[mealType]} size={18} tintColor={LoginButtonGreen} />
+                    <SymbolView name={MEAL_TYPE_ICONS[mealType]} size={18} tintColor={theme.accent} />
                   </View>
                   <ThemedText type="smallBold" color={theme.text}>
                     {t(`mealTypes.${mealType}`)}
                   </ThemedText>
                 </View>
                 <Pressable onPress={() => setSwapMealType(mealType)} hitSlop={8} style={styles.editButton}>
-                  <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={16} tintColor={LoginButtonGreen} />
+                  <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={16} tintColor={theme.accent} />
                 </Pressable>
               </View>
               {items.length === 0 ? <ThemedText type="small" color={theme.textSecondary}>
@@ -257,7 +259,7 @@ function MealPlanScreen() {
             <View style={styles.mealTypeHeader}>
               <View style={styles.mealTypeHeaderLeft}>
                 <View style={styles.iconWrapper}>
-                  <SymbolView name={QUICK_SNACK_ICON} size={18} tintColor={LoginButtonGreen} />
+                  <SymbolView name={QUICK_SNACK_ICON} size={18} tintColor={theme.accent} />
                 </View>
                 <View>
                   <ThemedText type="smallBold" color={theme.text}>{entry.label}</ThemedText>
@@ -266,7 +268,7 @@ function MealPlanScreen() {
               </View>
               <View style={styles.quickSnackActions}>
                 <Pressable onPress={() => handleOpenEditSnack(entry)} hitSlop={8} style={styles.editButton}>
-                  <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={16} tintColor={LoginButtonGreen} />
+                  <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={16} tintColor={theme.accent} />
                 </Pressable>
                 <Pressable onPress={() => foodLogStore.removeEntry(entry.id)} hitSlop={8} style={styles.deleteButton}>
                   <SymbolView name={{ ios: 'trash', android: 'delete', web: 'delete' }} size={16} tintColor={theme.error} />
@@ -276,8 +278,8 @@ function MealPlanScreen() {
           </View>)}
 
         <Pressable onPress={handleOpenAddSnack} style={styles.addSnackButton}>
-          <SymbolView name={{ ios: 'plus.circle.fill', android: 'add_circle', web: 'add_circle' }} size={20} tintColor={LoginButtonGreen} />
-          <ThemedText type="smallBold" color={LoginButtonGreen}>{t('mealPlan.addSnack')}</ThemedText>
+          <SymbolView name={{ ios: 'plus.circle.fill', android: 'add_circle', web: 'add_circle' }} size={20} tintColor={theme.accent} />
+          <ThemedText type="smallBold" color={theme.accent}>{t('mealPlan.addSnack')}</ThemedText>
         </Pressable>
       </View>
       </ScreenScrollView>
@@ -300,7 +302,7 @@ function MealPlanScreen() {
                 <ThemedText type="caption" color={theme.textSecondary}>{t('mealPlan.swapSubtitle')}</ThemedText>
               </View>
               <Pressable onPress={() => setSwapMealType(null)} hitSlop={8} style={styles.editButton}>
-                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={LoginButtonGreen} />
+                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={theme.accent} />
               </Pressable>
             </View>
 
@@ -330,7 +332,7 @@ function MealPlanScreen() {
                 <ThemedText type="caption" color={theme.textSecondary}>{t('mealPlan.addSnackSubtitle')}</ThemedText>
               </View>
               <Pressable onPress={closeSnackModal} hitSlop={8} style={styles.editButton}>
-                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={LoginButtonGreen} />
+                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={theme.accent} />
               </Pressable>
             </View>
 
@@ -338,7 +340,7 @@ function MealPlanScreen() {
               <View style={styles.swapList}>
                 {QUICK_SNACKS.map(snack => <Pressable key={snack.id} onPress={() => commitSnack(t(snack.nameKey), snack.calories)} style={styles.swapRow}>
                     <View style={styles.quickSnackIconWrapper}>
-                      <SymbolView name={QUICK_SNACK_ICON} size={16} tintColor={LoginButtonGreen} />
+                      <SymbolView name={QUICK_SNACK_ICON} size={16} tintColor={theme.accent} />
                     </View>
                     <ThemedText type="smallBold" color={theme.text} style={styles.flex1}>{t(snack.nameKey)}</ThemedText>
                     <ThemedText type="small" color={theme.textSecondary}>{snack.calories} {t('common.kcal')}</ThemedText>
@@ -360,7 +362,7 @@ function MealPlanScreen() {
 
 export default observer(MealPlanScreen);
 
-const styles = StyleSheet.create({
+const createStyles = theme => StyleSheet.create({
   flex1: {
     flex: 1
   },
@@ -370,7 +372,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: LoginButtonGreen,
+    backgroundColor: theme.accent,
     borderRadius: 999,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.three,
@@ -390,7 +392,7 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
     paddingHorizontal: Spacing.four,
     paddingBottom: Spacing.two,
-    backgroundColor: Colors.light.background
+    backgroundColor: theme.background
   },
   headerRow: {
     flexDirection: 'row',
@@ -406,7 +408,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: LoginIconBackground,
+    backgroundColor: theme.accentSoft,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -427,7 +429,7 @@ const styles = StyleSheet.create({
     padding: Spacing.three
   },
   progressCardEaten: {
-    borderColor: LoginButtonGreen
+    borderColor: theme.accent
   },
   shoppingListButton: {
     flex: 2,
@@ -455,7 +457,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12
   },
   mealTypeCardEaten: {
-    borderColor: LoginButtonGreen
+    borderColor: theme.accent
   },
   mealTypeHeader: {
     flexDirection: 'row',
@@ -471,7 +473,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 8,
-    backgroundColor: LoginIconBackground,
+    backgroundColor: theme.accentSoft,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -479,7 +481,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: LoginIconBackground,
+    backgroundColor: theme.accentSoft,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -490,7 +492,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: LoginIconBackground,
+    backgroundColor: theme.accentSoft,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -539,7 +541,7 @@ const styles = StyleSheet.create({
     color: theme.text
   },
   customSnackButton: {
-    backgroundColor: LoginButtonGreen,
+    backgroundColor: theme.accent,
     borderRadius: 12,
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two,

@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { StyleSheet, View } from 'react-native';
-import { Colors } from '@/constants/theme';
-
-const theme = Colors.light;
+import { useTheme } from '@/hooks/use-theme';
 
 export function RecipeImage({ uri, style, contentFit = 'cover', transition = 150, iconSize = 22 }) {
   const [failed, setFailed] = useState(false);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   if (!uri || failed) {
     return <View style={[styles.fallback, style]}>
@@ -20,7 +20,7 @@ export function RecipeImage({ uri, style, contentFit = 'cover', transition = 150
   }} style={style} contentFit={contentFit} transition={transition} onError={() => setFailed(true)} />;
 }
 
-const styles = StyleSheet.create({
+const createStyles = theme => StyleSheet.create({
   fallback: {
     backgroundColor: theme.backgroundElement,
     alignItems: 'center',

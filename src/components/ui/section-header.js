@@ -2,8 +2,7 @@ import { Link } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { Colors } from '@/constants/theme';
-const theme = Colors.light;
+import { useTheme } from '@/hooks/use-theme';
 export function SectionHeader({
   title,
   seeAllHref,
@@ -11,6 +10,7 @@ export function SectionHeader({
   onAction
 }) {
   const { t } = useTranslation();
+  const theme = useTheme();
   return <View style={styles.row}>
       <ThemedText type="headline" color={theme.text}>{title}</ThemedText>
       {seeAllHref && <Link href={seeAllHref} asChild>

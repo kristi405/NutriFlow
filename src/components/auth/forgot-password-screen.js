@@ -1,16 +1,17 @@
 import { SymbolView } from 'expo-symbols';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Fonts, LoginButtonGreen, Spacing } from '@/constants/theme';
+import { Fonts, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { authStore } from '@/store/authStore';
-
-const theme = Colors.light;
 
 export function ForgotPasswordScreen({ onBackToLogin }) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [email, setEmail] = useState('');
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,7 +44,7 @@ export function ForgotPasswordScreen({ onBackToLogin }) {
           </ThemedText>
         </Animated.View>
 
-        <Pressable onPress={onBackToLogin} style={[styles.button, styles.buttonSpacing, styles.buttonShadow, { backgroundColor: LoginButtonGreen }]}>
+        <Pressable onPress={onBackToLogin} style={[styles.button, styles.buttonSpacing, styles.buttonShadow, { backgroundColor: theme.accent }]}>
           <ThemedText type="smallBold" style={styles.buttonTextActive}>
             {t('auth.forgotPassword.backToLogin')}
           </ThemedText>
@@ -73,7 +74,7 @@ export function ForgotPasswordScreen({ onBackToLogin }) {
 
       <View style={styles.actions}>
         <Pressable onPress={handleSubmit} disabled={isSubmitting} style={({ pressed }) => [styles.button, styles.buttonSpacing, styles.buttonShadow, {
-        backgroundColor: LoginButtonGreen,
+        backgroundColor: theme.accent,
         opacity: isSubmitting ? 0.6 : 1,
         transform: [{ scale: pressed ? 0.97 : 1 }]
       }]}>
@@ -84,14 +85,14 @@ export function ForgotPasswordScreen({ onBackToLogin }) {
 
         <Pressable onPress={onBackToLogin} hitSlop={8} style={styles.switchLink}>
           <ThemedText type="link" color={theme.textSecondary}>
-            {t('auth.forgotPassword.rememberedIt')} <ThemedText type="linkPrimary" style={{ color: LoginButtonGreen, fontWeight: '600' }}>{t('auth.forgotPassword.login')}</ThemedText>
+            {t('auth.forgotPassword.rememberedIt')} <ThemedText type="linkPrimary" style={{ color: theme.accent, fontWeight: '600' }}>{t('auth.forgotPassword.login')}</ThemedText>
           </ThemedText>
         </Pressable>
       </View>
     </View>;
 }
 
-const styles = StyleSheet.create({
+const createStyles = theme => StyleSheet.create({
   container: {
     gap: Spacing.four
   },
@@ -139,7 +140,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.two
   },
   buttonShadow: {
-    shadowColor: LoginButtonGreen,
+    shadowColor: theme.accent,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 10,

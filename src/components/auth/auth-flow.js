@@ -1,4 +1,4 @@
-import { Colors, LoginGradientAccent, MaxContentWidth, Spacing } from '@/constants/theme';
+import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
@@ -21,7 +21,7 @@ export function AuthFlow() {
   const [mode, setMode] = useState('login');
   const [googleError, setGoogleError] = useState(null);
 
-  return <LinearGradient colors={[Colors.light.background, Colors.light.primarySoft, LoginGradientAccent]} style={styles.flex1}>
+  return <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
       <SafeAreaView style={styles.flex1}>
         <Pressable onPress={Keyboard.dismiss} style={styles.content}>
             {mode === 'login' && <LoginScreen onSwitchToRegister={() => setMode('register')} onForgotPassword={() => setMode('forgot')} />}

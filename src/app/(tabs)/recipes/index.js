@@ -10,7 +10,8 @@ import { RecentRecipeRow } from '@/components/ui/recent-recipe-row';
 import { RecipeCard } from '@/components/ui/recipe-card';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { SectionHeader } from '@/components/ui/section-header';
-import { Colors, LoginButtonGreen, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { getIngredientById } from '@/data/seed/ingredients';
 import { CATEGORIES } from '@/data/seed/categories';
 import { getRecipeById, RECIPES } from '@/data/seed/recipes';
@@ -18,7 +19,6 @@ import { calculateRecipeNutrition } from '@/lib/nutrition';
 import { favoritesStore } from '@/store/favoritesStore';
 import { recentlyViewedStore } from '@/store/recentlyViewedStore';
 
-const theme = Colors.light;
 const FAVORITE_RED = '#E0245E';
 
 const CONTAINER_PADDING = 20;
@@ -34,6 +34,8 @@ function chunkPairs(items) {
 
 function RecipesScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [query, setQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(null);
@@ -132,7 +134,7 @@ function RecipesScreen() {
     </ScreenScrollView>;
 }
 
-const styles = StyleSheet.create({
+const createStyles = theme => StyleSheet.create({
   searchSection: {
     gap: Spacing.three
   },
@@ -159,7 +161,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   micButtonActive: {
-    backgroundColor: LoginButtonGreen
+    backgroundColor: theme.accent
   },
   categoryRow: {
     flexDirection: 'row',
@@ -175,8 +177,8 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.one
   },
   categoryChipActive: {
-    backgroundColor: LoginButtonGreen,
-    borderColor: LoginButtonGreen
+    backgroundColor: theme.accent,
+    borderColor: theme.accent
   },
   favoritesChip: {
     flexDirection: 'row',

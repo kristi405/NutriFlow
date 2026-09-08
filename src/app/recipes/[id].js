@@ -2,29 +2,23 @@ import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
 import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
-import { Colors, LoginButtonGreen, LoginGradientAccent, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { getIngredientById, INGREDIENTS } from '@/data/seed/ingredients';
 import { getRecipeById } from '@/data/seed/recipes';
 import { calculateRecipeNutrition } from '@/lib/nutrition';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
+import { observer } from 'mobx-react-lite';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Animated, Modal, Pressable, Share, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { recentlyViewedStore } from '@/store/recentlyViewedStore';
 
-const theme = Colors.light;
 const WATER_BLUE = '#2F80ED';
 const TOP_BAR_CONTENT_HEIGHT = 52;
-
-const STATS = [
-  { key: 'calories', labelKey: 'recipes.calories', color: theme.primary },
-  { key: 'protein', labelKey: 'home.protein', color: WATER_BLUE },
-  { key: 'fat', labelKey: 'home.fat', color: '#F2994A' },
-  { key: 'carbs', labelKey: 'home.carbs', color: '#9B51E0' }
-];
 
 const TABS = [
   { key: 'ingredients', labelKey: 'recipes.ingredients', icon: { ios: 'checklist', android: 'checklist', web: 'checklist' } },
@@ -92,8 +86,11 @@ function swapPoolForIngredient(ingredient, unit) {
   return pool.filter(item => item.id !== ingredient.id && (unit === 'g' || unit === 'ml' || item.gramsPerUnit[unit] !== undefined));
 }
 
-export default function RecipeDetailScreen() {
+function RecipeDetailScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const STATS = useMemo(() => [{ key: 'calories', labelKey: 'recipes.calories', color: theme.primary }, { key: 'protein', labelKey: 'home.protein', color: WATER_BLUE }, { key: 'fat', labelKey: 'home.fat', color: '#F2994A' }, { key: 'carbs', labelKey: 'home.carbs', color: '#9B51E0' }], [theme]);
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { id } = useLocalSearchParams();
@@ -190,7 +187,7 @@ export default function RecipeDetailScreen() {
     }
   });
 
-  return <LinearGradient colors={[Colors.light.background, Colors.light.primarySoft, LoginGradientAccent]} style={styles.flex1}>
+  return <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
       <View style={[styles.fixedImageWrapper, {
       height: imageHeight
     }]}>
@@ -200,7 +197,7 @@ export default function RecipeDetailScreen() {
       <View style={[styles.topBar, {
       height: topBarHeight,
       paddingTop: insets.top,
-      backgroundColor: isScrolledPastImage ? LoginGradientAccent : 'transparent'
+      backgroundColor: isScrolledPastImage ? theme.accentSoft : 'transparent'
     }]}>
         <Pressable onPress={() => router.back()} hitSlop={8} style={styles.floatingButton}>
           <SymbolView name={{ ios: 'chevron.left', android: 'chevron_left', web: 'chevron_left' }} size={18} tintColor={theme.text} />
@@ -226,9 +223,9 @@ export default function RecipeDetailScreen() {
           </View>
 
           <View style={styles.metaRow}>
-            <MetaItem icon={{ ios: 'clock', android: 'schedule', web: 'schedule' }} label={`${totalTime} ${t('common.min')}`} color={WATER_BLUE} />
-            <MetaItem icon={{ ios: 'person.2.fill', android: 'group', web: 'group' }} label={`${recipe.servings} ${t('recipes.servings')}`} />
-            <MetaItem icon={{ ios: 'chart.bar.fill', android: 'bar_chart', web: 'bar_chart' }} label={t(`recipes.difficulty.${recipe.difficulty}`, { defaultValue: recipe.difficulty })} color={recipe.difficulty === 'easy' ? theme.primary : theme.textSecondary} />
+            <MetaItem styles={styles} icon={{ ios: 'clock', android: 'schedule', web: 'schedule' }} label={`${totalTime} ${t('common.min')}`} color={WATER_BLUE} />
+            <MetaItem styles={styles} icon={{ ios: 'person.2.fill', android: 'group', web: 'group' }} label={`${recipe.servings} ${t('recipes.servings')}`} color={theme.textSecondary} />
+            <MetaItem styles={styles} icon={{ ios: 'chart.bar.fill', android: 'bar_chart', web: 'bar_chart' }} label={t(`recipes.difficulty.${recipe.difficulty}`, { defaultValue: recipe.difficulty })} color={recipe.difficulty === 'easy' ? theme.primary : theme.textSecondary} />
           </View>
 
           {nutrition && <View style={styles.statsCard}>
@@ -246,8 +243,8 @@ export default function RecipeDetailScreen() {
             {TABS.map(tab => {
             const isActive = activeTab === tab.key;
             return <Pressable key={tab.key} onPress={() => setActiveTab(tab.key)} style={[styles.tabButton, isActive && styles.tabButtonActive]}>
-                  <SymbolView name={tab.icon} size={14} tintColor={isActive ? LoginButtonGreen : theme.textSecondary} />
-                  <ThemedText type="small" color={isActive ? LoginButtonGreen : theme.textSecondary}>
+                  <SymbolView name={tab.icon} size={14} tintColor={isActive ? theme.accent : theme.textSecondary} />
+                  <ThemedText type="small" color={isActive ? theme.accent : theme.textSecondary}>
                     {t(tab.labelKey)}
                   </ThemedText>
                 </Pressable>;
@@ -272,8 +269,8 @@ export default function RecipeDetailScreen() {
               <View style={styles.sectionHeaderRow}>
                 <ThemedText type="headline" color={theme.text}>{t('recipes.ingredients')}</ThemedText>
                 <Pressable onPress={() => setIsEditingIngredients(current => !current)} hitSlop={8} style={[styles.editButton, isEditingIngredients && styles.editButtonActive]}>
-                  <SymbolView name={isEditingIngredients ? { ios: 'checkmark', android: 'check', web: 'check' } : { ios: 'square.and.pencil', android: 'edit_square', web: 'edit_square' }} size={15} tintColor={isEditingIngredients ? '#ffffff' : LoginButtonGreen} />
-                  <ThemedText type="small" color={isEditingIngredients ? '#ffffff' : LoginButtonGreen}>
+                  <SymbolView name={isEditingIngredients ? { ios: 'checkmark', android: 'check', web: 'check' } : { ios: 'square.and.pencil', android: 'edit_square', web: 'edit_square' }} size={15} tintColor={isEditingIngredients ? '#ffffff' : theme.accent} />
+                  <ThemedText type="small" color={isEditingIngredients ? '#ffffff' : theme.accent}>
                     {isEditingIngredients ? t('common.done') : t('common.edit')}
                   </ThemedText>
                 </Pressable>
@@ -288,7 +285,7 @@ export default function RecipeDetailScreen() {
                           <SymbolView name={isExcluded ? { ios: 'circle', android: 'radio_button_unchecked', web: 'radio_button_unchecked' } : { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }} size={22} tintColor={isExcluded ? theme.border : theme.primary} />
                         </Pressable>}
                       {isEditingIngredients && !isExcluded && isSwappableIngredient(ingredient) && <Pressable onPress={() => setSwapIngredientId(line.ingredientId)} hitSlop={8}>
-                          <SymbolView name={{ ios: 'arrow.triangle.2.circlepath', android: 'sync', web: 'sync' }} size={20} tintColor={LoginButtonGreen} />
+                          <SymbolView name={{ ios: 'arrow.triangle.2.circlepath', android: 'sync', web: 'sync' }} size={20} tintColor={theme.accent} />
                         </Pressable>}
                       <View style={styles.ingredientCard}>
                         <ThemedText type="small" color={isExcluded ? theme.textSecondary : theme.text} style={isExcluded && styles.strikethrough}>
@@ -377,14 +374,14 @@ export default function RecipeDetailScreen() {
                 <ThemedText type="caption" color={theme.textSecondary}>{t('recipes.swapSubtitle')}</ThemedText>
               </View>
               <Pressable onPress={() => setSwapIngredientId(null)} hitSlop={8} style={styles.modalCloseButton}>
-                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={LoginButtonGreen} />
+                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={theme.accent} />
               </Pressable>
             </View>
 
             {swapCandidates.length === 0 ? <ThemedText type="small" color={theme.textSecondary}>{t('recipes.swapEmpty')}</ThemedText> : <View style={styles.swapList}>
                 {swapCandidates.map(item => <Pressable key={item.id} onPress={() => handleSelectSwap(item.id)} style={styles.swapRow}>
                     <View style={styles.swapIconWrapper}>
-                      <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={16} tintColor={LoginButtonGreen} />
+                      <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={16} tintColor={theme.accent} />
                     </View>
                     <View style={styles.swapTextWrapper}>
                       <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{item.name}</ThemedText>
@@ -399,14 +396,16 @@ export default function RecipeDetailScreen() {
     </LinearGradient>;
 }
 
-function MetaItem({ icon, label, color = theme.textSecondary }) {
+function MetaItem({ icon, label, color, styles }) {
   return <View style={styles.metaItem}>
       <SymbolView name={icon} size={14} tintColor={color} />
       <ThemedText type="small" color={color}>{label}</ThemedText>
     </View>;
 }
 
-const styles = StyleSheet.create({
+export default observer(RecipeDetailScreen);
+
+const createStyles = theme => StyleSheet.create({
   flex1: {
     flex: 1
   },
@@ -453,13 +452,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 5,
-    backgroundColor: LoginGradientAccent,
+    backgroundColor: theme.accentSoft,
     borderBottomWidth: 1,
     borderBottomColor: theme.border,
     paddingBottom: Spacing.three
   },
   headerSpacer: {
-    backgroundColor: LoginGradientAccent
+    backgroundColor: theme.accentSoft
   },
   header: {
     gap: Spacing.half,
@@ -504,7 +503,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent'
   },
   tabButtonActive: {
-    borderBottomColor: LoginButtonGreen
+    borderBottomColor: theme.accent
   },
   section: {
     gap: Spacing.three
@@ -547,7 +546,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two
   },
   editButtonActive: {
-    backgroundColor: LoginButtonGreen
+    backgroundColor: theme.accent
   },
   card: {
     backgroundColor: theme.background,

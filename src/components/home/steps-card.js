@@ -2,14 +2,15 @@ import { SymbolView } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { useStepCount } from '@/hooks/useStepCount';
 
-const theme = Colors.light;
 const DAILY_STEP_GOAL = 10000;
 
 export function StepsCard() {
   const { t } = useTranslation();
+  const theme = useTheme();
   const { steps, available } = useStepCount();
 
   if (!available) return null;

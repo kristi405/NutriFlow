@@ -1,19 +1,22 @@
+import { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { ThemedText } from '@/components/themed-text';
 import { RecipeImage } from '@/components/ui/recipe-image';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { favoritesStore } from '@/store/favoritesStore';
 import { Link } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
-const theme = Colors.light;
 function RecipeCardComponent({
   recipe,
   calories,
   style
 }) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const totalTime = recipe.prepTimeMinutes + recipe.cookTimeMinutes;
   const isFavorite = favoritesStore.isFavorite(recipe.id);
   return <Link href={{
@@ -58,7 +61,7 @@ function RecipeCardComponent({
     </Link>;
 }
 export const RecipeCard = observer(RecipeCardComponent);
-const styles = StyleSheet.create({
+const createStyles = theme => StyleSheet.create({
   card: {
     backgroundColor: theme.background,
     borderColor: theme.border,

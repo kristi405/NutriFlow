@@ -1,16 +1,17 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SymbolView } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, LoginButtonGreen, LoginGradientAccent } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 
-const theme = Colors.light;
 const PROGRESS_DURATION = 5000;
 
 export function CalculatingScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const progress = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(1)).current;
 
@@ -40,10 +41,10 @@ export function CalculatingScreen() {
     outputRange: ['0%', '100%']
   });
 
-  return <LinearGradient colors={[Colors.light.background, Colors.light.primarySoft, LoginGradientAccent]} style={styles.flex1}>
+  return <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
       <View style={styles.content}>
         <Animated.View style={{ transform: [{ scale: pulse }] }}>
-          <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={32} tintColor={LoginButtonGreen} />
+          <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={32} tintColor={theme.accent} />
         </Animated.View>
 
         <View style={styles.track}>
@@ -57,7 +58,7 @@ export function CalculatingScreen() {
     </LinearGradient>;
 }
 
-const styles = StyleSheet.create({
+const createStyles = theme => StyleSheet.create({
   flex1: {
     flex: 1
   },
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
   fill: {
     height: '100%',
     borderRadius: 3,
-    backgroundColor: LoginButtonGreen
+    backgroundColor: theme.accent
   },
   text: {
     textAlign: 'center'

@@ -4,10 +4,9 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Fonts } from '@/constants/theme';
+import { Fonts } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { authStore } from '@/store/authStore';
-
-const theme = Colors.light;
 
 // Required once per app so the browser tab used for the Google consent screen
 // closes itself and hands control back to the app after redirecting.
@@ -15,6 +14,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 export function GoogleSignInButton({ onError }) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,

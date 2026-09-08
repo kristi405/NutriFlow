@@ -2,8 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Svg, { Circle } from 'react-native-svg';
 import { ThemedText } from '@/components/themed-text';
-import { Colors } from '@/constants/theme';
-const theme = Colors.light;
+import { useTheme } from '@/hooks/use-theme';
 export function CalorieRing({
   consumed,
   target,
@@ -11,6 +10,7 @@ export function CalorieRing({
   strokeWidth = 16
 }) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const progress = target > 0 ? Math.min(1, consumed / target) : 0;

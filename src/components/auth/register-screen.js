@@ -1,17 +1,18 @@
 import { SymbolView } from 'expo-symbols';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Fonts, LoginButtonGreen, Spacing } from '@/constants/theme';
+import { Fonts, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { authStore } from '@/store/authStore';
 import { profileStore } from '@/store/profileStore';
 
-const theme = Colors.light;
-
 export function RegisterScreen({ onSwitchToLogin }) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -90,7 +91,7 @@ export function RegisterScreen({ onSwitchToLogin }) {
 
       <View style={styles.actions}>
         <Pressable onPress={handleSubmit} disabled={isSubmitting} style={({ pressed }) => [styles.button, styles.buttonSpacing, styles.buttonShadow, {
-        backgroundColor: LoginButtonGreen,
+        backgroundColor: theme.accent,
         opacity: isSubmitting ? 0.6 : 1,
         transform: [{ scale: pressed ? 0.97 : 1 }]
       }]}>
@@ -101,14 +102,14 @@ export function RegisterScreen({ onSwitchToLogin }) {
 
         <Pressable onPress={onSwitchToLogin} hitSlop={8} style={styles.switchLink}>
           <ThemedText type="link" color={theme.textSecondary}>
-            {t('auth.register.haveAccount')} <ThemedText type="linkPrimary" style={{ color: LoginButtonGreen, fontWeight: '600' }}>{t('auth.register.login')}</ThemedText>
+            {t('auth.register.haveAccount')} <ThemedText type="linkPrimary" style={{ color: theme.accent, fontWeight: '600' }}>{t('auth.register.login')}</ThemedText>
           </ThemedText>
         </Pressable>
       </View>
     </View>;
 }
 
-const styles = StyleSheet.create({
+const createStyles = theme => StyleSheet.create({
   container: {
     gap: Spacing.five
   },
@@ -119,10 +120,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: LoginButtonGreen,
+    backgroundColor: theme.accent,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: LoginButtonGreen,
+    shadowColor: theme.accent,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.two
   },
   buttonShadow: {
-    shadowColor: LoginButtonGreen,
+    shadowColor: theme.accent,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 10,
