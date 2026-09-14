@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { router } from 'expo-router';
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
@@ -17,9 +18,11 @@ import { CATEGORIES } from '@/data/seed/categories';
 import { getRecipeById, RECIPES } from '@/data/seed/recipes';
 import { calculateRecipeNutrition } from '@/lib/nutrition';
 import { favoritesStore } from '@/store/favoritesStore';
+import { myRecipesStore } from '@/store/myRecipesStore';
 import { recentlyViewedStore } from '@/store/recentlyViewedStore';
 
 const FAVORITE_RED = '#E0245E';
+const MY_RECIPES_FILTER = 'my-recipes';
 
 const CONTAINER_PADDING = 20;
 const CARD_GAP = Spacing.three;
@@ -66,17 +69,25 @@ function RecipesScreen() {
 
   const filteredRecipes = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    return RECIPES.filter(recipe => {
+    // The Favorites filter also searches My Recipes, so a favorited own recipe shows up here too.
+    const pool = selectedFilter === 'favorites' ? [...RECIPES, ...myRecipesStore.recipes] : RECIPES;
+    return pool.filter(recipe => {
       const matchesQuery = !normalized || recipe.title.toLowerCase().includes(normalized);
       const matchesFilter = !selectedFilter || (selectedFilter === 'favorites' ? favoritesStore.isFavorite(recipe.id) : recipe.categoryId === selectedFilter);
       return matchesQuery && matchesFilter;
     });
-  }, [query, selectedFilter, favoritesStore.favorites.length]);
+  }, [query, selectedFilter, favoritesStore.favorites.length, myRecipesStore.recipes.length]);
 
   const collections = useMemo(() => CATEGORIES.map(category => ({
     category,
     rows: chunkPairs(filteredRecipes.filter(recipe => recipe.categoryId === category.id))
   })).filter(collection => collection.rows.length > 0), [filteredRecipes]);
+
+  const myRecipesFiltered = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    return myRecipesStore.recipes.filter(recipe => !normalized || recipe.title.toLowerCase().includes(normalized));
+  }, [query, myRecipesStore.recipes.length]);
+  const myRecipesRows = useMemo(() => chunkPairs(myRecipesFiltered), [myRecipesFiltered]);
 
   const recentlyViewed = recentlyViewedStore.recipeIds.map(getRecipeById).filter(Boolean);
 
@@ -97,6 +108,12 @@ function RecipesScreen() {
           <Pressable onPress={() => setSelectedFilter(null)} style={[styles.categoryChip, !selectedFilter && styles.categoryChipActive]}>
             <ThemedText type="small" color={!selectedFilter ? '#ffffff' : theme.text}>
               {t('recipes.allCategories')}
+            </ThemedText>
+          </Pressable>
+          <Pressable onPress={() => setSelectedFilter(current => current === MY_RECIPES_FILTER ? null : MY_RECIPES_FILTER)} style={[styles.categoryChip, styles.myRecipesChip, selectedFilter === MY_RECIPES_FILTER && styles.myRecipesChipActive]}>
+            <SymbolView name={{ ios: 'book.closed.fill', android: 'menu_book', web: 'menu_book' }} size={13} tintColor={selectedFilter === MY_RECIPES_FILTER ? '#ffffff' : theme.secondary} />
+            <ThemedText type="small" color={selectedFilter === MY_RECIPES_FILTER ? '#ffffff' : theme.secondary}>
+              {t('recipes.myRecipes')}
             </ThemedText>
           </Pressable>
           <Pressable onPress={() => setSelectedFilter(current => current === 'favorites' ? null : 'favorites')} style={[styles.categoryChip, styles.favoritesChip, selectedFilter === 'favorites' && styles.favoritesChipActive]}>
@@ -120,7 +137,23 @@ function RecipesScreen() {
           </ScrollView>
         </View>}
 
-      {collections.length === 0 ? <EmptyState icon={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} title={t('recipes.noResults')} message={t('recipes.noResultsMessage')} /> : collections.map(({ category, rows }) => <View key={category.id} style={styles.section}>
+      {selectedFilter === MY_RECIPES_FILTER ? <View style={styles.section}>
+          <View style={styles.myRecipesHeaderRow}>
+            <ThemedText type="headline" color={theme.text}>{t('recipes.myRecipes')}</ThemedText>
+            <Pressable onPress={() => router.push('/add-recipe')} style={styles.addRecipeButton}>
+              <SymbolView name={{ ios: 'plus', android: 'add', web: 'add' }} size={15} tintColor="#ffffff" />
+              <ThemedText type="smallBold" color="#ffffff">{t('recipes.addRecipe')}</ThemedText>
+            </Pressable>
+          </View>
+          {myRecipesFiltered.length === 0 ? <EmptyState icon={{ ios: 'book.closed', android: 'menu_book', web: 'menu_book' }} title={t('recipes.myRecipesEmptyTitle')} message={t('recipes.myRecipesEmptyMessage')} actionLabel={t('recipes.addRecipe')} onAction={() => router.push('/add-recipe')} /> : <View style={styles.rows}>
+              {myRecipesRows.map((pair, index) => <View key={index} style={styles.row}>
+                  {pair.map(recipe => <View key={recipe.id} style={styles.cardSlot}>
+                      <RecipeCard recipe={recipe} calories={calculateRecipeNutrition(recipe, getIngredientById).nutrition.calories} style={styles.cardFill} />
+                    </View>)}
+                  {pair.length === 1 && <View style={styles.cardSlot} />}
+                </View>)}
+            </View>}
+        </View> : collections.length === 0 ? <EmptyState icon={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} title={t('recipes.noResults')} message={t('recipes.noResultsMessage')} /> : collections.map(({ category, rows }) => <View key={category.id} style={styles.section}>
           <SectionHeader title={category.name} />
           <View style={styles.rows}>
             {rows.map((pair, index) => <View key={index} style={styles.row}>
@@ -135,6 +168,20 @@ function RecipesScreen() {
 }
 
 const createStyles = theme => StyleSheet.create({
+  myRecipesHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  addRecipeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: theme.accent,
+    borderRadius: 999,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.one
+  },
   searchSection: {
     gap: Spacing.three
   },
@@ -190,6 +237,17 @@ const createStyles = theme => StyleSheet.create({
   favoritesChipActive: {
     backgroundColor: FAVORITE_RED,
     borderColor: FAVORITE_RED
+  },
+  myRecipesChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#E1EEF5',
+    borderColor: theme.secondary
+  },
+  myRecipesChipActive: {
+    backgroundColor: theme.secondary,
+    borderColor: theme.secondary
   },
   section: {
     gap: Spacing.three

@@ -1,3 +1,5 @@
+import { myRecipesStore } from '@/store/myRecipesStore';
+
 function i(ingredientId, quantity, unit, substituteIds) {
   return {
     ingredientId,
@@ -1053,5 +1055,5 @@ recipe({
 })];
 const RECIPE_INDEX = new Map(RECIPES.map(item => [item.id, item]));
 export function getRecipeById(id) {
-  return RECIPE_INDEX.get(id);
+  return RECIPE_INDEX.get(id) ?? myRecipesStore.getById(id);
 }

@@ -43,12 +43,12 @@ function RecipeCardComponent({
                 {recipe.title}
               </ThemedText>
               <View style={styles.metaRow}>
-                <View style={styles.metaItem}>
-                  <SymbolView name={{ ios: 'clock', android: 'schedule', web: 'schedule' }} size={11} tintColor={theme.textSecondary} />
-                  <ThemedText type="caption" color={theme.textSecondary}>
-                    {totalTime} {t('common.min')}
-                  </ThemedText>
-                </View>
+                {!recipe.isUserRecipe && <View style={styles.metaItem}>
+                    <SymbolView name={{ ios: 'clock', android: 'schedule', web: 'schedule' }} size={11} tintColor={theme.textSecondary} />
+                    <ThemedText type="caption" color={theme.textSecondary}>
+                      {totalTime} {t('common.min')}
+                    </ThemedText>
+                  </View>}
                 {calories !== undefined && <View style={styles.calorieBadge}>
                     <ThemedText type="caption" color={theme.primary}>
                       {Math.round(calories)} {t('common.kcal')}

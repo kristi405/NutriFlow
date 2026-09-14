@@ -15,7 +15,8 @@ export function WaterCard({
   const { t } = useTranslation();
   const theme = useTheme();
   const progress = targetMl > 0 ? Math.min(1, consumedMl / targetMl) : 0;
-  const goalReached = targetMl > 0 && consumedMl >= targetMl;
+  // Matches exactly (rounded to 1 decimal place, same precision shown below) — not just "at or over".
+  const goalReached = targetMl > 0 && (consumedMl / 1000).toFixed(1) === (targetMl / 1000).toFixed(1);
   return <View style={[styles.card, {
     backgroundColor: theme.background,
     borderColor: goalReached ? WATER_BLUE : theme.border

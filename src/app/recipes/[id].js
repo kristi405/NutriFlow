@@ -7,14 +7,16 @@ import { useTheme } from '@/hooks/use-theme';
 import { getIngredientById, INGREDIENTS } from '@/data/seed/ingredients';
 import { getRecipeById } from '@/data/seed/recipes';
 import { calculateRecipeNutrition } from '@/lib/nutrition';
+import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Animated, Modal, Pressable, Share, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Alert, Animated, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Share, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { myRecipesStore } from '@/store/myRecipesStore';
 import { recentlyViewedStore } from '@/store/recentlyViewedStore';
 
 const WATER_BLUE = '#2F80ED';
@@ -102,10 +104,35 @@ function RecipeDetailScreen() {
   const [activeTab, setActiveTab] = useState('ingredients');
   const [headerHeight, setHeaderHeight] = useState(0);
   const [isScrolledPastImage, setIsScrolledPastImage] = useState(false);
+  const [isEditingRecipe, setIsEditingRecipe] = useState(false);
+  const [editedTitle, setEditedTitle] = useState('');
+  const [editedImageUri, setEditedImageUri] = useState(null);
+  const [editedIngredients, setEditedIngredients] = useState([]);
+  const [isIngredientPickerOpen, setIsIngredientPickerOpen] = useState(false);
+  const [ingredientQuery, setIngredientQuery] = useState('');
   const scrollY = useRef(new Animated.Value(0)).current;
+
+  const filteredIngredients = useMemo(() => {
+    const normalized = ingredientQuery.trim().toLowerCase();
+    const pool = !normalized ? INGREDIENTS : INGREDIENTS.filter(ingredient => ingredient.name.toLowerCase().includes(normalized));
+    return pool.slice(0, 40);
+  }, [ingredientQuery]);
 
   const profile = useMemo(() => {
     if (!recipe) return undefined;
+    // While editing your own recipe, recalculate live from the in-progress
+    // ingredient list so KBJU/nutrients/vitamins reflect edits before saving.
+    if (recipe.isUserRecipe && isEditingRecipe) {
+      const liveIngredients = editedIngredients.map(line => ({
+        ingredientId: line.ingredientId,
+        quantity: Math.max(1, Number(line.quantity) || 1),
+        unit: 'g'
+      }));
+      return calculateRecipeNutrition({
+        ...recipe,
+        ingredients: liveIngredients
+      }, getIngredientById);
+    }
     const activeIngredients = recipe.ingredients.filter(line => !excludedIngredientIds.has(line.ingredientId)).map(line => substitutions[line.ingredientId] ? {
       ...line,
       ingredientId: substitutions[line.ingredientId]
@@ -114,7 +141,7 @@ function RecipeDetailScreen() {
       ...recipe,
       ingredients: activeIngredients
     }, getIngredientById);
-  }, [recipe, excludedIngredientIds, substitutions]);
+  }, [recipe, excludedIngredientIds, substitutions, isEditingRecipe, editedIngredients]);
   const nutrition = profile?.nutrition;
   const vitamins = profile?.vitamins;
   const minerals = profile?.minerals;
@@ -156,11 +183,70 @@ function RecipeDetailScreen() {
   }
 
   const totalTime = recipe.prepTimeMinutes + recipe.cookTimeMinutes;
+  const isOwnRecipe = recipe.isUserRecipe === true;
 
   function handleShare() {
     Share.share({
       message: `${recipe.title}\n${recipe.imageUrl}`
     }).catch(() => {});
+  }
+
+  async function handleTakePhoto() {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert(t('common.errorTitle'), t('common.errorDefault'));
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [4, 3], quality: 0.7 });
+    if (!result.canceled && result.assets[0]) setEditedImageUri(result.assets[0].uri);
+  }
+
+  async function handleChooseFromLibrary() {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert(t('common.errorTitle'), t('common.errorDefault'));
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [4, 3], quality: 0.7 });
+    if (!result.canceled && result.assets[0]) setEditedImageUri(result.assets[0].uri);
+  }
+
+  function handlePickPhoto() {
+    Alert.alert(t('recipes.addPhotoTitle'), undefined, [{ text: t('recipes.takePhoto'), onPress: handleTakePhoto }, { text: t('recipes.chooseFromLibrary'), onPress: handleChooseFromLibrary }, { text: t('common.cancel'), style: 'cancel' }]);
+  }
+
+  function handleToggleEditRecipe() {
+    if (isEditingRecipe) {
+      myRecipesStore.updateRecipe(recipe.id, {
+        title: editedTitle.trim() || recipe.title,
+        imageUrl: editedImageUri,
+        ingredients: editedIngredients.map(line => ({ ingredientId: line.ingredientId, quantity: Math.max(1, Number(line.quantity) || 1), unit: 'g' }))
+      });
+      setIsEditingRecipe(false);
+    } else {
+      setEditedTitle(recipe.title);
+      setEditedImageUri(recipe.imageUrl ?? null);
+      setEditedIngredients(recipe.ingredients.map(line => ({
+        ingredientId: line.ingredientId,
+        name: getIngredientById(line.ingredientId)?.name ?? line.ingredientId,
+        quantity: String(Math.round(line.quantity))
+      })));
+      setIsEditingRecipe(true);
+    }
+  }
+
+  function handleAddEditedIngredient(ingredient) {
+    setEditedIngredients(current => [...current, { ingredientId: ingredient.id, name: ingredient.name, quantity: '100' }]);
+    setIsIngredientPickerOpen(false);
+    setIngredientQuery('');
+  }
+
+  function handleRemoveEditedIngredient(index) {
+    setEditedIngredients(current => current.filter((_, i) => i !== index));
+  }
+
+  function handleEditedQuantityChange(index, value) {
+    setEditedIngredients(current => current.map((line, i) => i === index ? { ...line, quantity: value } : line));
   }
 
   const topBarHeight = insets.top + TOP_BAR_CONTENT_HEIGHT;
@@ -187,12 +273,19 @@ function RecipeDetailScreen() {
     }
   });
 
-  return <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
+  return <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex1}>
+      <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
       <View style={[styles.fixedImageWrapper, {
       height: imageHeight
     }]}>
-        <RecipeImage uri={recipe.imageUrl} style={styles.image} iconSize={48} />
+        <RecipeImage uri={isOwnRecipe && isEditingRecipe ? editedImageUri : recipe.imageUrl} style={styles.image} iconSize={48} />
       </View>
+
+      {isOwnRecipe && isEditingRecipe && <Pressable onPress={handlePickPhoto} hitSlop={8} style={[styles.imageEditBadge, {
+      top: imageHeight - 56
+    }]}>
+          <SymbolView name={{ ios: 'camera.fill', android: 'photo_camera', web: 'photo_camera' }} size={20} tintColor="#ffffff" />
+        </Pressable>}
 
       <View style={[styles.topBar, {
       height: topBarHeight,
@@ -202,9 +295,14 @@ function RecipeDetailScreen() {
         <Pressable onPress={() => router.back()} hitSlop={8} style={styles.floatingButton}>
           <SymbolView name={{ ios: 'chevron.left', android: 'chevron_left', web: 'chevron_left' }} size={18} tintColor={theme.text} />
         </Pressable>
-        <Pressable onPress={handleShare} hitSlop={8} style={styles.floatingButton}>
-          <SymbolView name={{ ios: 'square.and.arrow.up', android: 'ios_share', web: 'ios_share' }} size={17} tintColor={theme.text} />
-        </Pressable>
+        <View style={styles.topBarRightGroup}>
+          {isOwnRecipe && <Pressable onPress={handleToggleEditRecipe} hitSlop={8} style={styles.floatingButton}>
+              <SymbolView name={isEditingRecipe ? { ios: 'checkmark', android: 'check', web: 'check' } : { ios: 'pencil', android: 'edit', web: 'edit' }} size={17} tintColor={theme.text} />
+            </Pressable>}
+          <Pressable onPress={handleShare} hitSlop={8} style={styles.floatingButton}>
+            <SymbolView name={{ ios: 'square.and.arrow.up', android: 'ios_share', web: 'ios_share' }} size={17} tintColor={theme.text} />
+          </Pressable>
+        </View>
       </View>
 
       <Animated.View style={[styles.headerBlock, {
@@ -214,9 +312,9 @@ function RecipeDetailScreen() {
     }]} onLayout={event => setHeaderHeight(event.nativeEvent.layout.height)}>
         <View style={styles.paddedContainer}>
           <View style={styles.header}>
-            <ThemedText type="title" style={styles.title} color={theme.text}>
-              {recipe.title}
-            </ThemedText>
+            {isOwnRecipe && isEditingRecipe ? <TextInput value={editedTitle} onChangeText={setEditedTitle} style={styles.titleInput} placeholderTextColor={theme.textSecondary} /> : <ThemedText type="title" style={styles.title} color={theme.text}>
+                {recipe.title}
+              </ThemedText>}
             <ThemedText type="small" color={theme.textSecondary}>
               {recipe.description}
             </ThemedText>
@@ -240,7 +338,7 @@ function RecipeDetailScreen() {
             </View>}
 
           <View style={styles.tabBar}>
-            {TABS.map(tab => {
+            {TABS.filter(tab => tab.key !== 'steps' || !isOwnRecipe).map(tab => {
             const isActive = activeTab === tab.key;
             return <Pressable key={tab.key} onPress={() => setActiveTab(tab.key)} style={[styles.tabButton, isActive && styles.tabButtonActive]}>
                   <SymbolView name={tab.icon} size={14} tintColor={isActive ? theme.accent : theme.textSecondary} />
@@ -268,39 +366,53 @@ function RecipeDetailScreen() {
           {activeTab === 'ingredients' && <View style={styles.section}>
               <View style={styles.sectionHeaderRow}>
                 <ThemedText type="headline" color={theme.text}>{t('recipes.ingredients')}</ThemedText>
-                <Pressable onPress={() => setIsEditingIngredients(current => !current)} hitSlop={8} style={[styles.editButton, isEditingIngredients && styles.editButtonActive]}>
-                  <SymbolView name={isEditingIngredients ? { ios: 'checkmark', android: 'check', web: 'check' } : { ios: 'square.and.pencil', android: 'edit_square', web: 'edit_square' }} size={15} tintColor={isEditingIngredients ? '#ffffff' : theme.accent} />
-                  <ThemedText type="small" color={isEditingIngredients ? '#ffffff' : theme.accent}>
-                    {isEditingIngredients ? t('common.done') : t('common.edit')}
-                  </ThemedText>
-                </Pressable>
+                {!isOwnRecipe && <Pressable onPress={() => setIsEditingIngredients(current => !current)} hitSlop={8} style={[styles.editButton, isEditingIngredients && styles.editButtonActive]}>
+                    <SymbolView name={isEditingIngredients ? { ios: 'checkmark', android: 'check', web: 'check' } : { ios: 'square.and.pencil', android: 'edit_square', web: 'edit_square' }} size={15} tintColor={isEditingIngredients ? '#ffffff' : theme.accent} />
+                    <ThemedText type="small" color={isEditingIngredients ? '#ffffff' : theme.accent}>
+                      {isEditingIngredients ? t('common.done') : t('common.edit')}
+                    </ThemedText>
+                  </Pressable>}
               </View>
-              <View style={styles.list}>
-                {recipe.ingredients.map(line => {
-                const effectiveIngredientId = substitutions[line.ingredientId] ?? line.ingredientId;
-                const ingredient = getIngredientById(effectiveIngredientId);
-                const isExcluded = excludedIngredientIds.has(line.ingredientId);
-                return <View key={line.ingredientId} style={styles.ingredientRow}>
-                      {isEditingIngredients && <Pressable onPress={() => toggleIngredient(line.ingredientId)} hitSlop={8}>
-                          <SymbolView name={isExcluded ? { ios: 'circle', android: 'radio_button_unchecked', web: 'radio_button_unchecked' } : { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }} size={22} tintColor={isExcluded ? theme.border : theme.primary} />
-                        </Pressable>}
-                      {isEditingIngredients && !isExcluded && isSwappableIngredient(ingredient) && <Pressable onPress={() => setSwapIngredientId(line.ingredientId)} hitSlop={8}>
-                          <SymbolView name={{ ios: 'arrow.triangle.2.circlepath', android: 'sync', web: 'sync' }} size={20} tintColor={theme.accent} />
-                        </Pressable>}
-                      <View style={styles.ingredientCard}>
-                        <ThemedText type="small" color={isExcluded ? theme.textSecondary : theme.text} style={isExcluded && styles.strikethrough}>
-                          {ingredient?.name ?? line.ingredientId}
-                        </ThemedText>
-                        <ThemedText type="small" color={theme.textSecondary}>
-                          {line.quantity} {line.unit}
-                        </ThemedText>
-                      </View>
-                    </View>;
-              })}
-              </View>
+
+              {isOwnRecipe && isEditingRecipe ? <View style={styles.list}>
+                  {editedIngredients.map((line, index) => <View key={`${line.ingredientId}-${index}`} style={styles.editIngredientRow}>
+                      <ThemedText type="small" color={theme.text} style={styles.flex1} numberOfLines={1}>{line.name}</ThemedText>
+                      <TextInput value={line.quantity} onChangeText={value => handleEditedQuantityChange(index, value)} keyboardType="number-pad" style={styles.quantityInput} />
+                      <ThemedText type="caption" color={theme.textSecondary}>g</ThemedText>
+                      <Pressable onPress={() => handleRemoveEditedIngredient(index)} hitSlop={8}>
+                        <SymbolView name={{ ios: 'xmark.circle.fill', android: 'cancel', web: 'cancel' }} size={18} tintColor={theme.border} />
+                      </Pressable>
+                    </View>)}
+                  <Pressable onPress={() => setIsIngredientPickerOpen(true)} style={styles.addIngredientButton}>
+                    <SymbolView name={{ ios: 'plus.circle.fill', android: 'add_circle', web: 'add_circle' }} size={16} tintColor={theme.accent} />
+                    <ThemedText type="small" color={theme.accent}>{t('common.add')}</ThemedText>
+                  </Pressable>
+                </View> : <View style={styles.list}>
+                  {recipe.ingredients.map(line => {
+                  const effectiveIngredientId = substitutions[line.ingredientId] ?? line.ingredientId;
+                  const ingredient = getIngredientById(effectiveIngredientId);
+                  const isExcluded = excludedIngredientIds.has(line.ingredientId);
+                  return <View key={line.ingredientId} style={styles.ingredientRow}>
+                        {!isOwnRecipe && isEditingIngredients && <Pressable onPress={() => toggleIngredient(line.ingredientId)} hitSlop={8}>
+                            <SymbolView name={isExcluded ? { ios: 'circle', android: 'radio_button_unchecked', web: 'radio_button_unchecked' } : { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }} size={22} tintColor={isExcluded ? theme.border : theme.primary} />
+                          </Pressable>}
+                        {!isOwnRecipe && isEditingIngredients && !isExcluded && isSwappableIngredient(ingredient) && <Pressable onPress={() => setSwapIngredientId(line.ingredientId)} hitSlop={8}>
+                            <SymbolView name={{ ios: 'arrow.triangle.2.circlepath', android: 'sync', web: 'sync' }} size={20} tintColor={theme.accent} />
+                          </Pressable>}
+                        <View style={styles.ingredientCard}>
+                          <ThemedText type="small" color={isExcluded ? theme.textSecondary : theme.text} style={isExcluded && styles.strikethrough}>
+                            {ingredient?.name ?? line.ingredientId}
+                          </ThemedText>
+                          <ThemedText type="small" color={theme.textSecondary}>
+                            {line.quantity} {line.unit}
+                          </ThemedText>
+                        </View>
+                      </View>;
+                })}
+                </View>}
             </View>}
 
-          {activeTab === 'steps' && <View style={[styles.card, styles.stepsCard]}>
+          {activeTab === 'steps' && !isOwnRecipe && <View style={[styles.card, styles.stepsCard]}>
               <ThemedText type="headline" color={theme.text} style={styles.cardTitle}>
                 {t('recipes.steps')}
               </ThemedText>
@@ -393,7 +505,27 @@ function RecipeDetailScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-    </LinearGradient>;
+
+      <Modal visible={isIngredientPickerOpen} transparent animationType="slide" onRequestClose={() => setIsIngredientPickerOpen(false)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setIsIngredientPickerOpen(false)}>
+          <Pressable style={styles.modalSheet} onPress={event => event.stopPropagation()}>
+            <View style={styles.modalHeader}>
+              <ThemedText type="smallBold" color={theme.text}>{t('recipes.addIngredientTitle')}</ThemedText>
+              <Pressable onPress={() => setIsIngredientPickerOpen(false)} hitSlop={8} style={styles.modalCloseButton}>
+                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={theme.accent} />
+              </Pressable>
+            </View>
+            <TextInput value={ingredientQuery} onChangeText={setIngredientQuery} placeholder={t('recipes.searchIngredientsPlaceholder')} placeholderTextColor={theme.textSecondary} style={styles.ingredientSearchInput} />
+            <ScrollView style={styles.ingredientScroll}>
+              {filteredIngredients.map(ingredient => <Pressable key={ingredient.id} onPress={() => handleAddEditedIngredient(ingredient)} style={styles.ingredientOption}>
+                  <ThemedText type="small" color={theme.text}>{ingredient.name}</ThemedText>
+                </Pressable>)}
+            </ScrollView>
+          </Pressable>
+        </Pressable>
+      </Modal>
+      </LinearGradient>
+    </KeyboardAvoidingView>;
 }
 
 function MetaItem({ icon, label, color, styles }) {
@@ -643,5 +775,82 @@ const createStyles = theme => StyleSheet.create({
   swapTextWrapper: {
     flex: 1,
     gap: 2
+  },
+  topBarRightGroup: {
+    flexDirection: 'row',
+    gap: Spacing.two
+  },
+  imageEditBadge: {
+    position: 'absolute',
+    right: Spacing.three,
+    zIndex: 11,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.accent,
+    borderWidth: 2,
+    borderColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  titleInput: {
+    fontSize: 22,
+    lineHeight: 28,
+    fontWeight: '700',
+    color: theme.text,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.accent,
+    paddingVertical: 2
+  },
+  flex1: {
+    flex: 1
+  },
+  editIngredientRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    backgroundColor: theme.background,
+    borderColor: theme.border,
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two
+  },
+  quantityInput: {
+    width: 56,
+    borderColor: theme.border,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: Spacing.one,
+    paddingVertical: 4,
+    color: theme.text,
+    textAlign: 'center'
+  },
+  addIngredientButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    borderWidth: 1.5,
+    borderColor: theme.accent,
+    borderRadius: 999,
+    paddingVertical: Spacing.two
+  },
+  ingredientSearchInput: {
+    borderColor: theme.border,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    fontSize: 16,
+    color: theme.text
+  },
+  ingredientScroll: {
+    maxHeight: 320
+  },
+  ingredientOption: {
+    paddingVertical: Spacing.two,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.border
   }
 });

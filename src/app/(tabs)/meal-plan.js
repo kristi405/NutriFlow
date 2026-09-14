@@ -15,12 +15,12 @@ import { BottomTabInset, Spacing } from '@/constants/theme';
 import { getIngredientById } from '@/data/seed/ingredients';
 import { getRecipeById, RECIPES } from '@/data/seed/recipes';
 import { useTheme } from '@/hooks/use-theme';
-import { useDailyNutrition } from '@/hooks/useDailyNutrition';
 import { todayKey, weekContaining } from '@/lib/date';
 import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
 import { calculateDailyTargets, calculateRecipeNutrition, scaleForServings } from '@/lib/nutrition';
 import { foodLogStore } from '@/store/foodLogStore';
 import { mealPlanStore } from '@/store/mealPlanStore';
+import { myRecipesStore } from '@/store/myRecipesStore';
 import { profileStore } from '@/store/profileStore';
 
 function shuffle(array) {
@@ -40,7 +40,10 @@ function isCategoryAllowedForMealType(categoryId, mealType) {
 }
 
 function categoryPoolForMealType(mealType) {
-  return RECIPES.filter(recipe => isCategoryAllowedForMealType(recipe.categoryId, mealType));
+  // My Recipes come first so they're preferred as swap candidates over seed recipes.
+  const myPool = myRecipesStore.recipes.filter(recipe => isCategoryAllowedForMealType(recipe.categoryId, mealType));
+  const seedPool = RECIPES.filter(recipe => isCategoryAllowedForMealType(recipe.categoryId, mealType));
+  return [...myPool, ...seedPool];
 }
 
 const CALORIE_MATCH_TOLERANCE = 100;
@@ -66,10 +69,18 @@ function MealPlanScreen() {
   const [editingSnackId, setEditingSnackId] = useState(null);
   const profile = profileStore.profile;
   const targets = useMemo(() => profile ? calculateDailyTargets(profile) : undefined, [profile]);
-  const { total } = useDailyNutrition(date);
   const planItems = mealPlanStore.itemsForDate(date);
   const loggedEntries = foodLogStore.entriesForDate(date);
   const menuCalories = planItems.reduce((sum, item) => {
+    const recipe = getRecipeById(item.recipeId);
+    if (!recipe) return sum;
+    return sum + scaleForServings(calculateRecipeNutrition(recipe, getIngredientById), item.servings).nutrition.calories;
+  }, 0);
+  // Only meals actually checked off on this screen count as "eaten" here — quick snacks
+  // and anything else logged elsewhere don't affect this progress bar.
+  const eatenCalories = planItems.reduce((sum, item) => {
+    const isEaten = loggedEntries.some(entry => entry.mealType === item.mealType && entry.recipeId === item.recipeId);
+    if (!isEaten) return sum;
     const recipe = getRecipeById(item.recipeId);
     if (!recipe) return sum;
     return sum + scaleForServings(calculateRecipeNutrition(recipe, getIngredientById), item.servings).nutrition.calories;
@@ -121,19 +132,39 @@ function MealPlanScreen() {
     const pool = categoryPoolForMealType(swapMealType);
     const currentItem = planItems.find(item => item.mealType === swapMealType);
     const currentRecipe = currentItem ? getRecipeById(currentItem.recipeId) : undefined;
-    if (!currentRecipe) return shuffle(pool).slice(0, 5);
 
-    const currentCalories = calculateRecipeNutrition(currentRecipe, getIngredientById).nutrition.calories;
-    return pool.filter(recipe => recipe.id !== currentRecipe.id).map(recipe => {
-      const calories = calculateRecipeNutrition(recipe, getIngredientById).nutrition.calories;
-      return { recipe, calories, diff: Math.abs(calories - currentCalories) };
-    }).filter(entry => entry.diff <= CALORIE_MATCH_TOLERANCE).sort((a, b) => a.diff - b.diff).slice(0, 5).sort((a, b) => a.calories - b.calories).map(entry => entry.recipe);
+    const myPool = pool.filter(recipe => recipe.isUserRecipe && recipe.id !== currentRecipe?.id);
+    const seedPool = pool.filter(recipe => !recipe.isUserRecipe && recipe.id !== currentRecipe?.id);
+
+    // My Recipes of this meal type's category always come first, regardless of calorie match —
+    // only the remaining slots (up to 5 total) are filled with calorie-matched seed recipes.
+    const myCandidates = [...myPool].sort((a, b) => calculateRecipeNutrition(a, getIngredientById).nutrition.calories - calculateRecipeNutrition(b, getIngredientById).nutrition.calories).slice(0, 5);
+    const remainingSlots = Math.max(0, 5 - myCandidates.length);
+
+    let seedCandidates = [];
+    if (remainingSlots > 0) {
+      if (!currentRecipe) {
+        seedCandidates = shuffle(seedPool).slice(0, remainingSlots);
+      } else {
+        const currentCalories = calculateRecipeNutrition(currentRecipe, getIngredientById).nutrition.calories;
+        seedCandidates = seedPool.map(recipe => {
+          const calories = calculateRecipeNutrition(recipe, getIngredientById).nutrition.calories;
+          return { recipe, calories, diff: Math.abs(calories - currentCalories) };
+        }).filter(entry => entry.diff <= CALORIE_MATCH_TOLERANCE).sort((a, b) => a.diff - b.diff).slice(0, remainingSlots).sort((a, b) => a.calories - b.calories).map(entry => entry.recipe);
+      }
+    }
+
+    return [...myCandidates, ...seedCandidates];
   }, [swapMealType, planItems]);
 
   function handleSelectSwap(recipe) {
     const currentItem = planItems.find(item => item.mealType === swapMealType);
     if (currentItem) {
+      // If this slot was already logged as eaten, keep that log entry pointing at the
+      // actual (post-swap) dish instead of leaving it stuck on the replaced one.
+      const loggedEntry = loggedEntries.find(entry => entry.mealType === swapMealType && entry.recipeId === currentItem.recipeId);
       mealPlanStore.updateRecipe(currentItem.id, recipe.id);
+      if (loggedEntry) foodLogStore.updateEntry(loggedEntry.id, { recipeId: recipe.id });
     } else {
       mealPlanStore.addItem({ date, mealType: swapMealType, recipeId: recipe.id, servings: 1 });
     }
@@ -213,7 +244,7 @@ function MealPlanScreen() {
     }}>
       <View style={styles.topRow}>
         <View style={[styles.progressCard, allMealsEaten && styles.progressCardEaten]}>
-          <MacroBar label={t('recipes.calories')} value={total.nutrition.calories} target={menuCalories} unit={t('common.kcal')} color={theme.primary} />
+          <MacroBar label={t('recipes.calories')} value={eatenCalories} target={targets.calories} unit={t('common.kcal')} color={theme.primary} />
         </View>
         <Pressable onPress={handleGenerateShoppingList} style={styles.shoppingListButton}>
           <SymbolView name="cart.fill" size={20} tintColor="#ffffff" />
@@ -281,6 +312,11 @@ function MealPlanScreen() {
           <SymbolView name={{ ios: 'plus.circle.fill', android: 'add_circle', web: 'add_circle' }} size={20} tintColor={theme.accent} />
           <ThemedText type="smallBold" color={theme.accent}>{t('mealPlan.addSnack')}</ThemedText>
         </Pressable>
+
+        <View style={styles.totalPlannedRow}>
+          <ThemedText type="small" color={theme.textSecondary}>{t('mealPlan.totalPlannedCalories')}</ThemedText>
+          <ThemedText type="smallBold" color={theme.text}>{Math.round(menuCalories)} {t('common.kcal')}</ThemedText>
+        </View>
       </View>
       </ScreenScrollView>
 
@@ -522,6 +558,13 @@ const createStyles = theme => StyleSheet.create({
     borderStyle: 'dashed',
     borderRadius: 16,
     paddingVertical: Spacing.three
+  },
+  totalPlannedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.one,
+    paddingTop: Spacing.one
   },
   quickSnackScroll: {
     maxHeight: 320

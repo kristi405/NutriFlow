@@ -50,10 +50,7 @@ function HomeScreen() {
   }
   const profile = profileStore.profile;
   const [date, setDate] = useState(todayKey());
-  const {
-    meals,
-    total
-  } = useDailyNutrition(date);
+  const { total } = useDailyNutrition(date);
   const scoreResult = useNutritionScore(date);
   const { steps } = useStepCount();
   const waterMl = waterStore.totalForDate(date);
@@ -82,6 +79,7 @@ function HomeScreen() {
       calories
     };
   }, [planItems, loggedEntries]);
+  const allMealsEaten = planItems.length > 0 && planItems.every(item => loggedEntries.some(entry => entry.mealType === item.mealType && entry.recipeId === item.recipeId));
   if (!profile || !targets) return null;
   const consumedCalories = Math.round(total.nutrition.calories);
   const burnedCalories = Math.round(steps * profile.weightKg * 0.0005);
@@ -162,21 +160,27 @@ function HomeScreen() {
 
       <PremiumCard />
 
-      {nextMeal && <View style={styles.section}>
+      {nextMeal ? <View style={styles.section}>
           <SectionHeader title={t('home.nextMeal')} />
           <MealRow recipeId={nextMeal.recipe.id} mealType={nextMeal.mealType} title={nextMeal.recipe.title} imageUrl={nextMeal.recipe.imageUrl} calories={nextMeal.calories} />
-        </View>}
-
-      <View style={styles.section}>
-        <SectionHeader title={t('home.todaysMeals')} />
-        {meals.length === 0 ? <EmptyState icon={{
+        </View> : <View style={styles.section}>
+          <SectionHeader title={t('home.nextMeal')} />
+          {allMealsEaten ? <View style={styles.planCompleteCard}>
+              <View style={styles.planCompleteIconWrapper}>
+                <SymbolView name={{ ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }} size={32} tintColor="#ffffff" />
+              </View>
+              <ThemedText type="headline" color={theme.text} style={styles.centerText}>
+                {t('home.planCompleteTitle')}
+              </ThemedText>
+              <ThemedText type="small" color={theme.textSecondary} style={styles.centerText}>
+                {t('home.planCompleteMessage')}
+              </ThemedText>
+            </View> : <EmptyState icon={{
         ios: 'fork.knife',
         android: 'restaurant_menu',
         web: 'restaurant_menu'
-      }} title={t('home.emptyDayTitle')} message={t('home.emptyDayMessage')} actionLabel={t('home.browseRecipes')} onAction={() => router.push('/recipes')} /> : <View style={styles.mealList}>
-            {meals.map(meal => <MealRow key={meal.id} recipeId={meal.recipeId} mealType={meal.mealType} title={meal.recipeTitle} imageUrl={meal.recipeImageUrl} calories={meal.profile.nutrition.calories} />)}
-          </View>}
-      </View>
+      }} title={t('home.emptyDayTitle')} message={t('home.emptyDayMessage')} actionLabel={t('home.browseRecipes')} onAction={() => router.push('/recipes')} />}
+        </View>}
 
       <View style={styles.section}>
         <SectionHeader title={t('home.quickActions')} />
@@ -309,5 +313,26 @@ const createStyles = theme => StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.three,
     paddingRight: Spacing.two
+  },
+  planCompleteCard: {
+    alignItems: 'center',
+    gap: Spacing.two,
+    backgroundColor: theme.accentSoft,
+    borderColor: theme.accent,
+    borderWidth: 1.5,
+    borderRadius: 20,
+    paddingVertical: Spacing.five,
+    paddingHorizontal: Spacing.four
+  },
+  planCompleteIconWrapper: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: theme.accent,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  centerText: {
+    textAlign: 'center'
   }
 });

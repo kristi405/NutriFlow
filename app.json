@@ -13,7 +13,8 @@
       "appleTeamId": "CFTJPS6ZYY",
       "buildNumber": "2",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "NutriFlow uses your photo library so you can set a profile photo and attach lab result images for AI analysis."
+        "NSPhotoLibraryUsageDescription": "NutriFlow uses your photo library so you can set a profile photo, attach lab result images for AI analysis, and add photos to your recipes.",
+        "NSCameraUsageDescription": "NutriFlow uses your camera so you can take a photo for your recipe."
       }
     },
     "android": {

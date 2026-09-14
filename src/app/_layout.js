@@ -128,6 +128,16 @@ function TabLayout() {
           headerTintColor: theme.text,
           headerTitleStyle: { fontWeight: '700' }
         }} />
+        <Stack.Screen name="add-recipe" options={{
+          headerShown: true,
+          headerTitle: t('recipes.addRecipe'),
+          headerBackTitle: t('common.back'),
+          headerBackTitleStyle: { fontSize: 14 },
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+          headerTitleStyle: { fontWeight: '700' }
+        }} />
       </Stack>;
   }
   return <SafeAreaProvider>
