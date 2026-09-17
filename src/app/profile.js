@@ -21,14 +21,16 @@ const GOAL_LABEL_KEYS = {
   'maintain-weight': 'onboarding.goal.maintainWeight',
   'gain-weight': 'onboarding.goal.gainWeight',
   'build-muscle': 'onboarding.goal.buildMuscle',
-  'eat-healthier': 'onboarding.goal.eatHealthier'
+  'eat-healthier': 'onboarding.goal.eatHealthier',
+  'general-health': 'onboarding.goal.generalHealth'
 };
 const ACTIVITY_LABEL_KEYS = {
   sedentary: 'onboarding.activity.sedentary',
   light: 'onboarding.activity.light',
   moderate: 'onboarding.activity.moderate',
   active: 'onboarding.activity.active',
-  'very-active': 'onboarding.activity.veryActive'
+  'very-active': 'onboarding.activity.veryActive',
+  'extra-active': 'onboarding.activity.extraActive'
 };
 const DIETARY_TAG_KEYS = {
   vegetarian: 'vegetarian',

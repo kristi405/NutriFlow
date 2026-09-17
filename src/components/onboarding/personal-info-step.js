@@ -1,69 +1,50 @@
-import { useMemo, useState } from 'react';
-import { SymbolView } from 'expo-symbols';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { KG_PER_LB } from '@/lib/units';
 
-const CM_PER_INCH = 2.54;
+const AGE_MIN = 5;
+const AGE_MAX = 99;
+const AGE_DEFAULT = 20;
+const AGE_ITEM_HEIGHT = 30;
+const AGE_VISIBLE_ITEMS = 3;
+const AGES = Array.from({ length: AGE_MAX - AGE_MIN + 1 }, (_, i) => AGE_MIN + i);
 
-function round1(number) {
-  return Math.round(number * 10) / 10;
-}
+function AgeWheelPicker({ theme, styles, value, onChange }) {
+  const scrollRef = useRef(null);
+  const selectedAge = AGES.includes(Number(value)) ? Number(value) : AGE_DEFAULT;
 
-function cmToDisplay(heightCm, unit) {
-  if (heightCm === '') return '';
-  const cm = Number(heightCm);
-  if (!Number.isFinite(cm)) return '';
-  return unit === 'cm' ? heightCm : String(round1(cm / CM_PER_INCH));
-}
+  useEffect(() => {
+    const index = AGES.indexOf(selectedAge);
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ y: index * AGE_ITEM_HEIGHT, animated: false });
+    });
+    // Only snap to position on mount — subsequent updates come from the user's own scrolling.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-function displayToCm(text, unit) {
-  if (text === '') return '';
-  const parsed = Number(text);
-  if (!Number.isFinite(parsed)) return undefined;
-  return unit === 'cm' ? text : String(round1(parsed * CM_PER_INCH));
-}
+  function handleMomentumEnd(event) {
+    const index = Math.round(event.nativeEvent.contentOffset.y / AGE_ITEM_HEIGHT);
+    const clamped = Math.min(Math.max(index, 0), AGES.length - 1);
+    onChange(String(AGES[clamped]));
+  }
 
-function kgToDisplay(weightKg, unit) {
-  if (weightKg === '') return '';
-  const kg = Number(weightKg);
-  if (!Number.isFinite(kg)) return '';
-  return unit === 'kg' ? weightKg : String(round1(kg / KG_PER_LB));
-}
-
-function displayToKg(text, unit) {
-  if (text === '') return '';
-  const parsed = Number(text);
-  if (!Number.isFinite(parsed)) return undefined;
-  return unit === 'kg' ? text : String(round1(parsed * KG_PER_LB));
-}
-
-function UnitDropdown({ theme, styles, value, options, onChange }) {
-  const [open, setOpen] = useState(false);
-  return <>
-      <Pressable onPress={() => setOpen(true)} style={styles.unitButton}>
-        <ThemedText type="small" color={theme.accent} style={styles.modalOptionActiveText}>{value}</ThemedText>
-        <SymbolView name={{ ios: 'chevron.down', android: 'expand_more', web: 'expand_more' }} size={10} tintColor={theme.accent} />
-      </Pressable>
-      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setOpen(false)}>
-          <View style={styles.modalCard}>
-            {options.map(option => <Pressable key={option} onPress={() => {
-            onChange(option);
-            setOpen(false);
-          }} style={styles.modalOption}>
-                <ThemedText type="default" color={option === value ? theme.accent : theme.text} style={option === value ? styles.modalOptionActiveText : undefined}>
-                  {option}
-                </ThemedText>
-                {option === value && <SymbolView name={{ ios: 'checkmark', android: 'check', web: 'check' }} size={16} tintColor={theme.accent} />}
-              </Pressable>)}
-          </View>
-        </Pressable>
-      </Modal>
-    </>;
+  return <View style={[styles.wheelShadowWrap, { height: AGE_ITEM_HEIGHT * AGE_VISIBLE_ITEMS }]}>
+      <View style={styles.wheelContainer}>
+        <View pointerEvents="none" style={[styles.wheelHighlight, { top: AGE_ITEM_HEIGHT, height: AGE_ITEM_HEIGHT, backgroundColor: `${theme.accent}40` }]} />
+        <ScrollView ref={scrollRef} showsVerticalScrollIndicator={false} snapToInterval={AGE_ITEM_HEIGHT} decelerationRate="fast" contentContainerStyle={{
+        paddingVertical: AGE_ITEM_HEIGHT
+      }} onMomentumScrollEnd={handleMomentumEnd}>
+          {AGES.map(age => <View key={age} style={styles.wheelItem}>
+              <ThemedText type={age === selectedAge ? 'smallBold' : 'small'} color={age === selectedAge ? theme.text : theme.textSecondary} style={styles.wheelItemText}>
+                {age}
+              </ThemedText>
+            </View>)}
+        </ScrollView>
+      </View>
+    </View>;
 }
 
 export function PersonalInfoStep({
@@ -74,53 +55,16 @@ export function PersonalInfoStep({
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const [heightUnit, setHeightUnit] = useState('in');
-  const [weightUnit, setWeightUnit] = useState(value.weightUnit ?? 'lb');
-  const [heightText, setHeightText] = useState(() => cmToDisplay(value.heightCm, 'in'));
-  const [weightText, setWeightText] = useState(() => kgToDisplay(value.weightKg, 'lb'));
-  const [targetWeightText, setTargetWeightText] = useState(() => kgToDisplay(value.targetWeightKg, 'lb'));
 
   function fieldStyle(invalid) {
     return [styles.input, {
       backgroundColor: theme.background,
-      borderColor: invalid ? theme.error : theme.border,
+      borderColor: invalid ? theme.error : 'transparent',
       color: theme.text
     }];
   }
   const nameInvalid = showValidation && value.name.trim().length === 0;
-  const ageInvalid = showValidation && !(Number(value.age) > 0);
-  const heightInvalid = showValidation && !(Number(value.heightCm) > 0);
-  const weightInvalid = showValidation && !(Number(value.weightKg) > 0);
 
-  function handleHeightChange(text) {
-    setHeightText(text);
-    const heightCm = displayToCm(text, heightUnit);
-    if (heightCm !== undefined) onChange({ heightCm });
-  }
-
-  function handleWeightChange(text) {
-    setWeightText(text);
-    const weightKg = displayToKg(text, weightUnit);
-    if (weightKg !== undefined) onChange({ weightKg });
-  }
-
-  function handleTargetWeightChange(text) {
-    setTargetWeightText(text);
-    const targetWeightKg = displayToKg(text, weightUnit);
-    if (targetWeightKg !== undefined) onChange({ targetWeightKg });
-  }
-
-  function handleHeightUnitChange(newUnit) {
-    setHeightUnit(newUnit);
-    setHeightText(cmToDisplay(value.heightCm, newUnit));
-  }
-
-  function handleWeightUnitChange(newUnit) {
-    setWeightUnit(newUnit);
-    setWeightText(kgToDisplay(value.weightKg, newUnit));
-    setTargetWeightText(kgToDisplay(value.targetWeightKg, newUnit));
-    onChange({ weightUnit: newUnit });
-  }
   return <View style={styles.container}>
       <View style={styles.header}>
         <ThemedText type="title" style={styles.title} color={theme.text}>
@@ -131,57 +75,38 @@ export function PersonalInfoStep({
         </ThemedText>
       </View>
 
-      <View style={styles.field}>
-        <ThemedText type="small" color={theme.text}>{t('onboarding.personalInfo.name')}</ThemedText>
-        <TextInput value={value.name} onChangeText={name => onChange({
-        name
-      })} placeholder={t('onboarding.personalInfo.namePlaceholder')} placeholderTextColor={theme.textSecondary} style={fieldStyle(nameInvalid)} />
+      <View style={styles.nameAgeRow}>
+        <View style={[styles.field, styles.nameField]}>
+          <ThemedText type="small" color={theme.textSecondary}>{t('onboarding.personalInfo.name')}</ThemedText>
+          <TextInput value={value.name} onChangeText={name => onChange({
+          name
+        })} placeholder={t('onboarding.personalInfo.namePlaceholder')} placeholderTextColor={theme.textSecondary} style={[fieldStyle(nameInvalid), styles.nameInput]} />
+        </View>
+        <View style={[styles.field, styles.ageField]}>
+          <ThemedText type="small" color={theme.textSecondary}>{t('onboarding.personalInfo.age')}</ThemedText>
+          <AgeWheelPicker theme={theme} styles={styles} value={value.age} onChange={age => onChange({
+          age
+        })} />
+        </View>
       </View>
 
-      <View style={styles.field}>
-        <ThemedText type="small" color={theme.text}>{t('onboarding.personalInfo.sex')}</ThemedText>
+      <View style={[styles.field, styles.sexField]}>
+        <ThemedText type="small" color={theme.textSecondary}>{t('onboarding.personalInfo.sex')}</ThemedText>
         <View style={styles.segmented}>
           {['female', 'male'].map(sex => <Pressable key={sex} onPress={() => onChange({
           sex
-        })} style={[styles.segment, {
+        })} style={[styles.segment, styles.sexSegment, {
           backgroundColor: value.sex === sex ? theme.accent : theme.background,
-          borderColor: value.sex === sex ? theme.accent : theme.border
+          borderColor: value.sex === sex ? theme.accent : 'transparent'
         }]}>
+              <ThemedText style={styles.sexIcon} color={value.sex === sex ? '#ffffff' : theme.text}>
+                {sex === 'female' ? '♀' : '♂'}
+              </ThemedText>
               <ThemedText type="smallBold" color={value.sex === sex ? '#ffffff' : theme.text}>
                 {sex === 'female' ? t('onboarding.personalInfo.female') : t('onboarding.personalInfo.male')}
               </ThemedText>
             </Pressable>)}
         </View>
-      </View>
-
-      <View style={styles.row}>
-        <View style={[styles.field, styles.flex1]}>
-          <View style={styles.labelRow}>
-            <ThemedText type="small" color={theme.text}>{t('onboarding.personalInfo.age')}</ThemedText>
-          </View>
-          <TextInput value={value.age} onChangeText={age => onChange({
-          age
-        })} keyboardType="number-pad" placeholder={t('onboarding.personalInfo.agePlaceholder')} placeholderTextColor={theme.textSecondary} style={fieldStyle(ageInvalid)} />
-        </View>
-        <View style={[styles.field, styles.flex1]}>
-          <View style={styles.labelRow}>
-            <ThemedText type="small" color={theme.text}>{t('onboarding.personalInfo.height')}</ThemedText>
-            <UnitDropdown theme={theme} styles={styles} value={heightUnit} options={['cm', 'in']} onChange={handleHeightUnitChange} />
-          </View>
-          <TextInput value={heightText} onChangeText={handleHeightChange} keyboardType="decimal-pad" placeholder={heightUnit === 'cm' ? '170' : '67'} placeholderTextColor={theme.textSecondary} style={fieldStyle(heightInvalid)} />
-        </View>
-        <View style={[styles.field, styles.flex1]}>
-          <View style={styles.labelRow}>
-            <ThemedText type="small" color={theme.text}>{t('onboarding.personalInfo.weight')}</ThemedText>
-            <UnitDropdown theme={theme} styles={styles} value={weightUnit} options={['kg', 'lb']} onChange={handleWeightUnitChange} />
-          </View>
-          <TextInput value={weightText} onChangeText={handleWeightChange} keyboardType="decimal-pad" placeholder={weightUnit === 'kg' ? '68' : '150'} placeholderTextColor={theme.textSecondary} style={fieldStyle(weightInvalid)} />
-        </View>
-      </View>
-
-      <View style={styles.field}>
-        <ThemedText type="small" color={theme.text}>{t('onboarding.personalInfo.targetWeight')} ({weightUnit})</ThemedText>
-        <TextInput value={targetWeightText} onChangeText={handleTargetWeightChange} keyboardType="decimal-pad" placeholder={weightUnit === 'kg' ? '65' : '145'} placeholderTextColor={theme.textSecondary} style={fieldStyle(false)} />
       </View>
     </View>;
 }
@@ -190,7 +115,8 @@ const createStyles = theme => StyleSheet.create({
     gap: Spacing.three
   },
   header: {
-    gap: Spacing.half
+    gap: Spacing.half,
+    marginBottom: Spacing.two
   },
   title: {
     fontSize: 32,
@@ -199,11 +125,22 @@ const createStyles = theme => StyleSheet.create({
   field: {
     gap: Spacing.one
   },
-  row: {
-    flexDirection: 'row',
-    gap: Spacing.two
+  sexField: {
+    gap: Spacing.two,
+    marginBottom: Spacing.two
   },
-  flex1: {
+  nameAgeRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.four
+  },
+  nameField: {
+    flex: 2
+  },
+  nameInput: {
+    marginTop: 20
+  },
+  ageField: {
     flex: 1
   },
   input: {
@@ -211,7 +148,42 @@ const createStyles = theme => StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: Spacing.three,
     paddingVertical: 14,
-    fontSize: 16
+    fontSize: 16,
+    shadowColor: '#1B5E20',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4
+  },
+  wheelShadowWrap: {
+    width: 96,
+    alignSelf: 'flex-start',
+    borderRadius: 12,
+    shadowColor: '#1B5E20',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4
+  },
+  wheelContainer: {
+    flex: 1,
+    borderRadius: 12,
+    overflow: 'hidden'
+  },
+  wheelHighlight: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    borderRadius: 8
+  },
+  wheelItem: {
+    height: AGE_ITEM_HEIGHT,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  wheelItemText: {
+    fontSize: 18,
+    lineHeight: 22
   },
   segmented: {
     flexDirection: 'row',
@@ -220,42 +192,25 @@ const createStyles = theme => StyleSheet.create({
   segment: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: Spacing.two,
+    justifyContent: 'center',
+    paddingVertical: Spacing.four,
     borderRadius: 12,
-    borderWidth: 1
+    borderWidth: 1,
+    shadowColor: '#1B5E20',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4
   },
-  labelRow: {
+  sexSegment: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.one,
-    minHeight: 26
+    gap: Spacing.one
   },
-  unitButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  modalCard: {
-    width: 200,
-    backgroundColor: theme.background,
-    borderRadius: 16,
-    paddingVertical: Spacing.one,
-    overflow: 'hidden'
-  },
-  modalOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.three
-  },
-  modalOptionActiveText: {
+  sexIcon: {
+    fontSize: 24,
+    lineHeight: 26,
+    marginTop: -3,
     fontWeight: '700'
   }
 });

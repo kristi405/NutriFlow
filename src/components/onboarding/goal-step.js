@@ -1,9 +1,9 @@
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { OptionCard } from './option-card';
+import { SquareOptionCard } from './square-option-card';
 
 export function GoalStep({
   value,
@@ -16,27 +16,32 @@ export function GoalStep({
     type: 'lose-weight',
     title: t('onboarding.goal.loseWeight'),
     subtitle: t('onboarding.goal.loseWeightSubtitle'),
-    icon: { ios: 'arrow.down.circle', android: 'arrow_circle_down', web: 'arrow_circle_down' }
+    icon: { ios: 'figure.run', android: 'directions_run', web: 'directions_run' }
   }, {
     type: 'maintain-weight',
     title: t('onboarding.goal.maintainWeight'),
     subtitle: t('onboarding.goal.maintainWeightSubtitle'),
-    icon: { ios: 'equal.circle', android: 'balance', web: 'balance' }
+    icon: { ios: 'figure.stand', android: 'accessibility_new', web: 'accessibility_new' }
   }, {
     type: 'gain-weight',
     title: t('onboarding.goal.gainWeight'),
     subtitle: t('onboarding.goal.gainWeightSubtitle'),
-    icon: { ios: 'arrow.up.circle', android: 'arrow_circle_up', web: 'arrow_circle_up' }
+    icon: { ios: 'figure.strengthtraining.traditional', android: 'fitness_center', web: 'fitness_center' }
   }, {
     type: 'build-muscle',
     title: t('onboarding.goal.buildMuscle'),
     subtitle: t('onboarding.goal.buildMuscleSubtitle'),
-    icon: { ios: 'figure.strengthtraining.traditional', android: 'fitness_center', web: 'fitness_center' }
+    icon: { ios: 'figure.core.training', android: 'sports_gymnastics', web: 'sports_gymnastics' }
   }, {
     type: 'eat-healthier',
     title: t('onboarding.goal.eatHealthier'),
     subtitle: t('onboarding.goal.eatHealthierSubtitle'),
-    icon: { ios: 'leaf', android: 'eco', web: 'eco' }
+    icon: { ios: 'figure.yoga', android: 'self_improvement', web: 'self_improvement' }
+  }, {
+    type: 'general-health',
+    title: t('onboarding.goal.generalHealth'),
+    subtitle: t('onboarding.goal.generalHealthSubtitle'),
+    icon: { ios: 'figure.hiking', android: 'hiking', web: 'hiking' }
   }];
   return <View style={styles.container}>
       <ThemedText type="title" style={styles.title} color={theme.text}>
@@ -46,21 +51,28 @@ export function GoalStep({
         {t('onboarding.goal.subtitle')}
       </ThemedText>
       {showError && <ThemedText type="small" color={theme.error}>{t('onboarding.goal.error')}</ThemedText>}
-      <View style={styles.options}>
-        {GOAL_OPTIONS.map(option => <OptionCard key={option.type} title={option.title} subtitle={option.subtitle} icon={option.icon} selected={value === option.type} onPress={() => onChange(option.type)} />)}
-      </View>
+      <ScrollView style={styles.optionsScroll} contentContainerStyle={styles.options} showsVerticalScrollIndicator={false}>
+        {GOAL_OPTIONS.map(option => <SquareOptionCard key={option.type} title={option.title} subtitle={option.subtitle} icon={option.icon} selected={value === option.type} onPress={() => onChange(option.type)} />)}
+      </ScrollView>
     </View>;
 }
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     gap: Spacing.three
   },
   title: {
     fontSize: 32,
     lineHeight: 38
   },
-  options: {
-    gap: 12,
+  optionsScroll: {
+    flex: 1,
     marginTop: Spacing.two
+  },
+  options: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    paddingBottom: Spacing.three
   }
 });

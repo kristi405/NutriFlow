@@ -1,6 +1,7 @@
 {
   "calculating": {
-    "title": "Berechnung deiner Kalorienziele..."
+    "title": "Berechnung deiner Kalorienziele...",
+    "steps": ["Analysieren deiner Ziele", "Berechnen deines Kalorienbedarfs", "Abstimmen deiner Makros", "Erstellen deines Essensplans", "Personalisieren der Empfehlungen"]
   },
   "common": {
     "seeAll": "Alle anzeigen",
@@ -94,7 +95,9 @@
       "buildMuscle": "Muskeln aufbauen",
       "buildMuscleSubtitle": "Mehr Eiweiß, moderater Überschuss",
       "eatHealthier": "Gesünder essen",
-      "eatHealthierSubtitle": "Ausgewogene Ernährung ohne Kalorienfokus"
+      "eatHealthierSubtitle": "Ausgewogene Ernährung ohne Kalorienfokus",
+      "generalHealth": "Allgemeines Wohlbefinden",
+      "generalHealthSubtitle": "Einfach bessere Gewohnheiten aufbauen"
     },
     "personalInfo": {
       "title": "Erzähl uns von dir",
@@ -108,7 +111,13 @@
       "agePlaceholder": "28",
       "height": "Größe",
       "weight": "Gewicht",
-      "targetWeight": "Zielgewicht"
+      "targetWeight": "Zielgewicht",
+      "measurementSystem": "Einheiten",
+      "metricSystem": "Metrisch (cm, kg)",
+      "imperialSystem": "Imperial (Zoll, lb)"
+    },
+    "measurements": {
+      "title": "Deine Körperdaten"
     },
     "activity": {
       "title": "Wie aktiv bist du?",
@@ -123,7 +132,9 @@
       "active": "Aktiv",
       "activeSubtitle": "Intensive Bewegung 6-7 Tage pro Woche",
       "veryActive": "Sehr aktiv",
-      "veryActiveSubtitle": "Körperliche Arbeit oder zweimal täglich Training"
+      "veryActiveSubtitle": "Körperliche Arbeit oder zweimal täglich Training",
+      "extraActive": "Extrem aktiv",
+      "extraActiveSubtitle": "Training auf Athletenniveau oder körperliche Arbeit plus Sport"
     },
     "preferences": {
       "title": "Hast du Vorlieben?",

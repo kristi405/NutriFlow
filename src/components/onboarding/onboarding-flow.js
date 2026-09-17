@@ -11,11 +11,12 @@ import { authStore } from '@/store/authStore';
 import { profileStore } from '@/store/profileStore';
 import { ActivityStep } from './activity-step';
 import { GoalStep } from './goal-step';
+import { MeasurementsStep } from './measurements-step';
 import { OnboardingProgress } from './onboarding-progress';
 import { PersonalInfoStep } from './personal-info-step';
 import { PreferencesStep } from './preferences-step';
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 export function OnboardingFlow() {
   const { t } = useTranslation();
@@ -26,17 +27,17 @@ export function OnboardingFlow() {
   const [personalInfo, setPersonalInfo] = useState({
     name: '',
     sex: 'female',
-    age: '',
-    heightCm: '',
-    weightKg: '',
-    targetWeightKg: '',
-    weightUnit: 'lb'
+    age: '20',
+    heightCm: '170',
+    weightKg: '80',
+    targetWeightKg: '60',
+    system: 'imperial'
   });
   const [activityLevel, setActivityLevel] = useState();
   const [dietaryTags, setDietaryTags] = useState([]);
   const [allergies, setAllergies] = useState([]);
   const [showValidation, setShowValidation] = useState(false);
-  const canProceed = step === 0 && Boolean(goal) || step === 1 && personalInfo.name.trim().length > 0 && Number(personalInfo.age) > 0 && Number(personalInfo.heightCm) > 0 && Number(personalInfo.weightKg) > 0 || step === 2 && Boolean(activityLevel) || step === 3;
+  const canProceed = step === 0 && Boolean(goal) || step === 1 && personalInfo.name.trim().length > 0 && Number(personalInfo.age) > 0 || step === 2 && Number(personalInfo.heightCm) > 0 && Number(personalInfo.weightKg) > 0 || step === 3 && Boolean(activityLevel) || step === 4;
   function handleNext() {
     if (!canProceed) {
       setShowValidation(true);
@@ -64,7 +65,7 @@ export function OnboardingFlow() {
         allergies,
         dislikedIngredientIds: [],
         favoriteCuisines: [],
-        units: personalInfo.weightUnit === 'kg' ? 'metric' : 'imperial'
+        units: personalInfo.system
       }
     };
     completeOnboarding(profile);
@@ -120,8 +121,12 @@ export function OnboardingFlow() {
               ...patch
             }))} showValidation={showValidation} />
             </View>}
-          {step === 2 && <ActivityStep value={activityLevel} onChange={setActivityLevel} showError={showValidation && !activityLevel} />}
-          {step === 3 && <PreferencesStep dietaryTags={dietaryTags} allergies={allergies} onChangeDietaryTags={setDietaryTags} onChangeAllergies={setAllergies} />}
+          {step === 2 && <MeasurementsStep value={personalInfo} onChange={patch => setPersonalInfo(prev => ({
+          ...prev,
+          ...patch
+        }))} showValidation={showValidation} />}
+          {step === 3 && <ActivityStep value={activityLevel} onChange={setActivityLevel} showError={showValidation && !activityLevel} />}
+          {step === 4 && <PreferencesStep dietaryTags={dietaryTags} allergies={allergies} onChangeDietaryTags={setDietaryTags} onChangeAllergies={setAllergies} />}
         </Animated.View>
 
         <View style={styles.footer}>

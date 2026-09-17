@@ -3,14 +3,16 @@ export const ACTIVITY_MULTIPLIERS = {
   light: 1.375,
   moderate: 1.55,
   active: 1.725,
-  'very-active': 1.9
+  'very-active': 1.9,
+  'extra-active': 2.2
 };
 const CALORIE_ADJUSTMENT_BY_GOAL = {
   'lose-weight': -500,
   'maintain-weight': 0,
   'gain-weight': 300,
   'build-muscle': 300,
-  'eat-healthier': 0
+  'eat-healthier': 0,
+  'general-health': 0
 };
 
 /** Macro split as % of total calories. Build-muscle skews higher-protein. */
@@ -36,6 +38,11 @@ const MACRO_SPLIT_BY_GOAL = {
     fat: 0.25
   },
   'eat-healthier': {
+    protein: 0.3,
+    carbs: 0.4,
+    fat: 0.3
+  },
+  'general-health': {
     protein: 0.3,
     carbs: 0.4,
     fat: 0.3

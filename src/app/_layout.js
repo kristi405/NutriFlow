@@ -18,8 +18,7 @@ import { profileStore } from '@/store/profileStore';
 import { themeStore } from '@/store/themeStore';
 SplashScreen.preventAutoHideAsync();
 const CALCULATING_DURATION = 5000;
-// TEMPORARY: skips the login screen for testing. Set back to false before shipping.
-const SKIP_AUTH_FOR_TESTING = true;
+const SKIP_AUTH_FOR_TESTING = false;
 function TabLayout() {
   const { t } = useTranslation();
   const theme = useTheme();

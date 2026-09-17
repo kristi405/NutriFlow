@@ -20,6 +20,10 @@ export function LoginScreen({ onSwitchToRegister, onForgotPassword }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const canSubmit = email.trim().length > 0 && password.length > 0;
 
+  function inputWrapperStyle(hasValue) {
+    return [styles.inputWrapper, hasValue && styles.inputWrapperFilled];
+  }
+
   async function handleSubmit() {
     setError(null);
     if (!canSubmit) {
@@ -51,7 +55,7 @@ export function LoginScreen({ onSwitchToRegister, onForgotPassword }) {
       </Animated.View>
 
       <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.fieldGroup}>
-        <View style={styles.inputWrapper}>
+        <View style={inputWrapperStyle(email.length > 0)}>
           <SymbolView name={{ ios: 'envelope.fill', android: 'mail', web: 'mail' }} size={18} tintColor={theme.textSecondary} />
           <TextInput value={email} onChangeText={text => {
           setEmail(text);
@@ -59,7 +63,7 @@ export function LoginScreen({ onSwitchToRegister, onForgotPassword }) {
         }} placeholder={t('auth.login.emailPlaceholder')} placeholderTextColor={theme.textSecondary} autoCapitalize="none" autoComplete="email" keyboardType="email-address" style={styles.input} />
         </View>
 
-        <View style={styles.inputWrapper}>
+        <View style={inputWrapperStyle(password.length > 0)}>
           <SymbolView name={{ ios: 'lock.fill', android: 'lock', web: 'lock' }} size={18} tintColor={theme.textSecondary} />
           <TextInput value={password} onChangeText={text => {
           setPassword(text);
@@ -145,6 +149,9 @@ const createStyles = theme => StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 1
+  },
+  inputWrapperFilled: {
+    borderColor: theme.accent
   },
   input: {
     flex: 1,

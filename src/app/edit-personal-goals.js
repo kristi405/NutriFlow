@@ -11,8 +11,8 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { profileStore } from '@/store/profileStore';
 
-const GOAL_OPTIONS = [{ type: 'lose-weight', labelKey: 'onboarding.goal.loseWeight' }, { type: 'maintain-weight', labelKey: 'onboarding.goal.maintainWeight' }, { type: 'gain-weight', labelKey: 'onboarding.goal.gainWeight' }, { type: 'build-muscle', labelKey: 'onboarding.goal.buildMuscle' }, { type: 'eat-healthier', labelKey: 'onboarding.goal.eatHealthier' }];
-const ACTIVITY_OPTIONS = [{ level: 'sedentary', labelKey: 'onboarding.activity.sedentary' }, { level: 'light', labelKey: 'onboarding.activity.light' }, { level: 'moderate', labelKey: 'onboarding.activity.moderate' }, { level: 'active', labelKey: 'onboarding.activity.active' }, { level: 'very-active', labelKey: 'onboarding.activity.veryActive' }];
+const GOAL_OPTIONS = [{ type: 'lose-weight', labelKey: 'onboarding.goal.loseWeight' }, { type: 'maintain-weight', labelKey: 'onboarding.goal.maintainWeight' }, { type: 'gain-weight', labelKey: 'onboarding.goal.gainWeight' }, { type: 'build-muscle', labelKey: 'onboarding.goal.buildMuscle' }, { type: 'eat-healthier', labelKey: 'onboarding.goal.eatHealthier' }, { type: 'general-health', labelKey: 'onboarding.goal.generalHealth' }];
+const ACTIVITY_OPTIONS = [{ level: 'sedentary', labelKey: 'onboarding.activity.sedentary' }, { level: 'light', labelKey: 'onboarding.activity.light' }, { level: 'moderate', labelKey: 'onboarding.activity.moderate' }, { level: 'active', labelKey: 'onboarding.activity.active' }, { level: 'very-active', labelKey: 'onboarding.activity.veryActive' }, { level: 'extra-active', labelKey: 'onboarding.activity.extraActive' }];
 
 function EditPersonalGoalsScreen() {
   const { t } = useTranslation();

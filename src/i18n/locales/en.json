@@ -1,6 +1,7 @@
 {
   "calculating": {
-    "title": "Calculating your calorie targets..."
+    "title": "Calculating your calorie targets...",
+    "steps": ["Analyzing your goals", "Calculating your calorie needs", "Balancing your macros", "Building your meal plan", "Personalizing recommendations"]
   },
   "common": {
     "seeAll": "See all",
@@ -94,7 +95,9 @@
       "buildMuscle": "Build Muscle",
       "buildMuscleSubtitle": "Higher protein, lean surplus",
       "eatHealthier": "Eat Healthier",
-      "eatHealthierSubtitle": "Balanced nutrition, no calorie focus"
+      "eatHealthierSubtitle": "Balanced nutrition, no calorie focus",
+      "generalHealth": "General Wellness",
+      "generalHealthSubtitle": "Just here to build better habits"
     },
     "personalInfo": {
       "title": "Tell us about yourself",
@@ -108,7 +111,13 @@
       "agePlaceholder": "28",
       "height": "Height",
       "weight": "Weight",
-      "targetWeight": "Target Weight"
+      "targetWeight": "Target Weight",
+      "measurementSystem": "Units",
+      "metricSystem": "Metric (cm, kg)",
+      "imperialSystem": "Imperial (in, lb)"
+    },
+    "measurements": {
+      "title": "Your measurements"
     },
     "activity": {
       "title": "How active are you?",
@@ -123,7 +132,9 @@
       "active": "Active",
       "activeSubtitle": "Hard exercise 6-7 days/week",
       "veryActive": "Very Active",
-      "veryActiveSubtitle": "Physical job or twice-daily training"
+      "veryActiveSubtitle": "Physical job or twice-daily training",
+      "extraActive": "Extra Active",
+      "extraActiveSubtitle": "Athlete-level training or a physically demanding job plus exercise"
     },
     "preferences": {
       "title": "Any preferences?",

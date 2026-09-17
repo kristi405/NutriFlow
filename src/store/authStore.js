@@ -2,6 +2,10 @@ import { makeAutoObservable } from 'mobx';
 import i18next from '@/i18n';
 import { apiRequest } from '@/lib/api';
 
+// TEMPORARY: skips the real login/register network request during testing, so the
+// app moves straight to the next screen with a fake local user. Set back to false before shipping.
+const SKIP_AUTH_REQUEST_FOR_TESTING = true;
+
 // Backend error messages are plain English strings (see AuthService.js), and the
 // same message can mean different things depending on which endpoint sent it —
 // e.g. "email is invalid" means "bad format" on register but "no such account" on
@@ -52,6 +56,12 @@ class AuthStore {
   }
 
   async register(email, password) {
+    if (SKIP_AUTH_REQUEST_FOR_TESTING) {
+      this.token = 'dev-token';
+      this.currentUser = { id: 'dev-user', email: email.trim() };
+      this.hasLoggedOut = false;
+      return;
+    }
     let data;
     try {
       data = await apiRequest('/auth/register', { method: 'POST', body: { email: email.trim(), password } });
@@ -64,6 +74,12 @@ class AuthStore {
   }
 
   async login(email, password) {
+    if (SKIP_AUTH_REQUEST_FOR_TESTING) {
+      this.token = 'dev-token';
+      this.currentUser = { id: 'dev-user', email: email.trim() };
+      this.hasLoggedOut = false;
+      return;
+    }
     let data;
     try {
       data = await apiRequest('/auth/login', { method: 'POST', body: { email: email.trim(), password } });

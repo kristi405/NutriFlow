@@ -1,6 +1,7 @@
 {
   "calculating": {
-    "title": "Obliczanie Twoich celów kalorycznych..."
+    "title": "Obliczanie Twoich celów kalorycznych...",
+    "steps": ["Analizujemy Twoje cele", "Obliczamy zapotrzebowanie kaloryczne", "Bilansujemy makroskładniki", "Tworzymy plan posiłków", "Przygotowujemy spersonalizowane zalecenia"]
   },
   "common": {
     "seeAll": "Zobacz wszystkie",
@@ -94,7 +95,9 @@
       "buildMuscle": "Zbudować mięśnie",
       "buildMuscleSubtitle": "Więcej białka, niewielka nadwyżka",
       "eatHealthier": "Jeść zdrowiej",
-      "eatHealthierSubtitle": "Zbilansowana dieta bez skupiania się na kaloriach"
+      "eatHealthierSubtitle": "Zbilansowana dieta bez skupiania się na kaloriach",
+      "generalHealth": "Ogólne samopoczucie",
+      "generalHealthSubtitle": "Chcę po prostu wyrobić lepsze nawyki"
     },
     "personalInfo": {
       "title": "Opowiedz nam o sobie",
@@ -108,7 +111,13 @@
       "agePlaceholder": "28",
       "height": "Wzrost",
       "weight": "Waga",
-      "targetWeight": "Docelowa waga"
+      "targetWeight": "Docelowa waga",
+      "measurementSystem": "Jednostki",
+      "metricSystem": "Metryczne (cm, kg)",
+      "imperialSystem": "Amerykańskie (cale, funty)"
+    },
+    "measurements": {
+      "title": "Twoje wymiary"
     },
     "activity": {
       "title": "Jak bardzo jesteś aktywny/a?",
@@ -123,7 +132,9 @@
       "active": "Aktywny/a",
       "activeSubtitle": "Intensywne ćwiczenia 6-7 dni w tygodniu",
       "veryActive": "Bardzo aktywny/a",
-      "veryActiveSubtitle": "Praca fizyczna lub treningi dwa razy dziennie"
+      "veryActiveSubtitle": "Praca fizyczna lub treningi dwa razy dziennie",
+      "extraActive": "Wyjątkowo aktywny/a",
+      "extraActiveSubtitle": "Trening na poziomie sportowca lub praca fizyczna plus ćwiczenia"
     },
     "preferences": {
       "title": "Masz jakieś preferencje?",

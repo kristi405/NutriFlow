@@ -1,9 +1,9 @@
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { OptionCard } from './option-card';
+import { SquareOptionCard } from './square-option-card';
 
 export function ActivityStep({
   value,
@@ -37,6 +37,11 @@ export function ActivityStep({
     title: t('onboarding.activity.veryActive'),
     subtitle: t('onboarding.activity.veryActiveSubtitle'),
     icon: { ios: 'bolt.fill', android: 'bolt', web: 'bolt' }
+  }, {
+    level: 'extra-active',
+    title: t('onboarding.activity.extraActive'),
+    subtitle: t('onboarding.activity.extraActiveSubtitle'),
+    icon: { ios: 'trophy.fill', android: 'emoji_events', web: 'emoji_events' }
   }];
   return <View style={styles.container}>
       <ThemedText type="title" style={styles.title} color={theme.text}>
@@ -46,21 +51,28 @@ export function ActivityStep({
         {t('onboarding.activity.subtitle')}
       </ThemedText>
       {showError && <ThemedText type="small" color={theme.error}>{t('onboarding.activity.error')}</ThemedText>}
-      <View style={styles.options}>
-        {ACTIVITY_OPTIONS.map(option => <OptionCard key={option.level} title={option.title} subtitle={option.subtitle} icon={option.icon} selected={value === option.level} onPress={() => onChange(option.level)} />)}
-      </View>
+      <ScrollView style={styles.optionsScroll} contentContainerStyle={styles.options} showsVerticalScrollIndicator={false}>
+        {ACTIVITY_OPTIONS.map(option => <SquareOptionCard key={option.level} title={option.title} subtitle={option.subtitle} icon={option.icon} selected={value === option.level} onPress={() => onChange(option.level)} />)}
+      </ScrollView>
     </View>;
 }
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     gap: Spacing.three
   },
   title: {
     fontSize: 32,
     lineHeight: 38
   },
-  options: {
-    gap: 12,
+  optionsScroll: {
+    flex: 1,
     marginTop: Spacing.two
+  },
+  options: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    paddingBottom: Spacing.three
   }
 });

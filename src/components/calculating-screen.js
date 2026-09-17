@@ -3,7 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SymbolView } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
-import { ThemedText } from '@/components/themed-text';
+import { Fonts } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 const PROGRESS_DURATION = 5000;
@@ -12,6 +12,7 @@ export function CalculatingScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const steps = t('calculating.steps', { returnObjects: true });
   const progress = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(1)).current;
 
@@ -44,16 +45,25 @@ export function CalculatingScreen() {
   return <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
       <View style={styles.content}>
         <Animated.View style={{ transform: [{ scale: pulse }] }}>
-          <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={32} tintColor={theme.accent} />
+          <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={56} tintColor={theme.accent} />
         </Animated.View>
 
         <View style={styles.track}>
           <Animated.View style={[styles.fill, { width: fillWidth }]} />
         </View>
 
-        <ThemedText type="headline" style={styles.text} color={theme.text}>
-          {t('calculating.title')}
-        </ThemedText>
+        <View style={styles.steps}>
+          {steps.map((step, index) => {
+          const color = progress.interpolate({
+            inputRange: [index / steps.length, (index + 1) / steps.length],
+            outputRange: [theme.textSecondary, theme.accent],
+            extrapolate: 'clamp'
+          });
+          return <Animated.Text key={step} style={[styles.stepText, { color }]}>
+                • {step}
+              </Animated.Text>;
+        })}
+        </View>
       </View>
     </LinearGradient>;
 }
@@ -81,7 +91,16 @@ const createStyles = theme => StyleSheet.create({
     borderRadius: 3,
     backgroundColor: theme.accent
   },
-  text: {
-    textAlign: 'center'
+  steps: {
+    width: '100%',
+    gap: 12,
+    alignItems: 'flex-start',
+    marginTop: 16
+  },
+  stepText: {
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: Fonts.rounded,
+    textAlign: 'left'
   }
 });
