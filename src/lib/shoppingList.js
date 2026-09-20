@@ -1,6 +1,5 @@
-import { getIngredientById } from '@/data/seed/ingredients';
+import { getIngredientById, getRecipeById } from '@/data/catalog';
 import { getIngredientCategoryById } from '@/data/seed/ingredientCategories';
-import { getRecipeById } from '@/data/seed/recipes';
 import { gramsForQuantity } from '@/lib/nutrition';
 
 /**

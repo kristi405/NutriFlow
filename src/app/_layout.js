@@ -14,6 +14,7 @@ import { ThemedView } from '@/components/themed-view';
 import { useTheme } from '@/hooks/use-theme';
 import { queryClient } from '@/lib/query-client';
 import { authStore } from '@/store/authStore';
+import { catalogStore } from '@/store/catalogStore';
 import { profileStore } from '@/store/profileStore';
 import { themeStore } from '@/store/themeStore';
 SplashScreen.preventAutoHideAsync();
@@ -52,6 +53,14 @@ function TabLayout() {
       prevHasOnboardedRef.current = true;
     }
   }, [hasHydrated, hasOnboarded, authStore.isAuthenticated]);
+  useEffect(() => {
+    // Fires on the auth false->true edge — a fresh login, or the persisted
+    // session being restored on app launch. Either way it's the right moment
+    // to pull any catalog changes since the last sync.
+    if (authStore.isAuthenticated) {
+      catalogStore.sync(authStore.token);
+    }
+  }, [authStore.isAuthenticated]);
   useEffect(() => {
     if (!prevHasOnboardedRef.current && hasOnboarded) {
       setShowCalculating(true);

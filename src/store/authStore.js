@@ -1,10 +1,7 @@
 import { makeAutoObservable } from 'mobx';
 import i18next from '@/i18n';
-import { apiRequest } from '@/lib/api';
-
-// TEMPORARY: skips the real login/register network request during testing, so the
-// app moves straight to the next screen with a fake local user. Set back to false before shipping.
-const SKIP_AUTH_REQUEST_FOR_TESTING = true;
+import { apiRequest, setUnauthorizedHandler } from '@/lib/api';
+import { persistStore } from './persist';
 
 // Backend error messages are plain English strings (see AuthService.js), and the
 // same message can mean different things depending on which endpoint sent it —
@@ -42,13 +39,16 @@ class AuthStore {
   // Set once the user explicitly signs out — lets _layout.js's SKIP_AUTH_FOR_TESTING
   // bypass be overridden so logout actually lands on the login screen during dev.
   hasLoggedOut = false;
-  // Auth state is intentionally never persisted to disk — every app launch starts
-  // at the login screen. hasHydrated stays true from the start so _layout.js can
-  // gate rendering on it the same way it does for the other (persisted) stores.
-  hasHydrated = true;
+  hasHydrated = false;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
+    persistStore(this, 'nutriflow.auth', ['token', 'currentUser']);
+    // Sessions never expire server-side, but a token can still be killed
+    // early (revoked from another device, account blocked) — any 401 from an
+    // authed request means the persisted session is dead, so drop it locally
+    // too instead of leaving the app stuck silently failing every request.
+    setUnauthorizedHandler(() => this.logout());
   }
 
   get isAuthenticated() {
@@ -56,12 +56,6 @@ class AuthStore {
   }
 
   async register(email, password) {
-    if (SKIP_AUTH_REQUEST_FOR_TESTING) {
-      this.token = 'dev-token';
-      this.currentUser = { id: 'dev-user', email: email.trim() };
-      this.hasLoggedOut = false;
-      return;
-    }
     let data;
     try {
       data = await apiRequest('/auth/register', { method: 'POST', body: { email: email.trim(), password } });
@@ -74,12 +68,6 @@ class AuthStore {
   }
 
   async login(email, password) {
-    if (SKIP_AUTH_REQUEST_FOR_TESTING) {
-      this.token = 'dev-token';
-      this.currentUser = { id: 'dev-user', email: email.trim() };
-      this.hasLoggedOut = false;
-      return;
-    }
     let data;
     try {
       data = await apiRequest('/auth/login', { method: 'POST', body: { email: email.trim(), password } });
@@ -114,7 +102,7 @@ class AuthStore {
       preferences: profile.preferences
     };
     try {
-      this.currentUser = await apiRequest('/users/me', { method: 'PUT', token: this.token, body });
+      this.currentUser = await apiRequest('/app/users/me', { method: 'PUT', token: this.token, body });
     } catch {
       // Best-effort — the onboarding flow already moved on locally; the next
       // successful sync (or a future explicit retry) will catch this up.

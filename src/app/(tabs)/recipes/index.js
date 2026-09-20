@@ -13,9 +13,7 @@ import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { getIngredientById } from '@/data/seed/ingredients';
-import { CATEGORIES } from '@/data/seed/categories';
-import { getRecipeById, RECIPES } from '@/data/seed/recipes';
+import { getCategories, getIngredientById, getRecipeById, getRecipes } from '@/data/catalog';
 import { calculateRecipeNutrition } from '@/lib/nutrition';
 import { favoritesStore } from '@/store/favoritesStore';
 import { myRecipesStore } from '@/store/myRecipesStore';
@@ -42,6 +40,8 @@ function RecipesScreen() {
   const [query, setQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(null);
+  const categories = getCategories();
+  const recipes = getRecipes();
 
   useSpeechRecognitionEvent('result', event => {
     const transcript = event.results[0]?.transcript;
@@ -70,18 +70,18 @@ function RecipesScreen() {
   const filteredRecipes = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     // The Favorites filter also searches My Recipes, so a favorited own recipe shows up here too.
-    const pool = selectedFilter === 'favorites' ? [...RECIPES, ...myRecipesStore.recipes] : RECIPES;
+    const pool = selectedFilter === 'favorites' ? [...recipes, ...myRecipesStore.recipes] : recipes;
     return pool.filter(recipe => {
       const matchesQuery = !normalized || recipe.title.toLowerCase().includes(normalized);
       const matchesFilter = !selectedFilter || (selectedFilter === 'favorites' ? favoritesStore.isFavorite(recipe.id) : recipe.categoryId === selectedFilter);
       return matchesQuery && matchesFilter;
     });
-  }, [query, selectedFilter, favoritesStore.favorites.length, myRecipesStore.recipes.length]);
+  }, [query, selectedFilter, favoritesStore.favorites.length, myRecipesStore.recipes.length, recipes]);
 
-  const collections = useMemo(() => CATEGORIES.map(category => ({
+  const collections = useMemo(() => categories.map(category => ({
     category,
     rows: chunkPairs(filteredRecipes.filter(recipe => recipe.categoryId === category.id))
-  })).filter(collection => collection.rows.length > 0), [filteredRecipes]);
+  })).filter(collection => collection.rows.length > 0), [filteredRecipes, categories]);
 
   const myRecipesFiltered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -122,7 +122,7 @@ function RecipesScreen() {
               {t('recipes.favorites')}
             </ThemedText>
           </Pressable>
-          {CATEGORIES.map(category => <Pressable key={category.id} onPress={() => setSelectedFilter(current => current === category.id ? null : category.id)} style={[styles.categoryChip, selectedFilter === category.id && styles.categoryChipActive]}>
+          {categories.map(category => <Pressable key={category.id} onPress={() => setSelectedFilter(current => current === category.id ? null : category.id)} style={[styles.categoryChip, selectedFilter === category.id && styles.categoryChipActive]}>
               <ThemedText type="small" color={selectedFilter === category.id ? '#ffffff' : theme.text}>
                 {category.name}
               </ThemedText>

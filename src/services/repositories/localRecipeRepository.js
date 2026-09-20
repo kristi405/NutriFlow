@@ -1,6 +1,4 @@
-import { getIngredientById } from '@/data/seed/ingredients';
-import { CATEGORIES } from '@/data/seed/categories';
-import { RECIPES } from '@/data/seed/recipes';
+import { getCategories, getIngredientById, getRecipeById, getRecipes } from '@/data/catalog';
 import { calculateRecipeNutrition } from '@/lib/nutrition';
 /** Simulates real network latency so loading/skeleton states are genuine, not decorative. */
 function delay(ms = 260) {
@@ -40,7 +38,7 @@ function matchesFilters(recipe, filters) {
 export class LocalRecipeRepository {
   async listCategories() {
     await delay(150);
-    return CATEGORIES;
+    return getCategories();
   }
   async listRecipes({
     page,
@@ -48,7 +46,7 @@ export class LocalRecipeRepository {
     filters
   }) {
     await delay();
-    const filtered = RECIPES.filter(recipe => matchesFilters(recipe, filters));
+    const filtered = getRecipes().filter(recipe => matchesFilters(recipe, filters));
     const start = page * pageSize;
     const items = filtered.slice(start, start + pageSize);
     const hasMore = start + pageSize < filtered.length;
@@ -60,11 +58,11 @@ export class LocalRecipeRepository {
   }
   async getRecipe(id) {
     await delay(200);
-    return RECIPES.find(recipe => recipe.id === id);
+    return getRecipeById(id);
   }
   async searchRecipes(query) {
     await delay(300);
-    return RECIPES.filter(recipe => matchesFilters(recipe, {
+    return getRecipes().filter(recipe => matchesFilters(recipe, {
       query
     }));
   }

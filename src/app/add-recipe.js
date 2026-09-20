@@ -10,8 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
-import { CATEGORIES } from '@/data/seed/categories';
-import { INGREDIENTS } from '@/data/seed/ingredients';
+import { getCategories, getIngredients } from '@/data/catalog';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { myRecipesStore } from '@/store/myRecipesStore';
@@ -27,9 +26,11 @@ function AddRecipeScreen() {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
 
+  const categories = getCategories();
+  const ingredients = getIngredients();
   const [title, setTitle] = useState('');
   const [imageUri, setImageUri] = useState(null);
-  const [categoryId, setCategoryId] = useState(CATEGORIES[0].id);
+  const [categoryId, setCategoryId] = useState(categories[0]?.id);
   const [difficulty, setDifficulty] = useState('easy');
   const [ingredientLines, setIngredientLines] = useState([]);
   const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false);
@@ -37,9 +38,9 @@ function AddRecipeScreen() {
 
   const filteredIngredients = useMemo(() => {
     const normalized = ingredientQuery.trim().toLowerCase();
-    const pool = !normalized ? INGREDIENTS : INGREDIENTS.filter(ingredient => ingredient.name.toLowerCase().includes(normalized));
+    const pool = !normalized ? ingredients : ingredients.filter(ingredient => ingredient.name.toLowerCase().includes(normalized));
     return pool.slice(0, 40);
-  }, [ingredientQuery]);
+  }, [ingredientQuery, ingredients]);
 
   async function handleTakePhoto() {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
@@ -112,7 +113,7 @@ function AddRecipeScreen() {
         <View style={styles.field}>
           <ThemedText type="small" color={theme.textSecondary}>{t('recipes.categoriesLabel')}</ThemedText>
           <View style={styles.chipRow}>
-            {CATEGORIES.map(category => {
+            {categories.map(category => {
             const isActive = categoryId === category.id;
             return <Pressable key={category.id} onPress={() => setCategoryId(category.id)} style={[styles.chip, isActive && styles.chipActive]}>
                   <ThemedText type="small" color={isActive ? '#ffffff' : theme.text}>{category.name}</ThemedText>

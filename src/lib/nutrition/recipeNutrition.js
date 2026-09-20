@@ -6,13 +6,19 @@ import { scaleIngredient, scaleProfile, sumProfiles } from './scaling';
  * reads a cached total.
  */
 export function calculateRecipeNutrition(recipe, getIngredient) {
+  // An ingredient can go missing from underneath a recipe reference it once
+  // resolved fine against — e.g. a plan/log entry saved before a catalog sync
+  // that renamed/removed ingredient ids. Skipping that line (instead of
+  // throwing) keeps the rest of the recipe's nutrition usable instead of
+  // crashing every screen that happens to render it.
   const lineItems = recipe.ingredients.map(line => {
     const ingredient = getIngredient(line.ingredientId);
     if (!ingredient) {
-      throw new Error(`Unknown ingredient id "${line.ingredientId}" in recipe "${recipe.id}"`);
+      if (__DEV__) console.warn(`Unknown ingredient id "${line.ingredientId}" in recipe "${recipe.id}" — skipped in nutrition calc`);
+      return undefined;
     }
     return scaleIngredient(ingredient, line.quantity, line.unit);
-  });
+  }).filter(Boolean);
   const total = sumProfiles(lineItems);
   return scaleProfile(total, 1 / recipe.servings);
 }

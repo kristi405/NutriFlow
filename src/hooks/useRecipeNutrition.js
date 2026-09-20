@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { getIngredientById } from '@/data/seed/ingredients';
+import { getIngredientById } from '@/data/catalog';
 import { calculateRecipeNutrition, recalculateForSubstitution, scaleForServings } from '@/lib/nutrition';
 /**
  * Derives per-serving and scaled nutrition for a recipe, re-deriving from ingredients

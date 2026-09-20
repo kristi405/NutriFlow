@@ -1,5 +1,4 @@
-import { getIngredientById } from '@/data/seed/ingredients';
-import { RECIPES } from '@/data/seed/recipes';
+import { getIngredientById, getRecipes } from '@/data/catalog';
 import { calculateRecipeNutrition } from '@/lib/nutrition';
 
 const TOLERANCE_KCAL = 50;
@@ -42,12 +41,13 @@ function toItems({ breakfast, lunch, dinner, dinnerServings = 1, snack }) {
  * meals), pass 2 flexes the dinner serving size to close the gap.
  */
 export function generateDailyMealPlan(targetCalories, { includeSnack = true } = {}) {
-  const breakfastPool = RECIPES.filter(recipe => recipe.categoryId === 'breakfast');
-  const lunchPool = RECIPES.filter(recipe => recipe.categoryId === 'lunch');
-  const dinnerPool = RECIPES.filter(recipe => DINNER_CATEGORIES.includes(recipe.categoryId));
+  const recipes = getRecipes();
+  const breakfastPool = recipes.filter(recipe => recipe.categoryId === 'breakfast');
+  const lunchPool = recipes.filter(recipe => recipe.categoryId === 'lunch');
+  const dinnerPool = recipes.filter(recipe => DINNER_CATEGORIES.includes(recipe.categoryId));
   if (breakfastPool.length === 0 || lunchPool.length === 0 || dinnerPool.length === 0) return [];
 
-  const snackPool = RECIPES.filter(recipe => recipe.categoryId === 'snack');
+  const snackPool = recipes.filter(recipe => recipe.categoryId === 'snack');
   const snack = includeSnack && snackPool.length > 0 ? shuffle(snackPool)[0] : undefined;
 
   const caloriesById = new Map();

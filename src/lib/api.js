@@ -13,6 +13,15 @@ export class ApiError extends Error {
   }
 }
 
+// Session tokens now persist across app restarts (see authStore), so a stale
+// token that the server has since revoked/expired needs a way to force a
+// fresh login instead of every screen just silently failing forever. Set by
+// authStore itself to avoid a circular import.
+let onUnauthorized = () => {};
+export function setUnauthorizedHandler(handler) {
+  onUnauthorized = handler;
+}
+
 export async function apiRequest(path, { method = 'GET', body, token } = {}) {
   let response;
   try {
@@ -30,6 +39,7 @@ export async function apiRequest(path, { method = 'GET', body, token } = {}) {
 
   const data = await response.json().catch(() => null);
   if (!response.ok) {
+    if (response.status === 401 && token) onUnauthorized();
     throw new ApiError(data?.message ?? 'Request failed', response.status);
   }
   return data;

@@ -4,8 +4,7 @@ import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { getIngredientById, INGREDIENTS } from '@/data/seed/ingredients';
-import { getRecipeById } from '@/data/seed/recipes';
+import { getIngredientById, getIngredients, getRecipeById } from '@/data/catalog';
 import { calculateRecipeNutrition } from '@/lib/nutrition';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -80,10 +79,10 @@ function isSwappableIngredient(ingredient) {
   return ingredient.categoryId === 'meat' || ingredient.categoryId === 'fish' || ingredient.subcategoryId === 'vegetables' || ingredient.subcategoryId === 'grains';
 }
 
-function swapPoolForIngredient(ingredient, unit) {
+function swapPoolForIngredient(ingredient, unit, allIngredients) {
   if (!ingredient) return [];
   let pool;
-  if (ingredient.categoryId === 'meat') pool = INGREDIENTS.filter(item => item.categoryId === 'meat');else if (ingredient.categoryId === 'fish') pool = INGREDIENTS.filter(item => item.categoryId === 'fish');else if (ingredient.subcategoryId === 'vegetables') pool = INGREDIENTS.filter(item => item.subcategoryId === 'vegetables');else if (ingredient.subcategoryId === 'grains') pool = INGREDIENTS.filter(item => item.subcategoryId === 'grains');else return [];
+  if (ingredient.categoryId === 'meat') pool = allIngredients.filter(item => item.categoryId === 'meat');else if (ingredient.categoryId === 'fish') pool = allIngredients.filter(item => item.categoryId === 'fish');else if (ingredient.subcategoryId === 'vegetables') pool = allIngredients.filter(item => item.subcategoryId === 'vegetables');else if (ingredient.subcategoryId === 'grains') pool = allIngredients.filter(item => item.subcategoryId === 'grains');else return [];
   // Only offer substitutes that can be measured in the recipe line's existing unit.
   return pool.filter(item => item.id !== ingredient.id && (unit === 'g' || unit === 'ml' || item.gramsPerUnit[unit] !== undefined));
 }
@@ -97,6 +96,7 @@ function RecipeDetailScreen() {
   const { width } = useWindowDimensions();
   const { id } = useLocalSearchParams();
   const recipe = getRecipeById(id);
+  const ingredients = getIngredients();
   const [excludedIngredientIds, setExcludedIngredientIds] = useState(() => new Set());
   const [isEditingIngredients, setIsEditingIngredients] = useState(false);
   const [substitutions, setSubstitutions] = useState({});
@@ -114,9 +114,9 @@ function RecipeDetailScreen() {
 
   const filteredIngredients = useMemo(() => {
     const normalized = ingredientQuery.trim().toLowerCase();
-    const pool = !normalized ? INGREDIENTS : INGREDIENTS.filter(ingredient => ingredient.name.toLowerCase().includes(normalized));
+    const pool = !normalized ? ingredients : ingredients.filter(ingredient => ingredient.name.toLowerCase().includes(normalized));
     return pool.slice(0, 40);
-  }, [ingredientQuery]);
+  }, [ingredientQuery, ingredients]);
 
   const profile = useMemo(() => {
     if (!recipe) return undefined;
@@ -148,7 +148,7 @@ function RecipeDetailScreen() {
 
   const swapLine = swapIngredientId ? recipe?.ingredients.find(line => line.ingredientId === swapIngredientId) : undefined;
   const swapCurrentIngredient = swapLine ? getIngredientById(substitutions[swapLine.ingredientId] ?? swapLine.ingredientId) : undefined;
-  const swapCandidates = swapLine ? swapPoolForIngredient(swapCurrentIngredient, swapLine.unit) : [];
+  const swapCandidates = swapLine ? swapPoolForIngredient(swapCurrentIngredient, swapLine.unit, ingredients) : [];
 
   function toggleIngredient(ingredientId) {
     setExcludedIngredientIds(current => {
@@ -323,7 +323,7 @@ function RecipeDetailScreen() {
           <View style={styles.metaRow}>
             <MetaItem styles={styles} icon={{ ios: 'clock', android: 'schedule', web: 'schedule' }} label={`${totalTime} ${t('common.min')}`} color={WATER_BLUE} />
             <MetaItem styles={styles} icon={{ ios: 'person.2.fill', android: 'group', web: 'group' }} label={`${recipe.servings} ${t('recipes.servings')}`} color={theme.textSecondary} />
-            <MetaItem styles={styles} icon={{ ios: 'chart.bar.fill', android: 'bar_chart', web: 'bar_chart' }} label={t(`recipes.difficulty.${recipe.difficulty}`, { defaultValue: recipe.difficulty })} color={recipe.difficulty === 'easy' ? theme.primary : theme.textSecondary} />
+            {recipe.difficulty && <MetaItem styles={styles} icon={{ ios: 'chart.bar.fill', android: 'bar_chart', web: 'bar_chart' }} label={t(`recipes.difficulty.${recipe.difficulty}`, { defaultValue: recipe.difficulty })} color={recipe.difficulty === 'easy' ? theme.primary : theme.textSecondary} />}
           </View>
 
           {nutrition && <View style={styles.statsCard}>

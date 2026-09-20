@@ -12,8 +12,7 @@ import { MacroBar } from '@/components/ui/macro-bar';
 import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
-import { getIngredientById } from '@/data/seed/ingredients';
-import { getRecipeById, RECIPES } from '@/data/seed/recipes';
+import { getIngredientById, getRecipeById, getRecipes } from '@/data/catalog';
 import { useTheme } from '@/hooks/use-theme';
 import { todayKey, weekContaining } from '@/lib/date';
 import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
@@ -42,8 +41,8 @@ function isCategoryAllowedForMealType(categoryId, mealType) {
 function categoryPoolForMealType(mealType) {
   // My Recipes come first so they're preferred as swap candidates over seed recipes.
   const myPool = myRecipesStore.recipes.filter(recipe => isCategoryAllowedForMealType(recipe.categoryId, mealType));
-  const seedPool = RECIPES.filter(recipe => isCategoryAllowedForMealType(recipe.categoryId, mealType));
-  return [...myPool, ...seedPool];
+  const catalogPool = getRecipes().filter(recipe => isCategoryAllowedForMealType(recipe.categoryId, mealType));
+  return [...myPool, ...catalogPool];
 }
 
 const CALORIE_MATCH_TOLERANCE = 100;

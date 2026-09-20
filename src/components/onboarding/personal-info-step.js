@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -47,6 +47,48 @@ function AgeWheelPicker({ theme, styles, value, onChange }) {
     </View>;
 }
 
+const MODAL_ROW_HEIGHT = 48;
+
+// A scrolling wheel isn't an Android UI pattern (no Material equivalent), and a
+// native OS picker (e.g. @expo/ui's) can't be restyled to match the app's own
+// inputs. So on Android this is a tap-to-open sheet, styled the same as every
+// other field here — same pill, same shadow, same border.
+function AndroidAgePicker({ theme, styles, value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const selectedAge = AGES.includes(Number(value)) ? Number(value) : AGE_DEFAULT;
+  const selectedIndex = AGES.indexOf(selectedAge);
+
+  function selectAge(age) {
+    onChange(String(age));
+    setOpen(false);
+  }
+
+  return <>
+      <Pressable onPress={() => setOpen(true)} style={[styles.input, styles.androidAgeTrigger, { backgroundColor: theme.background }]}>
+        <ThemedText type="default" color={theme.text}>{selectedAge}</ThemedText>
+        <ThemedText color={theme.textSecondary}>▾</ThemedText>
+      </Pressable>
+
+      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+        <View style={styles.modalRoot}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setOpen(false)} />
+          <View style={[styles.modalSheet, { backgroundColor: theme.background }]}>
+            <View style={[styles.modalHandle, { backgroundColor: theme.border }]} />
+            <FlatList data={AGES} keyExtractor={age => String(age)} initialScrollIndex={selectedIndex} getItemLayout={(_, index) => ({
+            length: MODAL_ROW_HEIGHT,
+            offset: MODAL_ROW_HEIGHT * index,
+            index
+          })} renderItem={({ item: age }) => <Pressable onPress={() => selectAge(age)} style={[styles.modalRow, { borderBottomColor: theme.border }]}>
+                  <ThemedText type={age === selectedAge ? 'smallBold' : 'default'} color={age === selectedAge ? theme.accent : theme.text}>
+                    {age}
+                  </ThemedText>
+                </Pressable>} />
+          </View>
+        </View>
+      </Modal>
+    </>;
+}
+
 export function PersonalInfoStep({
   value,
   onChange,
@@ -80,13 +122,15 @@ export function PersonalInfoStep({
           <ThemedText type="small" color={theme.textSecondary}>{t('onboarding.personalInfo.name')}</ThemedText>
           <TextInput value={value.name} onChangeText={name => onChange({
           name
-        })} placeholder={t('onboarding.personalInfo.namePlaceholder')} placeholderTextColor={theme.textSecondary} style={[fieldStyle(nameInvalid), styles.nameInput]} />
+        })} placeholder={t('onboarding.personalInfo.namePlaceholder')} placeholderTextColor={theme.textSecondary} style={[fieldStyle(nameInvalid), Platform.OS === 'ios' && styles.nameInput]} />
         </View>
         <View style={[styles.field, styles.ageField]}>
           <ThemedText type="small" color={theme.textSecondary}>{t('onboarding.personalInfo.age')}</ThemedText>
-          <AgeWheelPicker theme={theme} styles={styles} value={value.age} onChange={age => onChange({
+          {Platform.OS === 'android' ? <AndroidAgePicker theme={theme} styles={styles} value={value.age} onChange={age => onChange({
           age
-        })} />
+        })} /> : <AgeWheelPicker theme={theme} styles={styles} value={value.age} onChange={age => onChange({
+          age
+        })} />}
         </View>
       </View>
 
@@ -164,6 +208,34 @@ const createStyles = theme => StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 4
+  },
+  androidAgeTrigger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  modalRoot: {
+    flex: 1,
+    justifyContent: 'flex-end'
+  },
+  modalSheet: {
+    maxHeight: MODAL_ROW_HEIGHT * 6.5,
+    paddingBottom: Spacing.four,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20
+  },
+  modalHandle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginVertical: Spacing.two
+  },
+  modalRow: {
+    height: MODAL_ROW_HEIGHT,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: StyleSheet.hairlineWidth
   },
   wheelContainer: {
     flex: 1,

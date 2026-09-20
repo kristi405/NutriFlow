@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
-import { getIngredientById } from '@/data/seed/ingredients';
-import { getRecipeById } from '@/data/seed/recipes';
+import { getIngredientById, getRecipeById } from '@/data/catalog';
 import { calculateRecipeNutrition, scaleForServings, sumProfiles } from '@/lib/nutrition';
 import { ZERO_MINERALS, ZERO_NUTRITION, ZERO_VITAMINS } from '@/models/nutrition';
 import { foodLogStore } from '@/store/foodLogStore';

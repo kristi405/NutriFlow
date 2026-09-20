@@ -35,6 +35,12 @@
       "expo-router",
       "expo-apple-authentication",
       [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.223613501486-am8iqmgfa2c8k2u0nqo497c7bpv0fscu"
+        }
+      ],
+      [
         "expo-sensors",
         {
           "motionPermission": "Allow NutriFlow to access your step count to show your daily activity."
