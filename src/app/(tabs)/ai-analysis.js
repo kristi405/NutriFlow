@@ -1,13 +1,16 @@
 import { useMemo } from 'react';
+import * as DocumentPicker from 'expo-document-picker';
 import { SymbolView } from 'expo-symbols';
+import * as Sharing from 'expo-sharing';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { aiAnalysisStore } from '@/store/aiAnalysisStore';
 
 const STEPS = [
   { icon: { ios: 'doc.badge.plus', android: 'note_add', web: 'note_add' }, titleKey: 'aiAnalysis.step1Title', subtitleKey: 'aiAnalysis.step1Subtitle' },
@@ -19,9 +22,27 @@ function AiAnalysisScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const analyses = aiAnalysisStore.sortedAnalyses;
 
-  function handleUpload() {
-    Alert.alert(t('aiAnalysis.uploadButton'), t('home.comingSoon'));
+  async function handleUpload() {
+    const result = await DocumentPicker.getDocumentAsync({ type: 'application/pdf', copyToCacheDirectory: true });
+    if (result.canceled) return;
+    const file = result.assets[0];
+    try {
+      await aiAnalysisStore.uploadAnalysis({ uri: file.uri, name: file.name, mimeType: file.mimeType });
+    } catch (error) {
+      Alert.alert(t('aiAnalysis.uploadErrorTitle'), error.message ?? t('aiAnalysis.uploadErrorMessage'));
+    }
+  }
+
+  async function handleOpen(localUri) {
+    const canShare = await Sharing.isAvailableAsync();
+    if (!canShare) return;
+    await Sharing.shareAsync(localUri, { mimeType: 'application/pdf' });
+  }
+
+  function handleDelete(id) {
+    Alert.alert(t('aiAnalysis.deleteTitle'), t('aiAnalysis.deleteMessage'), [{ text: t('common.cancel'), style: 'cancel' }, { text: t('common.delete'), style: 'destructive', onPress: () => aiAnalysisStore.removeAnalysis(id) }]);
   }
 
   return <ScreenScrollView gap={Spacing.three}>
@@ -44,11 +65,13 @@ function AiAnalysisScreen() {
         <ThemedText type="small" color={theme.textSecondary} style={styles.centerText}>
           {t('aiAnalysis.uploadSubtitle')}
         </ThemedText>
-        <Pressable onPress={handleUpload} style={({ pressed }) => [styles.uploadButton, pressed && styles.pressed]}>
-          <SymbolView name={{ ios: 'arrow.up.doc', android: 'upload_file', web: 'upload_file' }} size={15} tintColor="#ffffff" />
-          <ThemedText type="smallBold" style={styles.uploadButtonText}>
-            {t('aiAnalysis.uploadButton')}
-          </ThemedText>
+        <Pressable onPress={handleUpload} disabled={aiAnalysisStore.isUploading} style={({ pressed }) => [styles.uploadButton, (pressed || aiAnalysisStore.isUploading) && styles.pressed]}>
+          {aiAnalysisStore.isUploading ? <ActivityIndicator color="#ffffff" /> : <>
+              <SymbolView name={{ ios: 'arrow.up.doc', android: 'upload_file', web: 'upload_file' }} size={15} tintColor="#ffffff" />
+              <ThemedText type="smallBold" style={styles.uploadButtonText}>
+                {t('aiAnalysis.uploadButton')}
+              </ThemedText>
+            </>}
         </Pressable>
       </View>
 
@@ -77,7 +100,24 @@ function AiAnalysisScreen() {
         <ThemedText type="smallBold" color={theme.text}>
           {t('aiAnalysis.recentAnalyses')}
         </ThemedText>
-        <EmptyState icon={{ ios: 'doc.text.magnifyingglass', android: 'find_in_page', web: 'find_in_page' }} title={t('aiAnalysis.emptyTitle')} message={t('aiAnalysis.emptyMessage')} />
+        {analyses.length === 0 ? <EmptyState icon={{ ios: 'doc.text.magnifyingglass', android: 'find_in_page', web: 'find_in_page' }} title={t('aiAnalysis.emptyTitle')} message={t('aiAnalysis.emptyMessage')} /> : <View style={styles.analysesList}>
+            {analyses.map(analysis => <Pressable key={analysis.id} onPress={() => handleOpen(analysis.localUri)} style={({ pressed }) => [styles.analysisRow, pressed && styles.pressed]}>
+                <View style={styles.analysisIconWrapper}>
+                  <SymbolView name={{ ios: 'doc.text.fill', android: 'description', web: 'description' }} size={18} tintColor={theme.accent} />
+                </View>
+                <View style={styles.analysisText}>
+                  <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>
+                    {analysis.fileName}
+                  </ThemedText>
+                  <ThemedText type="caption" color={theme.textSecondary}>
+                    {new Date(analysis.createdAt).toLocaleDateString()}
+                  </ThemedText>
+                </View>
+                <Pressable onPress={() => handleDelete(analysis.id)} hitSlop={8}>
+                  <SymbolView name={{ ios: 'trash', android: 'delete', web: 'delete' }} size={18} tintColor={theme.textSecondary} />
+                </Pressable>
+              </Pressable>)}
+          </View>}
       </View>
     </ScreenScrollView>;
 }
@@ -118,7 +158,9 @@ const createStyles = theme => StyleSheet.create({
   uploadButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 6,
+    minWidth: 140,
     backgroundColor: theme.accent,
     borderRadius: 999,
     paddingHorizontal: Spacing.four,
@@ -156,6 +198,30 @@ const createStyles = theme => StyleSheet.create({
     justifyContent: 'center'
   },
   stepText: {
+    flex: 1,
+    gap: 2
+  },
+  analysesList: {
+    gap: Spacing.two
+  },
+  analysisRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: theme.border,
+    padding: Spacing.two
+  },
+  analysisIconWrapper: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: theme.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  analysisText: {
     flex: 1,
     gap: 2
   }

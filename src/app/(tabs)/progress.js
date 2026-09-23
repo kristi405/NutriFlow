@@ -19,10 +19,10 @@ import { weightLogStore } from '@/store/weightLogStore';
 
 const CHART_WIDTH = 300;
 const CHART_HEIGHT = 170;
-const CHART_LEFT_PADDING = 32;
+const CHART_LEFT_PADDING = 38;
 const CHART_RIGHT_PADDING = 8;
 const CHART_TOP_PADDING = 16;
-const CHART_BOTTOM_PADDING = 22;
+const CHART_BOTTOM_PADDING = 28;
 const Y_TICK_COUNT = 4;
 const MAX_X_TICKS = 5;
 
@@ -68,7 +68,7 @@ function formatChartDate(dateKey) {
   });
 }
 
-function WeightChart({ entries, unitLabel, theme }) {
+function WeightChart({ entries, theme }) {
   if (entries.length === 0) return null;
 
   const weights = entries.map(entry => entry.weight);
@@ -118,16 +118,13 @@ function WeightChart({ entries, unitLabel, theme }) {
   return <Svg width={CHART_WIDTH} height={CHART_HEIGHT}>
       {yTicks.map(tick => <Fragment key={tick.y}>
           <Line x1={plotLeft} x2={plotRight} y1={tick.y} y2={tick.y} stroke={theme.border} strokeWidth={1} />
-          <SvgText x={plotLeft - 6} y={tick.y + 3} fontSize={9} fill={theme.textSecondary} textAnchor="end">
+          <SvgText x={plotLeft - 10} y={tick.y + 3} fontSize={9} fill={theme.textSecondary} textAnchor="end">
             {Math.round(tick.value)}
           </SvgText>
         </Fragment>)}
-      <SvgText x={2} y={plotTop - 4} fontSize={9} fill={theme.textSecondary}>
-        {unitLabel}
-      </SvgText>
       <Polyline points={polylinePoints} fill="none" stroke={theme.primary} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
       <Circle cx={last.x} cy={last.y} r={5} fill={theme.primary} />
-      {xTicks.map(tick => <SvgText key={`${tick.label}-${tick.x}`} x={tick.x} y={CHART_HEIGHT - 6} fontSize={9} fill={theme.textSecondary} textAnchor="middle">
+      {xTicks.map(tick => <SvgText key={`${tick.label}-${tick.x}`} x={tick.x} y={CHART_HEIGHT - 4} fontSize={9} fill={theme.textSecondary} textAnchor="middle">
           {tick.label}
         </SvgText>)}
     </Svg>;
@@ -210,7 +207,7 @@ function ProgressScreen() {
           </View>
         </View>
         <View style={styles.chartWrapper}>
-          <WeightChart entries={chartEntries} unitLabel={unitLabel} theme={theme} />
+          <WeightChart entries={chartEntries} theme={theme} />
         </View>
       </View>
 

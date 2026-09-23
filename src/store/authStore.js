@@ -121,10 +121,20 @@ class AuthStore {
     this.hasLoggedOut = false;
   }
 
-  loginWithApple({ userId, email }) {
-    // Backend-side Apple identity token verification isn't wired up yet — this
-    // preserves the button's previous local-only behavior until that lands.
-    this.currentUser = { id: userId, email: email ?? null };
+  async loginWithApple({ identityToken, email, fullName }) {
+    let data;
+    try {
+      data = await apiRequest('/auth/apple', { method: 'POST', body: {
+        identityToken,
+        email: email ?? undefined,
+        fullName: fullName ? { givenName: fullName.givenName ?? undefined, familyName: fullName.familyName ?? undefined } : undefined
+      } });
+    } catch (error) {
+      throw new Error(error.message);
+    }
+    this.token = data.session.token;
+    this.currentUser = data.user;
+    this.hasLoggedOut = false;
   }
 
   async logout() {

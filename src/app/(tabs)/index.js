@@ -3,7 +3,7 @@ import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { AiInsightCard } from '@/components/home/ai-insight-card';
+import { ArticleCard } from '@/components/home/article-card';
 import { DateStrip } from '@/components/home/date-strip';
 import { MacroCard } from '@/components/home/macro-card';
 import { MealRow } from '@/components/home/meal-row';
@@ -27,7 +27,7 @@ import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
 import { todayKey } from '@/lib/date';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { insightService } from '@/services/ai/insightService';
+import { articleStore } from '@/store/articleStore';
 import { foodLogStore } from '@/store/foodLogStore';
 import { mealPlanStore } from '@/store/mealPlanStore';
 import { profileStore } from '@/store/profileStore';
@@ -64,6 +64,9 @@ function HomeScreen() {
     const generated = generateDailyMealPlan(targets.calories);
     generated.forEach(item => mealPlanStore.addItem({ date: today, ...item }));
   }, [targets]);
+  useEffect(() => {
+    articleStore.ensureTodayArticle(todayKey());
+  }, []);
   const nextMeal = useMemo(() => {
     const loggedRecipeIds = new Set(loggedEntries.map(entry => `${entry.mealType}:${entry.recipeId}`));
     const pending = planItems.filter(item => !loggedRecipeIds.has(`${item.mealType}:${item.recipeId}`)).sort((a, b) => MEAL_ORDER.indexOf(a.mealType) - MEAL_ORDER.indexOf(b.mealType));
@@ -155,7 +158,7 @@ function HomeScreen() {
 
       {scoreResult && <NutritionScoreCard score={scoreResult.score} explanation={scoreResult.explanation} />}
 
-      <AiInsightCard insight={scoreResult ? insightService.getDailyInsight(scoreResult) : t('home.defaultInsight')} />
+      <ArticleCard article={articleStore.todayArticle} onPress={() => router.push({ pathname: '/article/[id]', params: { id: articleStore.todayArticle.id } })} />
 
       <PremiumCard />
 

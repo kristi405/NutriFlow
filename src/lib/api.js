@@ -44,3 +44,28 @@ export async function apiRequest(path, { method = 'GET', body, token } = {}) {
   }
   return data;
 }
+
+// For file uploads (multipart/form-data) — fetch sets its own boundary-aware
+// Content-Type when the body is a FormData instance, so it must NOT be set manually.
+export async function apiUpload(path, { fileUri, fileName, mimeType, token }) {
+  const formData = new FormData();
+  formData.append('file', { uri: fileUri, name: fileName, type: mimeType });
+
+  let response;
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      body: formData
+    });
+  } catch {
+    throw new ApiError('Network request failed', 0);
+  }
+
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    if (response.status === 401 && token) onUnauthorized();
+    throw new ApiError(data?.message ?? 'Request failed', response.status);
+  }
+  return data;
+}

@@ -21,6 +21,7 @@
     "save": "Speichern",
     "send": "Senden",
     "cancel": "Abbrechen",
+    "delete": "Löschen",
     "or": "oder"
   },
   "auth": {
@@ -74,6 +75,9 @@
     },
     "google": {
       "signIn": "Mit Google fortfahren"
+    },
+    "apple": {
+      "signIn": "Mit Apple fortfahren"
     }
   },
   "onboarding": {
@@ -187,11 +191,16 @@
     "addWater": "Wasser hinzufügen",
     "comingSoon": "Das ist Teil eines zukünftigen Updates — bald verfügbar!",
     "defaultInsight": "Erfasse eine Mahlzeit, um deinen ersten Hinweis zu erhalten.",
+    "articleOfTheDay": "Artikel des Tages",
     "protein": "Eiweiß",
     "carbs": "Kohlenhydrate",
     "fat": "Fett",
     "fiber": "Ballaststoffe",
     "steps": "Schritte"
+  },
+  "article": {
+    "notFoundTitle": "Artikel nicht gefunden",
+    "notFoundMessage": "Dieser Artikel wurde möglicherweise entfernt."
   },
   "profile": {
     "editProfile": "Profil bearbeiten",
@@ -409,7 +418,11 @@
     "step3Subtitle": "Erhalte einen personalisierten Ernährungsplan basierend auf deinen Werten",
     "recentAnalyses": "Letzte Analysen",
     "emptyTitle": "Noch keine Analysen",
-    "emptyMessage": "Lade dein erstes Laborergebnis hoch, um KI-gestützte Ernährungserkenntnisse zu erhalten"
+    "emptyMessage": "Lade dein erstes Laborergebnis hoch, um KI-gestützte Ernährungserkenntnisse zu erhalten",
+    "uploadErrorTitle": "Upload fehlgeschlagen",
+    "uploadErrorMessage": "Diese Datei konnte nicht analysiert werden. Bitte versuche es erneut.",
+    "deleteTitle": "Analyse löschen?",
+    "deleteMessage": "Der Bericht wird von deinem Gerät entfernt."
   },
   "privacyPolicy": {
     "title": "Datenschutz & Sicherheit",

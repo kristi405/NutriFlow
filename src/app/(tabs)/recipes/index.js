@@ -9,6 +9,7 @@ import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
 import { RecentRecipeRow } from '@/components/ui/recent-recipe-row';
 import { RecipeCard } from '@/components/ui/recipe-card';
+import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Spacing } from '@/constants/theme';
@@ -22,8 +23,14 @@ import { recentlyViewedStore } from '@/store/recentlyViewedStore';
 const FAVORITE_RED = '#E0245E';
 const MY_RECIPES_FILTER = 'my-recipes';
 
+// Matching photos for the non-category filter chips (all/my recipes/favorites),
+// so they get the same round-photo treatment as the real categories below.
+const ALL_CATEGORIES_IMAGE = 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=800';
+const MY_RECIPES_IMAGE = 'https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=800';
+const FAVORITES_IMAGE = 'https://images.unsplash.com/photo-1518057111178-44a106bad636?w=800';
+
 const CONTAINER_PADDING = 20;
-const CARD_GAP = Spacing.three;
+const CARD_GAP = Spacing.two;
 
 function chunkPairs(items) {
   const pairs = [];
@@ -91,61 +98,76 @@ function RecipesScreen() {
 
   const recentlyViewed = recentlyViewedStore.recipeIds.map(getRecipeById).filter(Boolean);
 
-  return <ScreenScrollView gap={Spacing.five} horizontalPadding={CONTAINER_PADDING}>
+  return <ScreenScrollView gap={Spacing.five} horizontalPadding={0}>
       <View style={styles.searchSection}>
-        <View style={styles.searchBar}>
-          <SymbolView name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} size={16} tintColor={theme.textSecondary} />
-          <TextInput value={query} onChangeText={setQuery} placeholder={t('recipes.searchPlaceholder')} placeholderTextColor={theme.textSecondary} style={styles.searchInput} returnKeyType="search" />
-          {query.length > 0 && <Pressable onPress={() => setQuery('')} hitSlop={8}>
-              <SymbolView name={{ ios: 'xmark.circle.fill', android: 'cancel', web: 'cancel' }} size={18} tintColor={theme.textSecondary} />
-            </Pressable>}
-          <Pressable onPress={handleVoiceSearch} hitSlop={8} style={[styles.micButton, isListening && styles.micButtonActive]}>
-            <SymbolView name={{ ios: 'mic.fill', android: 'mic', web: 'mic' }} size={20} tintColor={isListening ? '#ffffff' : theme.textSecondary} />
+        <View style={styles.searchRow}>
+          <View style={styles.searchBar}>
+            <SymbolView name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} size={16} tintColor={theme.textSecondary} />
+            <TextInput value={query} onChangeText={setQuery} placeholder={t('recipes.searchPlaceholder')} placeholderTextColor={theme.textSecondary} style={styles.searchInput} returnKeyType="search" />
+            {query.length > 0 && <Pressable onPress={() => setQuery('')} hitSlop={8}>
+                <SymbolView name={{ ios: 'xmark.circle.fill', android: 'cancel', web: 'cancel' }} size={18} tintColor={theme.textSecondary} />
+              </Pressable>}
+            <Pressable onPress={handleVoiceSearch} hitSlop={8} style={[styles.micButton, isListening && styles.micButtonActive]}>
+              <SymbolView name={{ ios: 'mic.fill', android: 'mic', web: 'mic' }} size={20} tintColor={isListening ? '#ffffff' : theme.textSecondary} />
+            </Pressable>
+          </View>
+          <Pressable onPress={() => router.push('/add-recipe')} hitSlop={8} style={styles.addRecipeCircleButton}>
+            <SymbolView name={{ ios: 'plus', android: 'add', web: 'add' }} size={20} tintColor="#ffffff" />
           </Pressable>
         </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryRow}>
-          <Pressable onPress={() => setSelectedFilter(null)} style={[styles.categoryChip, !selectedFilter && styles.categoryChipActive]}>
-            <ThemedText type="small" color={!selectedFilter ? '#ffffff' : theme.text}>
+          <Pressable onPress={() => setSelectedFilter(null)} style={styles.categoryCircleItem}>
+            <View style={[styles.categoryImageWrapper, !selectedFilter && styles.categoryImageWrapperActive]}>
+              <RecipeImage uri={ALL_CATEGORIES_IMAGE} style={styles.categoryImage} iconSize={16} />
+            </View>
+            <ThemedText type="caption" color={!selectedFilter ? theme.accent : theme.textSecondary} numberOfLines={2} style={styles.categoryLabel}>
               {t('recipes.allCategories')}
             </ThemedText>
           </Pressable>
-          <Pressable onPress={() => setSelectedFilter(current => current === MY_RECIPES_FILTER ? null : MY_RECIPES_FILTER)} style={[styles.categoryChip, styles.myRecipesChip, selectedFilter === MY_RECIPES_FILTER && styles.myRecipesChipActive]}>
-            <SymbolView name={{ ios: 'book.closed.fill', android: 'menu_book', web: 'menu_book' }} size={13} tintColor={selectedFilter === MY_RECIPES_FILTER ? '#ffffff' : theme.secondary} />
-            <ThemedText type="small" color={selectedFilter === MY_RECIPES_FILTER ? '#ffffff' : theme.secondary}>
+          <Pressable onPress={() => setSelectedFilter(current => current === MY_RECIPES_FILTER ? null : MY_RECIPES_FILTER)} style={styles.categoryCircleItem}>
+            <View style={[styles.categoryImageWrapper, selectedFilter === MY_RECIPES_FILTER && styles.myRecipesImageWrapperActive]}>
+              <RecipeImage uri={MY_RECIPES_IMAGE} style={styles.categoryImage} iconSize={16} />
+            </View>
+            <ThemedText type="caption" color={theme.secondary} numberOfLines={2} style={styles.categoryLabel}>
               {t('recipes.myRecipes')}
             </ThemedText>
           </Pressable>
-          <Pressable onPress={() => setSelectedFilter(current => current === 'favorites' ? null : 'favorites')} style={[styles.categoryChip, styles.favoritesChip, selectedFilter === 'favorites' && styles.favoritesChipActive]}>
-            <SymbolView name={{ ios: 'heart.fill', android: 'favorite', web: 'favorite' }} size={13} tintColor={selectedFilter === 'favorites' ? '#ffffff' : FAVORITE_RED} />
-            <ThemedText type="small" color={selectedFilter === 'favorites' ? '#ffffff' : FAVORITE_RED}>
+          <Pressable onPress={() => setSelectedFilter(current => current === 'favorites' ? null : 'favorites')} style={styles.categoryCircleItem}>
+            <View style={[styles.categoryImageWrapper, selectedFilter === 'favorites' && styles.favoritesImageWrapperActive]}>
+              <RecipeImage uri={FAVORITES_IMAGE} style={styles.categoryImage} iconSize={16} />
+            </View>
+            <ThemedText type="caption" color={FAVORITE_RED} numberOfLines={2} style={styles.categoryLabel}>
               {t('recipes.favorites')}
             </ThemedText>
           </Pressable>
-          {categories.map(category => <Pressable key={category.id} onPress={() => setSelectedFilter(current => current === category.id ? null : category.id)} style={[styles.categoryChip, selectedFilter === category.id && styles.categoryChipActive]}>
-              <ThemedText type="small" color={selectedFilter === category.id ? '#ffffff' : theme.text}>
+          {categories.map(category => <Pressable key={category.id} onPress={() => setSelectedFilter(current => current === category.id ? null : category.id)} style={styles.categoryCircleItem}>
+              <View style={[styles.categoryImageWrapper, selectedFilter === category.id && styles.categoryImageWrapperActive]}>
+                <RecipeImage uri={category.imageUrl} style={styles.categoryImage} iconSize={16} />
+              </View>
+              <ThemedText type="caption" color={selectedFilter === category.id ? theme.accent : theme.textSecondary} numberOfLines={2} style={styles.categoryLabel}>
                 {category.name}
               </ThemedText>
             </Pressable>)}
         </ScrollView>
       </View>
 
-      {recentlyViewed.length > 0 && <View style={styles.section}>
-          <SectionHeader title={t('recipes.recentlyViewed')} actionLabel={t('common.clear')} onAction={() => recentlyViewedStore.clear()} />
+      {recentlyViewed.length > 0 && <View style={[styles.section, styles.recentlyViewedSection]}>
+          <View style={styles.paddedX}>
+            <SectionHeader title={t('recipes.recentlyViewed')} />
+          </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.recentRow}>
             {recentlyViewed.map(recipe => <RecentRecipeRow key={recipe.id} recipe={recipe} calories={calculateRecipeNutrition(recipe, getIngredientById).nutrition.calories} style={styles.recentCard} />)}
           </ScrollView>
         </View>}
 
       {selectedFilter === MY_RECIPES_FILTER ? <View style={styles.section}>
-          <View style={styles.myRecipesHeaderRow}>
-            <ThemedText type="headline" color={theme.text}>{t('recipes.myRecipes')}</ThemedText>
-            <Pressable onPress={() => router.push('/add-recipe')} style={styles.addRecipeButton}>
-              <SymbolView name={{ ios: 'plus', android: 'add', web: 'add' }} size={15} tintColor="#ffffff" />
-              <ThemedText type="smallBold" color="#ffffff">{t('recipes.addRecipe')}</ThemedText>
-            </Pressable>
+          <View style={styles.paddedX}>
+            <SectionHeader title={t('recipes.myRecipes')} />
           </View>
-          {myRecipesFiltered.length === 0 ? <EmptyState icon={{ ios: 'book.closed', android: 'menu_book', web: 'menu_book' }} title={t('recipes.myRecipesEmptyTitle')} message={t('recipes.myRecipesEmptyMessage')} actionLabel={t('recipes.addRecipe')} onAction={() => router.push('/add-recipe')} /> : <View style={styles.rows}>
+          {myRecipesFiltered.length === 0 ? <View style={styles.paddedX}>
+              <EmptyState icon={{ ios: 'book.closed', android: 'menu_book', web: 'menu_book' }} title={t('recipes.myRecipesEmptyTitle')} message={t('recipes.myRecipesEmptyMessage')} actionLabel={t('recipes.addRecipe')} onAction={() => router.push('/add-recipe')} />
+            </View> : <View style={[styles.rows, styles.paddedX]}>
               {myRecipesRows.map((pair, index) => <View key={index} style={styles.row}>
                   {pair.map(recipe => <View key={recipe.id} style={styles.cardSlot}>
                       <RecipeCard recipe={recipe} calories={calculateRecipeNutrition(recipe, getIngredientById).nutrition.calories} style={styles.cardFill} />
@@ -153,9 +175,13 @@ function RecipesScreen() {
                   {pair.length === 1 && <View style={styles.cardSlot} />}
                 </View>)}
             </View>}
-        </View> : collections.length === 0 ? <EmptyState icon={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} title={t('recipes.noResults')} message={t('recipes.noResultsMessage')} /> : collections.map(({ category, rows }) => <View key={category.id} style={styles.section}>
-          <SectionHeader title={category.name} />
-          <View style={styles.rows}>
+        </View> : collections.length === 0 ? <View style={styles.paddedX}>
+          <EmptyState icon={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} title={t('recipes.noResults')} message={t('recipes.noResultsMessage')} />
+        </View> : collections.map(({ category, rows }) => <View key={category.id} style={styles.section}>
+          <View style={styles.paddedX}>
+            <SectionHeader title={category.name} />
+          </View>
+          <View style={[styles.rows, styles.paddedX]}>
             {rows.map((pair, index) => <View key={index} style={styles.row}>
                 {pair.map(recipe => <View key={recipe.id} style={styles.cardSlot}>
                     <RecipeCard recipe={recipe} calories={calculateRecipeNutrition(recipe, getIngredientById).nutrition.calories} style={styles.cardFill} />
@@ -168,24 +194,17 @@ function RecipesScreen() {
 }
 
 const createStyles = theme => StyleSheet.create({
-  myRecipesHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  },
-  addRecipeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: theme.accent,
-    borderRadius: 999,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.one
-  },
   searchSection: {
     gap: Spacing.three
   },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    marginHorizontal: CONTAINER_PADDING
+  },
   searchBar: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.two,
@@ -193,6 +212,17 @@ const createStyles = theme => StyleSheet.create({
     borderRadius: 22,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two
+  },
+  addRecipeCircleButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.accent,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  paddedX: {
+    paddingHorizontal: CONTAINER_PADDING
   },
   searchInput: {
     flex: 1,
@@ -212,48 +242,48 @@ const createStyles = theme => StyleSheet.create({
   },
   categoryRow: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
     gap: Spacing.two,
-    paddingRight: Spacing.two
+    paddingLeft: CONTAINER_PADDING
   },
-  categoryChip: {
-    backgroundColor: theme.background,
-    borderColor: theme.border,
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.one
+  categoryCircleItem: {
+    alignItems: 'center',
+    gap: 4,
+    width: 70
   },
-  categoryChipActive: {
-    backgroundColor: theme.accent,
+  categoryImageWrapper: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'transparent'
+  },
+  categoryImageWrapperActive: {
     borderColor: theme.accent
   },
-  favoritesChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#FCE4EC',
+  favoritesImageWrapperActive: {
     borderColor: FAVORITE_RED
   },
-  favoritesChipActive: {
-    backgroundColor: FAVORITE_RED,
-    borderColor: FAVORITE_RED
-  },
-  myRecipesChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#E1EEF5',
+  myRecipesImageWrapperActive: {
     borderColor: theme.secondary
   },
-  myRecipesChipActive: {
-    backgroundColor: theme.secondary,
-    borderColor: theme.secondary
+  categoryImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 30
+  },
+  categoryLabel: {
+    textAlign: 'center'
   },
   section: {
     gap: Spacing.three
   },
+  recentlyViewedSection: {
+    marginVertical: -Spacing.two
+  },
   rows: {
-    gap: Spacing.three
+    gap: Spacing.two
   },
   row: {
     flexDirection: 'row',
@@ -270,7 +300,7 @@ const createStyles = theme => StyleSheet.create({
   },
   recentRow: {
     gap: Spacing.two,
-    paddingRight: Spacing.two
+    paddingLeft: CONTAINER_PADDING
   },
   recentCard: {
     width: 200

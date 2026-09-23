@@ -6,6 +6,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Fonts } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { authStore } from '@/store/authStore';
+import { GoogleLogo } from './google-logo';
 
 // webClientId is what the resulting ID token is issued for (the "audience"
 // the backend verifies against) — the Android/iOS client IDs only attest
@@ -47,26 +48,38 @@ export function GoogleSignInButton({ onError }) {
   }
 
   return <Pressable onPress={handlePress} disabled={isSigningIn} style={({ pressed }) => [styles.button, {
-    borderColor: theme.border,
-    backgroundColor: theme.backgroundElement,
-    opacity: pressed || isSigningIn ? 0.7 : 1
+    borderColor: theme.accent,
+    backgroundColor: theme.background,
+    opacity: pressed || isSigningIn ? 0.7 : 1,
+    transform: [{ scale: pressed ? 0.97 : 1 }]
   }]}>
-      {isSigningIn ? <ActivityIndicator color={theme.text} /> : <ThemedText type="smallBold" color={theme.text} style={styles.label}>
-          {t('auth.google.signIn')}
-        </ThemedText>}
+      {isSigningIn ? <ActivityIndicator color={theme.accent} /> : <>
+          <GoogleLogo size={20} />
+          <ThemedText type="smallBold" color={theme.text} style={styles.label}>
+            {t('auth.google.signIn')}
+          </ThemedText>
+        </>}
     </Pressable>;
 }
 
 const styles = StyleSheet.create({
   button: {
+    flexDirection: 'row',
     width: '100%',
     height: 48,
-    borderRadius: 999,
+    borderRadius: 16,
     borderWidth: 1,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    gap: 10,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1
   },
   label: {
-    fontFamily: Fonts.rounded
+    fontFamily: Fonts.rounded,
+    fontSize: 16
   }
 });

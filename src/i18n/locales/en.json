@@ -21,6 +21,7 @@
     "save": "Save",
     "send": "Send",
     "cancel": "Cancel",
+    "delete": "Delete",
     "or": "or"
   },
   "auth": {
@@ -74,6 +75,9 @@
     },
     "google": {
       "signIn": "Continue with Google"
+    },
+    "apple": {
+      "signIn": "Continue with Apple"
     }
   },
   "onboarding": {
@@ -187,11 +191,16 @@
     "addWater": "Add Water",
     "comingSoon": "This is part of a future update — coming soon!",
     "defaultInsight": "Log a meal to get your first insight.",
+    "articleOfTheDay": "Article of the day",
     "protein": "Protein",
     "carbs": "Carbs",
     "fat": "Fat",
     "fiber": "Fiber",
     "steps": "Steps"
+  },
+  "article": {
+    "notFoundTitle": "Article not found",
+    "notFoundMessage": "This article may have been removed."
   },
   "profile": {
     "editProfile": "Edit Profile",
@@ -409,7 +418,11 @@
     "step3Subtitle": "Receive a personalized nutrition plan based on your levels",
     "recentAnalyses": "Recent analyses",
     "emptyTitle": "No analyses yet",
-    "emptyMessage": "Upload your first lab result to get AI-powered nutrition insights"
+    "emptyMessage": "Upload your first lab result to get AI-powered nutrition insights",
+    "uploadErrorTitle": "Upload failed",
+    "uploadErrorMessage": "We couldn't analyze that file. Please try again.",
+    "deleteTitle": "Delete analysis?",
+    "deleteMessage": "This will remove the report from your device."
   },
   "privacyPolicy": {
     "title": "Privacy & Security",

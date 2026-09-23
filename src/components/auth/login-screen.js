@@ -6,8 +6,10 @@ import { useTheme } from '@/hooks/use-theme';
 import { authStore } from '@/store/authStore';
 import { profileStore } from '@/store/profileStore';
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
+import { AppleSignInButton } from './apple-sign-in-button';
+import { GoogleSignInButton } from './google-sign-in-button';
 
 export function LoginScreen({ onSwitchToRegister, onForgotPassword }) {
   const { t } = useTranslation();
@@ -18,6 +20,8 @@ export function LoginScreen({ onSwitchToRegister, onForgotPassword }) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [googleError, setGoogleError] = useState(null);
+  const [appleError, setAppleError] = useState(null);
   const canSubmit = email.trim().length > 0 && password.length > 0;
 
   function inputWrapperStyle(hasValue) {
@@ -91,6 +95,16 @@ export function LoginScreen({ onSwitchToRegister, onForgotPassword }) {
             {isSubmitting ? t('auth.login.submitting') : t('auth.login.submit')}
           </ThemedText>
         </Pressable>
+
+        <View style={styles.googleSection}>
+          <GoogleSignInButton onError={setGoogleError} />
+          {googleError && <ThemedText type="small" color={theme.error}>{googleError}</ThemedText>}
+        </View>
+
+        {Platform.OS === 'ios' && <View style={styles.appleSection}>
+            <AppleSignInButton onError={setAppleError} />
+            {appleError && <ThemedText type="small" color={theme.error}>{appleError}</ThemedText>}
+          </View>}
 
         <Pressable onPress={onSwitchToRegister} hitSlop={8} style={styles.switchLink}>
           <ThemedText type="link" color={theme.textSecondary}>
@@ -167,6 +181,14 @@ const createStyles = theme => StyleSheet.create({
   },
   buttonSpacing: {
     marginTop: Spacing.two
+  },
+  googleSection: {
+    marginTop: Spacing.five + Spacing.two,
+    gap: Spacing.one
+  },
+  appleSection: {
+    marginTop: Spacing.two,
+    gap: Spacing.one
   },
   buttonShadow: {
     shadowColor: theme.accent,

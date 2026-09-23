@@ -1,6 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TAB_BAR_HEIGHT } from '@/components/custom-tab-bar';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -14,18 +15,22 @@ export function ScreenScrollView({
 }) {
   const theme = useTheme();
   const safeAreaInsets = useSafeAreaInsets();
-  // NativeTabs reserves safe-area space for its content on iOS, but on Android
-  // (edge-to-edge by default) it does not pad the top for the status bar / camera
-  // cutout, so that has to be added here explicitly.
+  // The custom tab bar floats over content (position: absolute) instead of
+  // reserving its own layout space, so every scrollable screen needs enough
+  // bottom clearance to scroll its last item out from underneath it.
+  const tabBarClearance = TAB_BAR_HEIGHT + Math.max(safeAreaInsets.bottom, 12) + Spacing.two;
+  // Explicit on both platforms — the plain JS Tabs navigator (unlike
+  // NativeTabs) doesn't auto-adjust each screen's content for the status bar,
+  // so this can't rely on UIScrollView's implicit contentInset behavior.
   const insets = {
-    top: Spacing.two,
+    top: safeAreaInsets.top + Spacing.two,
     left: safeAreaInsets.left,
     right: safeAreaInsets.right,
-    bottom: Spacing.three
+    bottom: tabBarClearance
   };
   const platformStyle = Platform.select({
     android: {
-      paddingTop: safeAreaInsets.top + insets.top,
+      paddingTop: insets.top,
       paddingLeft: insets.left,
       paddingRight: insets.right,
       paddingBottom: insets.bottom

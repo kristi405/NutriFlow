@@ -21,6 +21,7 @@
     "save": "Zapisz",
     "send": "Wyślij",
     "cancel": "Anuluj",
+    "delete": "Usuń",
     "or": "lub"
   },
   "auth": {
@@ -74,6 +75,9 @@
     },
     "google": {
       "signIn": "Kontynuuj przez Google"
+    },
+    "apple": {
+      "signIn": "Kontynuuj przez Apple"
     }
   },
   "onboarding": {
@@ -187,11 +191,16 @@
     "addWater": "Dodaj wodę",
     "comingSoon": "To część przyszłej aktualizacji — już wkrótce!",
     "defaultInsight": "Dodaj posiłek, aby otrzymać pierwszą wskazówkę.",
+    "articleOfTheDay": "Artykuł dnia",
     "protein": "Białko",
     "carbs": "Węglowodany",
     "fat": "Tłuszcz",
     "fiber": "Błonnik",
     "steps": "Kroki"
+  },
+  "article": {
+    "notFoundTitle": "Nie znaleziono artykułu",
+    "notFoundMessage": "Ten artykuł mógł zostać usunięty."
   },
   "profile": {
     "editProfile": "Edytuj profil",
@@ -409,7 +418,11 @@
     "step3Subtitle": "Otrzymaj spersonalizowany plan żywieniowy na podstawie swoich wyników",
     "recentAnalyses": "Ostatnie analizy",
     "emptyTitle": "Brak analiz",
-    "emptyMessage": "Prześlij pierwszy wynik badania, aby otrzymać wskazówki żywieniowe oparte na AI"
+    "emptyMessage": "Prześlij pierwszy wynik badania, aby otrzymać wskazówki żywieniowe oparte na AI",
+    "uploadErrorTitle": "Przesyłanie nie powiodło się",
+    "uploadErrorMessage": "Nie udało się przeanalizować tego pliku. Spróbuj ponownie.",
+    "deleteTitle": "Usunąć analizę?",
+    "deleteMessage": "Raport zostanie usunięty z Twojego urządzenia."
   },
   "privacyPolicy": {
     "title": "Prywatność i bezpieczeństwo",

@@ -146,6 +146,16 @@ function TabLayout() {
           headerTintColor: theme.text,
           headerTitleStyle: { fontWeight: '700' }
         }} />
+        <Stack.Screen name="article/[id]" options={{
+          headerShown: true,
+          headerTitle: t('home.articleOfTheDay'),
+          headerBackTitle: t('common.back'),
+          headerBackTitleStyle: { fontSize: 14 },
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+          headerTitleStyle: { fontWeight: '700' }
+        }} />
       </Stack>;
   }
   return <SafeAreaProvider>
