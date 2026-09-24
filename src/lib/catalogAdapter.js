@@ -4,6 +4,12 @@
  * was originally built against for the local seed data (§ src/data/seed/*).
  * Keeping that shape stable meant every screen/hook downstream of these
  * adapters needed only an import swap, not a rewrite.
+ *
+ * Text fields (name, description, cook_time, steps) arrive already resolved
+ * to the requested language by the server (?lang=), so they're used as-is.
+ * Tags are different: the app's logic keys off stable ids like "breakfast" or
+ * "gluten-free", which the localized `name` can't provide — `slugs` maps each
+ * tag id to its slug (see catalogStore.tagSlugs).
  */
 
 const NUTRITION_KEY_MAP = {
@@ -45,7 +51,11 @@ const MINERAL_KEYS = ['calcium', 'iron', 'magnesium', 'phosphorus', 'potassium',
 // alternatives for them and the shopping list groups them under "Other".
 const FALLBACK_INGREDIENT_CATEGORY_ID = 'other';
 
-export function adaptIngredient(raw) {
+function slugOf(tag, slugs) {
+  return slugs?.[tag.id] ?? tag.name.toLowerCase();
+}
+
+export function adaptIngredient(raw, slugs) {
   const nutrition = {};
   for (const [dbKey, appKey] of Object.entries(NUTRITION_KEY_MAP)) {
     nutrition[appKey] = Number(raw[dbKey] ?? 0);
@@ -65,22 +75,22 @@ export function adaptIngredient(raw) {
 
   return {
     id: raw.id,
-    name: raw.name_en,
+    name: raw.name,
     imageUrl: raw.image_url ?? undefined,
     categoryId: FALLBACK_INGREDIENT_CATEGORY_ID,
     subcategoryId: undefined,
     gramsPerUnit: raw.grams_per_unit || {},
     per100g: { nutrition, vitamins, minerals },
-    allergens: (raw.tags || []).filter(tag => tag.type === 'allergen').map(tag => tag.name_en)
+    allergens: tagValuesByType(raw.tags, 'allergen', slugs)
   };
 }
 
-function tagValuesByType(tags, type) {
-  return (tags || []).filter(tag => tag.type === type).map(tag => tag.name_en);
+function tagValuesByType(tags, type, slugs) {
+  return (tags || []).filter(tag => tag.type === type).map(tag => slugOf(tag, slugs));
 }
 
-// Backend steps are stored as "1. Do this\n2. Do that" (see RecipeService) —
-// split back into the {order, instruction} rows the UI renders.
+// Steps arrive as one "1. Do this\n2. Do that" string — split back into the
+// {order, instruction} rows the UI renders.
 function parseSteps(stepsText) {
   if (!stepsText) return [];
   return stepsText
@@ -90,10 +100,10 @@ function parseSteps(stepsText) {
     .map((line, index) => ({ order: index + 1, instruction: line.replace(/^\d+\.\s*/, '') }));
 }
 
-// cook_time is a free-text combined duration ("10 minutes", "1h 10m") — the
-// prep/cook split from the seed data doesn't survive migration, so the whole
-// duration is attributed to cookTimeMinutes (prepTimeMinutes stays 0) purely
-// so `prepTimeMinutes + cookTimeMinutes` in the UI still shows the real total.
+// cook_time is free text in the requested language ("10 minutes", "1 ч 10 мин")
+// so the UI shows it verbatim (cookTimeText). The numeric value is only a
+// best-effort guess for logic that needs minutes — it can't reliably parse
+// every language's units.
 function parseCookTimeMinutes(cookTimeText) {
   if (!cookTimeText) return 0;
   const hourMatch = cookTimeText.match(/(\d+)\s*h/i);
@@ -105,32 +115,33 @@ function parseCookTimeMinutes(cookTimeText) {
   return plainMatch ? Number(plainMatch[1]) : 0;
 }
 
-export function adaptRecipe(raw) {
+export function adaptRecipe(raw, slugs) {
   const tags = raw.tags || [];
-  const [categoryId] = tagValuesByType(tags, 'category');
+  const [categoryId] = tagValuesByType(tags, 'category', slugs);
 
   return {
     id: raw.id,
-    title: raw.name_en,
-    description: raw.description_en,
+    title: raw.name,
+    description: raw.description,
     imageUrl: raw.image_url ?? undefined,
     servings: raw.servings || 1,
     categoryId,
-    mealTypes: tagValuesByType(tags, 'meal_type'),
-    dietaryTags: tagValuesByType(tags, 'dietary'),
-    allergens: tagValuesByType(tags, 'allergen'),
+    mealTypes: tagValuesByType(tags, 'meal_type', slugs),
+    dietaryTags: tagValuesByType(tags, 'dietary', slugs),
+    allergens: tagValuesByType(tags, 'allergen', slugs),
     // No backend equivalent yet — undefined lets the UI's existing
     // `{recipe.difficulty && ...}` guards skip the badge instead of crashing.
     difficulty: undefined,
     rating: undefined,
     ratingCount: undefined,
     prepTimeMinutes: 0,
-    cookTimeMinutes: parseCookTimeMinutes(raw.cook_time_en),
+    cookTimeText: raw.cook_time || undefined,
+    cookTimeMinutes: parseCookTimeMinutes(raw.cook_time),
     isUserRecipe: false,
     ingredients: (raw.ingredients || [])
       .map(line => ({ ingredientId: line.ingredient?.id, quantity: Number(line.quantity), unit: line.unit }))
       .filter(line => line.ingredientId),
-    steps: parseSteps(raw.steps_en)
+    steps: parseSteps(raw.steps)
   };
 }
 
@@ -143,19 +154,15 @@ const CATEGORY_IMAGES = {
 };
 const DEFAULT_CATEGORY_IMAGE = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800';
 
-function capitalize(value) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
 // Recipe categories used to be a fixed seed array; now they're just the
 // `category`-type tags, so a new one added from the admin panel shows up here
-// automatically (with a generic fallback photo instead of a curated one).
-export function adaptCategories(tags) {
+// automatically (with a generic fallback photo instead of a curated one). The
+// id stays the language-independent slug; the label is the localized name.
+export function adaptCategories(tags, slugs) {
   return (tags || [])
     .filter(tag => tag.type === 'category')
-    .map(tag => ({
-      id: tag.name_en,
-      name: capitalize(tag.name_en),
-      imageUrl: CATEGORY_IMAGES[tag.name_en] ?? DEFAULT_CATEGORY_IMAGE
-    }));
+    .map(tag => {
+      const slug = slugOf(tag, slugs);
+      return { id: slug, name: tag.name, imageUrl: CATEGORY_IMAGES[slug] ?? DEFAULT_CATEGORY_IMAGE };
+    });
 }

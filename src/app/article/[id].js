@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Image } from 'expo-image';
-import { useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { articleStore } from '@/store/articleStore';
+import { localeStore } from '@/store/localeStore';
 
 function formatDate(dateString) {
   if (!dateString) return '';
@@ -29,7 +31,7 @@ function ArticleScreen() {
     if (cached) return;
     setIsLoading(true);
     setError(false);
-    articleStore.fetchById(id).then(setArticle).catch(() => setError(true)).finally(() => setIsLoading(false));
+    articleStore.fetchById(id, localeStore.language).then(setArticle).catch(() => setError(true)).finally(() => setIsLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -45,7 +47,14 @@ function ArticleScreen() {
       </View>;
   }
 
-  return <ScreenScrollView gap={Spacing.three} horizontalPadding={20}>
+  const isFavorite = articleStore.isFavorite(article.id);
+  return <>
+      <Stack.Screen options={{
+      headerRight: () => <Pressable onPress={() => articleStore.toggleFavorite(article.id)} hitSlop={10}>
+            <SymbolView name={isFavorite ? { ios: 'heart.fill', android: 'favorite', web: 'favorite' } : { ios: 'heart', android: 'favorite_border', web: 'favorite_border' }} size={22} tintColor={isFavorite ? '#E0245E' : theme.textSecondary} />
+          </Pressable>
+    }} />
+      <ScreenScrollView gap={Spacing.three} horizontalPadding={20}>
       {article.imageUrl && <Image source={{ uri: article.imageUrl }} style={styles.heroImage} contentFit="cover" />}
       <ThemedText type="title" style={styles.title} color={theme.text}>
         {article.title}
@@ -56,7 +65,8 @@ function ArticleScreen() {
       <ThemedText type="default" color={theme.text} style={styles.body}>
         {article.body}
       </ThemedText>
-    </ScreenScrollView>;
+    </ScreenScrollView>
+    </>;
 }
 
 export default observer(ArticleScreen);

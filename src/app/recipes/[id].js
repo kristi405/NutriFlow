@@ -321,7 +321,7 @@ function RecipeDetailScreen() {
           </View>
 
           <View style={styles.metaRow}>
-            <MetaItem styles={styles} icon={{ ios: 'clock', android: 'schedule', web: 'schedule' }} label={`${totalTime} ${t('common.min')}`} color={WATER_BLUE} />
+            <MetaItem styles={styles} icon={{ ios: 'clock', android: 'schedule', web: 'schedule' }} label={recipe.cookTimeText ?? `${totalTime} ${t('common.min')}`} color={WATER_BLUE} />
             <MetaItem styles={styles} icon={{ ios: 'person.2.fill', android: 'group', web: 'group' }} label={`${recipe.servings} ${t('recipes.servings')}`} color={theme.textSecondary} />
             {recipe.difficulty && <MetaItem styles={styles} icon={{ ios: 'chart.bar.fill', android: 'bar_chart', web: 'bar_chart' }} label={t(`recipes.difficulty.${recipe.difficulty}`, { defaultValue: recipe.difficulty })} color={recipe.difficulty === 'easy' ? theme.primary : theme.textSecondary} />}
           </View>

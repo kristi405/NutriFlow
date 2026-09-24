@@ -28,7 +28,9 @@ export async function apiRequest(path, { method = 'GET', body, token } = {}) {
     response = await fetch(`${API_URL}${path}`, {
       method,
       headers: {
-        'Content-Type': 'application/json',
+        // Fastify rejects a JSON content-type on a request with no body
+        // (e.g. the bodiless POST/DELETE of article favorites).
+        ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       },
       body: body !== undefined ? JSON.stringify(body) : undefined
@@ -47,25 +49,32 @@ export async function apiRequest(path, { method = 'GET', body, token } = {}) {
 
 // For file uploads (multipart/form-data) — fetch sets its own boundary-aware
 // Content-Type when the body is a FormData instance, so it must NOT be set manually.
-export async function apiUpload(path, { fileUri, fileName, mimeType, token }) {
-  const formData = new FormData();
-  formData.append('file', { uri: fileUri, name: fileName, type: mimeType });
+// Uses XMLHttpRequest rather than fetch: Expo's global fetch (expo/fetch)
+// can't send React Native's `{ uri, name, type }` file parts in a FormData —
+// such an upload fails instantly with a generic network error.
+export function apiUpload(path, { fileUri, fileName, mimeType, token }) {
+  return new Promise((resolve, reject) => {
+    const formData = new FormData();
+    formData.append('file', { uri: fileUri, name: fileName, type: mimeType });
 
-  let response;
-  try {
-    response = await fetch(`${API_URL}${path}`, {
-      method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      body: formData
-    });
-  } catch {
-    throw new ApiError('Network request failed', 0);
-  }
-
-  const data = await response.json().catch(() => null);
-  if (!response.ok) {
-    if (response.status === 401 && token) onUnauthorized();
-    throw new ApiError(data?.message ?? 'Request failed', response.status);
-  }
-  return data;
+    const request = new XMLHttpRequest();
+    request.open('POST', `${API_URL}${path}`);
+    if (token) request.setRequestHeader('Authorization', `Bearer ${token}`);
+    request.onload = () => {
+      let data = null;
+      try {
+        data = JSON.parse(request.responseText);
+      } catch {
+        // non-JSON body (e.g. a proxy error page)
+      }
+      if (request.status >= 200 && request.status < 300) {
+        resolve(data);
+        return;
+      }
+      if (request.status === 401 && token) onUnauthorized();
+      reject(new ApiError(data?.message ?? 'Request failed', request.status));
+    };
+    request.onerror = () => reject(new ApiError('Network request failed', 0));
+    request.send(formData);
+  });
 }

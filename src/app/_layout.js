@@ -15,6 +15,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { queryClient } from '@/lib/query-client';
 import { authStore } from '@/store/authStore';
 import { catalogStore } from '@/store/catalogStore';
+import { localeStore } from '@/store/localeStore';
 import { profileStore } from '@/store/profileStore';
 import { themeStore } from '@/store/themeStore';
 SplashScreen.preventAutoHideAsync();
@@ -54,13 +55,19 @@ function TabLayout() {
     }
   }, [hasHydrated, hasOnboarded, authStore.isAuthenticated]);
   useEffect(() => {
-    // Fires on the auth false->true edge — a fresh login, or the persisted
-    // session being restored on app launch. Either way it's the right moment
-    // to pull any catalog changes since the last sync.
-    if (authStore.isAuthenticated) {
-      catalogStore.sync(authStore.token);
+    if (localeStore.hasHydrated) localeStore.fetchLanguages();
+  }, [localeStore.hasHydrated]);
+  const catalogSyncReady = authStore.isAuthenticated && localeStore.hasHydrated && catalogStore.hasHydrated;
+  const contentLanguage = localeStore.language;
+  useEffect(() => {
+    // Fires when the session becomes usable (fresh login or restored on app
+    // launch) and again whenever the app language changes, since catalog text
+    // is served pre-translated. Waits for the persisted language/catalog to
+    // load so it doesn't sync with a stale default first.
+    if (catalogSyncReady) {
+      catalogStore.sync(authStore.token, contentLanguage);
     }
-  }, [authStore.isAuthenticated]);
+  }, [catalogSyncReady, contentLanguage]);
   useEffect(() => {
     if (!prevHasOnboardedRef.current && hasOnboarded) {
       setShowCalculating(true);
@@ -146,9 +153,29 @@ function TabLayout() {
           headerTintColor: theme.text,
           headerTitleStyle: { fontWeight: '700' }
         }} />
+        <Stack.Screen name="lab-report/[id]" options={{
+          headerShown: true,
+          headerTitle: t('aiAnalysis.reportTitle'),
+          headerBackTitle: t('common.back'),
+          headerBackTitleStyle: { fontSize: 14 },
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+          headerTitleStyle: { fontWeight: '700' }
+        }} />
+        <Stack.Screen name="lab-report/history" options={{
+          headerShown: true,
+          headerTitle: t('aiAnalysis.historyTitle'),
+          headerBackTitle: t('common.back'),
+          headerBackTitleStyle: { fontSize: 14 },
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+          headerTitleStyle: { fontWeight: '700' }
+        }} />
         <Stack.Screen name="article/[id]" options={{
           headerShown: true,
-          headerTitle: t('home.articleOfTheDay'),
+          headerTitle: t('articles.title'),
           headerBackTitle: t('common.back'),
           headerBackTitleStyle: { fontSize: 14 },
           headerShadowVisible: false,

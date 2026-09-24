@@ -28,6 +28,7 @@ import { todayKey } from '@/lib/date';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { articleStore } from '@/store/articleStore';
+import { localeStore } from '@/store/localeStore';
 import { foodLogStore } from '@/store/foodLogStore';
 import { mealPlanStore } from '@/store/mealPlanStore';
 import { profileStore } from '@/store/profileStore';
@@ -65,8 +66,9 @@ function HomeScreen() {
     generated.forEach(item => mealPlanStore.addItem({ date: today, ...item }));
   }, [targets]);
   useEffect(() => {
-    articleStore.ensureTodayArticle(todayKey());
-  }, []);
+    if (!localeStore.hasHydrated) return;
+    articleStore.ensureTodayArticle(todayKey(), localeStore.language);
+  }, [localeStore.hasHydrated, localeStore.language]);
   const nextMeal = useMemo(() => {
     const loggedRecipeIds = new Set(loggedEntries.map(entry => `${entry.mealType}:${entry.recipeId}`));
     const pending = planItems.filter(item => !loggedRecipeIds.has(`${item.mealType}:${item.recipeId}`)).sort((a, b) => MEAL_ORDER.indexOf(a.mealType) - MEAL_ORDER.indexOf(b.mealType));
@@ -158,6 +160,7 @@ function HomeScreen() {
 
       {scoreResult && <NutritionScoreCard score={scoreResult.score} explanation={scoreResult.explanation} />}
 
+      <SectionHeader title={t('articles.title')} seeAllHref="/articles" />
       <ArticleCard article={articleStore.todayArticle} onPress={() => router.push({ pathname: '/article/[id]', params: { id: articleStore.todayArticle.id } })} />
 
       <PremiumCard />

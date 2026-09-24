@@ -16,24 +16,24 @@ import { myRecipesStore } from '@/store/myRecipesStore';
 import { adaptCategories, adaptIngredient, adaptRecipe } from '@/lib/catalogAdapter';
 
 export function getIngredients() {
-  return catalogStore.ingredients.map(adaptIngredient);
+  return catalogStore.ingredients.map(raw => adaptIngredient(raw, catalogStore.tagSlugs));
 }
 
 export function getIngredientById(id) {
   const raw = catalogStore.ingredients.find(ingredient => ingredient.id === id);
-  return raw ? adaptIngredient(raw) : undefined;
+  return raw ? adaptIngredient(raw, catalogStore.tagSlugs) : undefined;
 }
 
 export function getRecipes() {
-  return catalogStore.recipes.map(adaptRecipe);
+  return catalogStore.recipes.map(raw => adaptRecipe(raw, catalogStore.tagSlugs));
 }
 
 export function getRecipeById(id) {
   const raw = catalogStore.recipes.find(recipe => recipe.id === id);
-  if (raw) return adaptRecipe(raw);
+  if (raw) return adaptRecipe(raw, catalogStore.tagSlugs);
   return myRecipesStore.getById(id);
 }
 
 export function getCategories() {
-  return adaptCategories(catalogStore.tags);
+  return adaptCategories(catalogStore.tags, catalogStore.tagSlugs);
 }

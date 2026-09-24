@@ -36,11 +36,12 @@ export function GoogleSignInButton({ onError }) {
       }
       await authStore.loginWithGoogle(idToken);
     } catch (error) {
-      // TEMP DEBUG — surfacing the raw error to find the actual failure cause.
       if (isErrorWithCode(error)) {
-        if (error.code !== statusCodes.SIGN_IN_CANCELLED) onError?.(`[${error.code}] ${error.message}`);
+        if (error.code !== statusCodes.SIGN_IN_CANCELLED) onError?.(t('auth.errors.googleSignInFailed'));
       } else {
-        onError?.(`[thrown] ${error.message}`);
+        // A thrown Error from authStore.loginWithGoogle carries the backend's
+        // actual reason (e.g. "user is blocked") — worth showing as-is.
+        onError?.(error.message ?? t('auth.errors.googleSignInFailed'));
       }
     } finally {
       setIsSigningIn(false);

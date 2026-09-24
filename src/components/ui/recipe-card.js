@@ -45,7 +45,7 @@ function RecipeCardComponent({
                 {!recipe.isUserRecipe && <View style={styles.metaItem}>
                     <SymbolView name={{ ios: 'clock', android: 'schedule', web: 'schedule' }} size={11} tintColor="#ffffff" />
                     <ThemedText type="caption" color="#ffffff">
-                      {totalTime} {t('common.min')}
+                      {recipe.cookTimeText ?? `${totalTime} ${t('common.min')}`}
                     </ThemedText>
                   </View>}
                 {calories !== undefined && <View style={styles.metaItem}>

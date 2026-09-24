@@ -10,6 +10,7 @@ const TAB_ICONS = {
   index: { ios: 'house.fill', android: 'home', web: 'home' },
   recipes: { ios: 'fork.knife', android: 'restaurant_menu', web: 'restaurant_menu' },
   'meal-plan': { ios: 'calendar', android: 'calendar_today', web: 'calendar_today' },
+  articles: { ios: 'newspaper.fill', android: 'article', web: 'article' },
   'ai-analysis': { ios: 'sparkles', android: 'auto_awesome', web: 'auto_awesome' },
   progress: { ios: 'chart.line.uptrend.xyaxis', android: 'show_chart', web: 'show_chart' }
 };
