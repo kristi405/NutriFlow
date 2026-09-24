@@ -494,7 +494,15 @@
     "noChartMessage": "This indicator has no numeric values to plot.",
     "loadFailedTitle": "Couldn't load",
     "loadFailedMessage": "Check your connection and try again.",
-    "disclaimer": "For information only — not a medical diagnosis. Discuss your results with a doctor."
+    "disclaimer": "For information only — not a medical diagnosis. Discuss your results with a doctor.",
+    "ifLow": "If it's low",
+    "ifHigh": "If it's high",
+    "foodSources": "Food sources",
+    "viewHistory": "View history",
+    "view": "View",
+    "about": "About",
+    "indicatorTitle": "Indicator",
+    "noDetails": "No additional information is available for this indicator."
   },
   "privacyPolicy": {
     "title": "Terms & Conditions",

@@ -3,6 +3,7 @@ import { makeAutoObservable, runInAction } from 'mobx';
 import { apiRequest, apiUpload } from '@/lib/api';
 import { adaptHistoryPoint, adaptLabReport } from '@/lib/labReportAdapter';
 import { authStore } from './authStore';
+import { localeStore } from './localeStore';
 
 /**
  * Lab reports live on the server (private to the user); nothing is cached on
@@ -10,13 +11,16 @@ import { authStore } from './authStore';
  * report that couldn't be parsed still comes back, with isFailed set.
  */
 class LabReportStore {
+  // Full reports (with results) fetched for the detail screen, so the
+  // indicator page opened from it can read them without another request.
+  detailCache = new Map();
   reports = [];
   isLoading = false;
   isUploading = false;
   hasError = false;
 
   constructor() {
-    makeAutoObservable(this, {}, { autoBind: true });
+    makeAutoObservable(this, { detailCache: false }, { autoBind: true });
     // Replaced the old on-device-only analyses store.
     AsyncStorage.removeItem('nutriflow.aiAnalyses').catch(() => {});
   }
@@ -43,7 +47,7 @@ class LabReportStore {
   async uploadReport({ uri, name, mimeType }) {
     this.isUploading = true;
     try {
-      const raw = await apiUpload('/app/lab-reports', { fileUri: uri, fileName: name, mimeType, token: authStore.token });
+      const raw = await apiUpload(`/app/lab-reports?lang=${localeStore.language}`, { fileUri: uri, fileName: name, mimeType, token: authStore.token });
       const report = adaptLabReport(raw);
       runInAction(() => {
         this.reports = [report, ...this.reports.filter(existing => existing.id !== report.id)];
@@ -57,7 +61,9 @@ class LabReportStore {
   }
 
   async fetchReport(id) {
-    return adaptLabReport(await apiRequest(`/app/lab-reports/${id}`, { token: authStore.token }));
+    const report = adaptLabReport(await apiRequest(`/app/lab-reports/${id}`, { token: authStore.token }));
+    this.detailCache.set(String(id), report);
+    return report;
   }
 
   async deleteReport(id) {

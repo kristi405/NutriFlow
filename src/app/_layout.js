@@ -163,6 +163,16 @@ function TabLayout() {
           headerTintColor: theme.text,
           headerTitleStyle: { fontWeight: '700' }
         }} />
+        <Stack.Screen name="lab-report/indicator" options={{
+          headerShown: true,
+          headerTitle: t('aiAnalysis.indicatorTitle'),
+          headerBackTitle: t('common.back'),
+          headerBackTitleStyle: { fontSize: 14 },
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+          headerTitleStyle: { fontWeight: '700' }
+        }} />
         <Stack.Screen name="lab-report/history" options={{
           headerShown: true,
           headerTitle: t('aiAnalysis.historyTitle'),

@@ -494,7 +494,15 @@
     "noChartMessage": "Ten wskaźnik nie ma wartości liczbowych do wykresu.",
     "loadFailedTitle": "Nie udało się wczytać",
     "loadFailedMessage": "Sprawdź połączenie i spróbuj ponownie.",
-    "disclaimer": "Tylko informacyjnie — to nie jest diagnoza medyczna. Omów wyniki z lekarzem."
+    "disclaimer": "Tylko informacyjnie — to nie jest diagnoza medyczna. Omów wyniki z lekarzem.",
+    "ifLow": "Gdy jest obniżony",
+    "ifHigh": "Gdy jest podwyższony",
+    "foodSources": "Źródła w żywności",
+    "viewHistory": "Zobacz historię",
+    "view": "Zobacz",
+    "about": "O wskaźniku",
+    "indicatorTitle": "Wskaźnik",
+    "noDetails": "Brak dodatkowych informacji o tym wskaźniku."
   },
   "privacyPolicy": {
     "title": "Regulamin",

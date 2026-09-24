@@ -84,28 +84,34 @@ function LabReportScreen() {
             </View>
 
             {results.length === 0 ? <EmptyState icon={{ ios: 'doc.text.magnifyingglass', android: 'find_in_page', web: 'find_in_page' }} title={t('aiAnalysis.noResultsTitle')} message={t('aiAnalysis.noResultsMessage')} /> : <View style={[styles.card, styles.resultsCard, { backgroundColor: theme.background, borderColor: theme.border }]}>
-                {results.map((result, index) => {
-              const flagColor = result.flag === 'high' ? theme.error : result.flag === 'low' ? theme.warning : theme.text;
-              const canOpenHistory = result.valueNumeric !== null;
-              return <Pressable key={`${result.name}-${index}`} disabled={!canOpenHistory} onPress={() => router.push({ pathname: '/lab-report/history', params: { name: result.name } })} style={[styles.resultRow, index < results.length - 1 && { borderBottomColor: theme.border, borderBottomWidth: StyleSheet.hairlineWidth }]}>
-                      <View style={styles.resultText}>
-                        <ThemedText type="small" color={theme.text}>{result.name}</ThemedText>
-                        {result.refRange ? <ThemedText type="caption" color={theme.textSecondary}>{t('aiAnalysis.reference', { range: result.refRange })}</ThemedText> : null}
-                      </View>
-                      <View style={styles.resultValue}>
-                        <ThemedText type="smallBold" color={flagColor}>
-                          {result.flag === 'high' ? '↑ ' : result.flag === 'low' ? '↓ ' : ''}{result.value}{result.unit ? ` ${result.unit}` : ''}
-                        </ThemedText>
-                      </View>
-                      {canOpenHistory ? <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={14} tintColor={theme.textSecondary} /> : null}
-                    </Pressable>;
-            })}
+                {results.map((result, index) => <ResultRow key={`${result.name}-${index}`} result={result} reportId={report.id} isLast={index === results.length - 1} />)}
               </View>}
 
             <ThemedText type="caption" color={theme.textSecondary} style={styles.disclaimer}>{t('aiAnalysis.disclaimer')}</ThemedText>
           </>}
       </ScreenScrollView>
     </>;
+}
+
+function ResultRow({ result, reportId, isLast }) {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const flagColor = result.flag === 'high' ? theme.error : result.flag === 'low' ? theme.warning : theme.text;
+
+  return <View style={[styles.resultRow, !isLast && { borderBottomColor: theme.border, borderBottomWidth: StyleSheet.hairlineWidth }]}>
+      <View style={styles.resultText}>
+        <ThemedText type="small" color={theme.text}>{result.name}</ThemedText>
+        {result.refRange ? <ThemedText type="caption" color={theme.textSecondary}>{t('aiAnalysis.reference', { range: result.refRange })}</ThemedText> : null}
+      </View>
+      <View style={styles.resultValue}>
+        <ThemedText type="smallBold" color={flagColor}>
+          {result.flag === 'high' ? '↑ ' : result.flag === 'low' ? '↓ ' : ''}{result.value}{result.unit ? ` ${result.unit}` : ''}
+        </ThemedText>
+      </View>
+      <Pressable onPress={() => router.push({ pathname: '/lab-report/indicator', params: { reportId, index: String(result.index) } })} hitSlop={6} style={[styles.viewButton, { backgroundColor: theme.accentSoft }]}>
+        <ThemedText type="caption" color={theme.accent} style={styles.viewButtonText}>{t('aiAnalysis.view')}</ThemedText>
+      </Pressable>
+    </View>;
 }
 
 function SummaryChip({ label, count, color }) {
@@ -159,6 +165,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.two,
     paddingVertical: Spacing.two
+  },
+  viewButton: {
+    borderRadius: 999,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: 4
+  },
+  viewButtonText: {
+    fontWeight: '700'
   },
   resultText: {
     flex: 1,

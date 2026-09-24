@@ -21,7 +21,13 @@ export function adaptLabResult(raw) {
     refRange: raw.ref_range || null,
     refMin: toNumber(raw.ref_min),
     refMax: toNumber(raw.ref_max),
-    flag: ABNORMAL_FLAGS.has(flag) ? flag : null
+    flag: ABNORMAL_FLAGS.has(flag) ? flag : null,
+    // Reference explanations from Gemini, in the language the report was
+    // uploaded with. Reports from before these fields existed have null / [].
+    description: raw.description || null,
+    lowEffects: raw.low_effects || null,
+    highEffects: raw.high_effects || null,
+    foodSources: Array.isArray(raw.food_sources) ? raw.food_sources : []
   };
 }
 
@@ -35,7 +41,7 @@ export function adaptLabReport(raw) {
     takenAt: raw.taken_at || null,
     createdAt: raw.ctime || raw.created_at || null,
     fileUrl: raw.file_url || null,
-    results: (raw.results ?? []).map(adaptLabResult)
+    results: (raw.results ?? []).map((result, index) => ({ ...adaptLabResult(result), index }))
   };
 }
 

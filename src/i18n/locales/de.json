@@ -494,7 +494,15 @@
     "noChartMessage": "Für diesen Wert gibt es keine Zahlenwerte zum Darstellen.",
     "loadFailedTitle": "Laden fehlgeschlagen",
     "loadFailedMessage": "Prüfe deine Verbindung und versuche es erneut.",
-    "disclaimer": "Nur zur Information — keine medizinische Diagnose. Besprich deine Werte mit einem Arzt."
+    "disclaimer": "Nur zur Information — keine medizinische Diagnose. Besprich deine Werte mit einem Arzt.",
+    "ifLow": "Bei niedrigem Wert",
+    "ifHigh": "Bei erhöhtem Wert",
+    "foodSources": "Lebensmittelquellen",
+    "viewHistory": "Verlauf ansehen",
+    "view": "Ansehen",
+    "about": "Worum es geht",
+    "indicatorTitle": "Wert",
+    "noDetails": "Für diesen Wert liegen keine zusätzlichen Informationen vor."
   },
   "privacyPolicy": {
     "title": "Nutzungsbedingungen",
