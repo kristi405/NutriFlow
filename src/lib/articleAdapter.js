@@ -36,6 +36,7 @@ export function adaptArticle(raw) {
     imageUrl: raw.image_url ?? null,
     publishedAt: raw.ctime ?? null,
     isFavorite: raw.isFavorite ?? false,
+    // Not returned by the backend yet — until it is, every article counts as unread.
     tags: (raw.tags ?? []).map(({ id, name }) => ({ id, name }))
   };
 }

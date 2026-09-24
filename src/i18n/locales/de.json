@@ -1,7 +1,13 @@
 {
   "calculating": {
     "title": "Berechnung deiner Kalorienziele...",
-    "steps": ["Analysieren deiner Ziele", "Berechnen deines Kalorienbedarfs", "Abstimmen deiner Makros", "Erstellen deines Essensplans", "Personalisieren der Empfehlungen"]
+    "steps": [
+      "Analysieren deiner Ziele",
+      "Berechnen deines Kalorienbedarfs",
+      "Abstimmen deiner Makros",
+      "Erstellen deines Essensplans",
+      "Personalisieren der Empfehlungen"
+    ]
   },
   "common": {
     "seeAll": "Alle anzeigen",
@@ -78,6 +84,13 @@
     },
     "apple": {
       "signIn": "Mit Apple fortfahren"
+    },
+    "terms": {
+      "agreePrefix": "Ich akzeptiere die ",
+      "link": "Nutzungsbedingungen",
+      "agreeSuffix": " und erteile meine ausdrückliche Einwilligung in die Verarbeitung meiner personenbezogenen Daten und Gesundheitsdaten.",
+      "close": "Schließen",
+      "accept": "Akzeptieren und fortfahren"
     }
   },
   "onboarding": {
@@ -226,10 +239,11 @@
   "profile": {
     "editProfile": "Profil bearbeiten",
     "editPhoto": "Foto ändern",
+    "removePhoto": "Foto entfernen",
     "mealsLogged": "Erfasste Mahlzeiten",
     "mealsPlanned": "Geplante Mahlzeiten",
     "memberSince": "Mitglied seit",
-    "personalGoals": "Persönliche Ziele",
+    "personalGoals": "Persönliche Informationen",
     "goal": "Ziel",
     "activityLevel": "Aktivitätsniveau",
     "dietPreferences": "Ernährungspräferenzen",
@@ -240,7 +254,7 @@
     "notifications": "Benachrichtigungen",
     "darkMode": "Dunkelmodus",
     "language": "Sprache",
-    "privacySecurity": "Datenschutz & Sicherheit",
+    "privacySecurity": "Nutzungsbedingungen",
     "helpSupport": "Hilfe & Support",
     "helpModalTitle": "Support kontaktieren",
     "helpModalSubtitle": "Schreib uns in den sozialen Medien oder sende uns eine Nachricht",
@@ -269,13 +283,16 @@
     "range1y": "1J",
     "rangeAll": "Alle",
     "todayProgress": "Heutiger Fortschritt",
+    "showMore": "Mehr anzeigen",
+    "showLess": "Weniger anzeigen",
+    "detailedNutrition": "Detaillierte Ernährung",
     "achievements": "Meine Erfolge",
     "achievementStreakTitle": "7-Tage-Serie",
     "achievementStreakSubtitle": "Diese Woche jeden Tag Mahlzeiten erfasst",
     "achievementWaterTitle": "Hydrations-Held",
     "achievementWaterSubtitle": "Wasserziel 5-mal erreicht",
     "achievementProteinTitle": "Eiweiß-Profi",
-    "achievementProteinSubtitle": "Eiweißziel 10-mal erreicht",
+    "achievementProteinSubtitle": "Eiweißziel 7-mal erreicht",
     "achievementFirstRecipeTitle": "Erstes Rezept",
     "achievementFirstRecipeSubtitle": "Dein erstes Rezept gekocht"
   },
@@ -284,6 +301,16 @@
     "subtitle": "Plane deine Mahlzeiten für den Tag",
     "noMealPlanned": "Noch keine Mahlzeit geplant",
     "weeklyMenu": "Wochenmenü",
+    "generatingWeekTitle": "Wochenmenü wird erstellt…",
+    "generatingWeekMessage": "Wir wählen Mahlzeiten passend zu deinem Kalorienziel",
+    "weekGeneratedTitle": "Wochenmenü ist fertig!",
+    "weekGeneratedMessage": "Dein Menü für die Woche wurde erstellt.",
+    "shoppingRangeTitle": "Einkaufsliste erstellen",
+    "shoppingRangeSubtitle": "Wähle, für welchen Zeitraum die Liste gelten soll",
+    "shoppingRangeToday": "Für heute",
+    "shoppingRangeTodayHint": "Zutaten für das heutige Menü",
+    "shoppingRangeWeek": "Für die Woche",
+    "shoppingRangeWeekHint": "Zutaten für die restlichen Tage dieser Woche",
     "swapTitle": "Diese Mahlzeit ersetzen",
     "swapSubtitle": "Wähle einen Ersatz aus derselben Kategorie",
     "swapEmpty": "Keine weiteren Rezepte in dieser Kategorie",
@@ -423,7 +450,8 @@
     "items": "Artikel",
     "allDone": "Alles erledigt — nichts mehr zu kaufen",
     "emptyTitle": "Noch nichts zum Einkaufen",
-    "emptyMessage": "Plane zuerst die heutigen Mahlzeiten und komm dann zurück, um deine Einkaufsliste zu erstellen."
+    "emptyMessage": "Plane zuerst die heutigen Mahlzeiten und komm dann zurück, um deine Einkaufsliste zu erstellen.",
+    "emptyMessageWeek": "Plane zuerst Mahlzeiten für diese Woche und komm dann für deine Einkaufsliste zurück."
   },
   "aiAnalysis": {
     "title": "KI-Analyse",
@@ -469,45 +497,77 @@
     "disclaimer": "Nur zur Information — keine medizinische Diagnose. Besprich deine Werte mit einem Arzt."
   },
   "privacyPolicy": {
-    "title": "Datenschutz & Sicherheit",
-    "lastUpdated": "Zuletzt aktualisiert: Januar 2026",
-    "intro": "NutriFlow („wir“, „unser“, „die App“) respektiert deine Privatsphäre. Diese Richtlinie erklärt, welche Informationen wir sammeln, wie wir sie verwenden und welche Wahlmöglichkeiten du hast.",
+    "title": "Nutzungsbedingungen",
+    "lastUpdated": "Zuletzt aktualisiert: September 2026",
+    "intro": "Bitte lesen Sie diese Nutzungsbedingungen und Datenschutzhinweise (die „Bedingungen“) sorgfältig. Sie bilden eine rechtliche Vereinbarung zwischen Ihnen und NutriFlow („wir“, „die App“) und regeln die Nutzung der App sowie die Erhebung und Verarbeitung Ihrer personenbezogenen Daten, einschließlich Gesundheitsdaten.",
     "sections": [
       {
-        "heading": "Welche Informationen wir sammeln",
-        "body": "Kontoinformationen (deine E-Mail-Adresse und Anmeldemethode); von dir angegebene Profildaten (Name, Geschlecht, Alter, Größe, Gewicht, Zielgewicht, Aktivitätsniveau, Ernährungspräferenzen und Allergien); Ernährungsaktivität (erfasste Mahlzeiten, Wasseraufnahme, Gewichtsverlauf, Essenspläne sowie angesehene und favorisierte Rezepte); Laborergebnisse, die du für die KI-gestützte Analyse hochlädst; Schrittzahl, sofern du die Bewegungsberechtigung erteilst; sowie App-Einstellungen wie Sprache, Dunkelmodus und Benachrichtigungen."
+        "heading": "1. Annahme der Bedingungen",
+        "body": "Mit der Erstellung eines Kontos oder der Nutzung von NutriFlow bestätigen Sie, dass Sie diese Bedingungen gelesen und verstanden haben und ihnen zustimmen. Wenn Sie nicht einverstanden sind, nutzen Sie die App bitte nicht."
       },
       {
-        "heading": "Wie wir deine Informationen verwenden",
-        "body": "Wir nutzen diese Informationen, um deine Kalorien- und Makronährstoffziele zu berechnen, Rezept- und Essensplanempfehlungen zu personalisieren, deinen Fortschritt im Zeitverlauf zu verfolgen, KI-Ernährungserkenntnisse aus hochgeladenen Laborergebnissen zu erstellen und uns deine App-Einstellungen zu merken."
+        "heading": "2. Über die App; keine medizinische Beratung",
+        "body": "NutriFlow ist ein Werkzeug zur Ernährungsdokumentation und für das Wohlbefinden. Kalorien- und Nährstoffschätzungen, Rezepte, Ernährungspläne, Artikel und KI-generierte Hinweise dienen ausschließlich allgemeinen Informationszwecken. Die App ist kein Medizinprodukt und bietet keine medizinische Beratung, Diagnose oder Behandlung. Die KI-Analyse von Laborwerten kann Fehler enthalten. Konsultieren Sie vor einer Ernährungsumstellung, dem Beginn eines Trainingsprogramms oder gesundheitlichen Entscheidungen stets eine qualifizierte medizinische Fachperson, insbesondere bei Schwangerschaft, Erkrankungen, Nahrungsmittelallergien oder Medikamenteneinnahme. Missachten Sie niemals fachlichen Rat aufgrund von Inhalten der App."
       },
       {
-        "heading": "Wo deine Daten gespeichert werden",
-        "body": "Dein Profil, deine Mahlzeitenprotokolle, dein Gewichtsverlauf und deine Einstellungen werden lokal auf deinem Gerät gespeichert. Wenn du dich mit Google oder Apple anmeldest, wird die Authentifizierung direkt von diesem Anbieter durchgeführt."
+        "heading": "3. Mindestalter",
+        "body": "Sie müssen mindestens 16 Jahre alt sein, um NutriFlow zu nutzen. Jüngere Personen dürfen die App nur mit nachweisbarer Einwilligung eines Erziehungsberechtigten nutzen, der diese Bedingungen in ihrem Namen akzeptiert."
       },
       {
-        "heading": "Drittanbieterdienste",
-        "body": "Wir nutzen die Anmeldung mit Google und die Anmeldung mit Apple als optionale Authentifizierungsmethoden. Jede unterliegt der eigenen Datenschutzrichtlinie des jeweiligen Anbieters, die wir dir zur Durchsicht empfehlen."
+        "heading": "4. Ihr Konto",
+        "body": "Sie sind für die Richtigkeit Ihrer Angaben und die Sicherheit Ihrer Zugangsdaten verantwortlich. Informieren Sie uns unverzüglich über jede unbefugte Nutzung Ihres Kontos. Die Anmeldung ist über Google oder Apple möglich; für diese Dienste gelten deren eigene Bedingungen."
       },
       {
-        "heading": "Datenweitergabe",
-        "body": "Wir verkaufen deine personenbezogenen Daten nicht und geben deine Gesundheits- oder Ernährungsdaten nicht an Dritte weiter, außer soweit dies für die von dir gewählten Anmeldemethoden erforderlich ist."
+        "heading": "5. Welche personenbezogenen Daten wir verarbeiten",
+        "body": "Kontodaten: E-Mail-Adresse und Anmeldemethode. Profildaten: Name, Profilfoto, Geschlecht, Alter, Größe, Gewicht, Zielgewicht, Aktivitätslevel, Ziel, Ernährungspräferenzen und Allergien. Gesundheitsbezogene Daten (besondere Kategorie): Gewichtsverlauf, BMI, Kalorien- und Nährstoffaufnahme, Wasseraufnahme, Schrittzahl, Allergien und Ernährungseinschränkungen sowie Laborergebnisse und Berichte, die Sie zur Analyse hochladen. Nutzungs- und Einstellungsdaten: angesehene und favorisierte Rezepte, Ernährungspläne, gelesene Artikel, Sprache, Design und Benachrichtigungseinstellungen."
       },
       {
-        "heading": "Deine Rechte und Wahlmöglichkeiten",
-        "body": "Du kannst deine Profildaten und Einstellungen jederzeit direkt in der App einsehen, bearbeiten oder löschen und dich abmelden, um deine Sitzung zu beenden. Kontaktiere uns, wenn du möchtest, dass mit deinem Konto verknüpfte Daten entfernt werden."
+        "heading": "6. Ihre Einwilligung in die Verarbeitung personenbezogener Daten und Gesundheitsdaten",
+        "body": "Indem Sie zustimmen, ein Kästchen aktivieren oder die App weiter nutzen, erteilen Sie Ihre freiwillige, bestimmte, informierte und ausdrückliche Einwilligung in die Erhebung, Speicherung und Verarbeitung Ihrer personenbezogenen Daten, einschließlich Gesundheitsdaten, wie in diesen Bedingungen beschrieben. Dies umfasst die Einwilligung in (a) die Speicherung dieser Daten auf Ihrem Gerät sowie auf unseren Servern und denen unserer Dienstleister; (b) die Nutzung zur Berechnung Ihrer Ziele, zur Personalisierung von Empfehlungen und zur Fortschrittsverfolgung; (c) die Übermittlung hochgeladener Laborergebnisse an einen externen KI-Dienst ausschließlich zur Erstellung der von Ihnen angeforderten Analyse. Die Einwilligung ist freiwillig. Ohne sie können Funktionen, die Gesundheitsdaten erfordern, nicht bereitgestellt werden. Sie können Ihre Einwilligung jederzeit gemäß Abschnitt 12 widerrufen."
       },
       {
-        "heading": "Datenschutz für Kinder",
-        "body": "NutriFlow richtet sich nicht an Kinder unter 13 Jahren, und wir sammeln wissentlich keine Informationen von ihnen."
+        "heading": "7. Zwecke und Rechtsgrundlagen",
+        "body": "Wir verarbeiten Ihre Daten, um: Ihr Konto zu erstellen und die App bereitzustellen (Vertragserfüllung); Ernährungsziele zu berechnen, Inhalte zu personalisieren und KI-Hinweise zu erzeugen, was Gesundheitsdaten betrifft (Ihre ausdrückliche Einwilligung); die Sicherheit zu gewährleisten, Missbrauch zu verhindern und Fehler zu beheben (unsere berechtigten Interessen); sowie gesetzliche Pflichten zu erfüllen. Wir verwenden Ihre Gesundheitsdaten nicht für Werbung."
       },
       {
-        "heading": "Änderungen dieser Richtlinie",
-        "body": "Wir können diese Richtlinie von Zeit zu Zeit aktualisieren. Bei einer Aktualisierung ändern wir das oben genannte Datum „Zuletzt aktualisiert“."
+        "heading": "8. Speicherung, KI-Verarbeitung und Dienstleister",
+        "body": "Daten können auf Ihrem Gerät und auf sicheren Servern gespeichert werden, die von uns oder unseren Hosting-Anbietern betrieben werden. Die Anmeldung erfolgt über Google und Apple. Hochgeladene Laborergebnisse werden nur zur Erstellung der angeforderten Analyse an einen externen KI-Anbieter übermittelt; wir verpflichten solche Anbieter, die Daten nur auf unsere Weisung zu verarbeiten. Bei Übermittlungen außerhalb Ihres Landes oder des EWR stützen wir uns auf geeignete Garantien, etwa Standardvertragsklauseln."
       },
       {
-        "heading": "Kontaktiere uns",
-        "body": "Wenn du Fragen zu dieser Richtlinie oder deinen Daten hast, erreichst du uns unter 5507151kr@gmail.com oder über Hilfe & Support in der App."
+        "heading": "9. Weitergabe von Daten",
+        "body": "Wir verkaufen Ihre personenbezogenen Daten nicht und geben Gesundheitsdaten nicht an Werbetreibende weiter. Daten werden nur an in unserem Auftrag handelnde Dienstleister wie oben beschrieben oder aufgrund gesetzlicher Pflichten bzw. zum Schutz von Rechten offengelegt."
+      },
+      {
+        "heading": "10. Speicherdauer und Löschung",
+        "body": "Wir speichern Ihre Daten, solange Ihr Konto aktiv ist oder dies zur Bereitstellung der App erforderlich ist. Sie können jederzeit Daten löschen oder die Löschung Ihres Kontos verlangen. Nach der Löschung entfernen oder anonymisieren wir Ihre Daten innerhalb angemessener Frist, sofern keine gesetzliche Aufbewahrungspflicht besteht."
+      },
+      {
+        "heading": "11. Ihre Rechte",
+        "body": "Je nach Wohnort (z. B. nach der DSGVO) haben Sie das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Widerspruch, Datenübertragbarkeit sowie auf Beschwerde bei Ihrer Datenschutzbehörde. Zur Ausübung dieser Rechte kontaktieren Sie uns über die Angaben in Abschnitt 17."
+      },
+      {
+        "heading": "12. Widerruf der Einwilligung",
+        "body": "Sie können Ihre Einwilligung jederzeit widerrufen, indem Sie die betreffenden Daten in der App löschen, die App nicht mehr nutzen oder uns per E-Mail kontaktieren. Der Widerruf berührt nicht die Rechtmäßigkeit der bis dahin erfolgten Verarbeitung. Nach dem Widerruf stellen wir die Verarbeitung Ihrer Gesundheitsdaten ein und löschen sie auf Wunsch; einige Funktionen sind dann möglicherweise nicht mehr verfügbar."
+      },
+      {
+        "heading": "13. Sicherheit",
+        "body": "Wir setzen angemessene technische und organisatorische Maßnahmen zum Schutz Ihrer Daten ein. Kein System ist vollkommen sicher, daher können wir absolute Sicherheit nicht garantieren. Sie sind für den Schutz Ihres Geräts und Kontos verantwortlich."
+      },
+      {
+        "heading": "14. Zulässige Nutzung und geistiges Eigentum",
+        "body": "Sie verpflichten sich, die App nicht zu missbrauchen, sich keinen unbefugten Zugang zu verschaffen, sie nicht zurückzuentwickeln und nicht rechtswidrig zu nutzen. Die App, ihr Design, Texte, Rezepte und weitere Inhalte gehören uns oder unseren Lizenzgebern und sind gesetzlich geschützt. Wir gewähren Ihnen eine beschränkte, persönliche, nicht übertragbare Lizenz zur Nutzung der App. Von Ihnen hinzugefügte Inhalte bleiben Ihre; Sie räumen uns die zur Speicherung und Anzeige im Rahmen des Dienstes erforderlichen Rechte ein."
+      },
+      {
+        "heading": "15. Haftungsausschluss und Haftungsbeschränkung",
+        "body": "Die App wird „wie besehen“ bereitgestellt. Soweit gesetzlich zulässig, übernehmen wir keine Gewähr dafür, dass Ernährungsinformationen, Rezepte oder KI-Analysen vollständig, richtig oder für Sie geeignet sind, und haften nicht für mittelbare Schäden oder gesundheitliche Folgen, die aus dem Vertrauen auf die App entstehen. Nichts in diesen Bedingungen schließt eine Haftung aus, die gesetzlich nicht ausgeschlossen werden kann, oder beschränkt Ihre zwingenden Verbraucherrechte."
+      },
+      {
+        "heading": "16. Änderungen dieser Bedingungen",
+        "body": "Wir können diese Bedingungen von Zeit zu Zeit aktualisieren. Wir passen das Datum der letzten Aktualisierung an und bitten Sie bei wesentlichen oder Ihre Einwilligung betreffenden Änderungen, diese zu prüfen oder Ihre Einwilligung zu erneuern. Die weitere Nutzung nach Änderungen gilt als Zustimmung."
+      },
+      {
+        "heading": "17. Anwendbares Recht und Kontakt",
+        "body": "Diese Bedingungen unterliegen dem Recht des Staates, in dem der Betreiber der App niedergelassen ist, unbeschadet zwingender Verbraucherschutzvorschriften Ihres Wohnsitzlandes. Bei Fragen, Datenanfragen oder zum Widerruf der Einwilligung schreiben Sie an 5507151kr@gmail.com oder nutzen Sie Hilfe & Support in der App."
       }
     ]
   }

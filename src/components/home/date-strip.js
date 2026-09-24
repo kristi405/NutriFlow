@@ -1,8 +1,32 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { todayKey, weekContaining, weekdayLabel } from '@/lib/date';
+
+function DayButton({ isSelected, isToday, onPress, weekday, dayNumber, theme }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    if (!isSelected) return;
+    Animated.sequence([Animated.timing(scale, { toValue: 1.18, duration: 160, easing: Easing.out(Easing.quad), useNativeDriver: true }), Animated.spring(scale, { toValue: 1, friction: 4, tension: 140, useNativeDriver: true })]).start();
+  }, [isSelected]);
+  return <Pressable onPress={onPress} style={styles.dayWrapper}>
+      <Animated.View style={[styles.day, {
+      backgroundColor: isSelected ? theme.accent : 'transparent',
+      borderColor: !isSelected && isToday ? theme.accent : 'transparent',
+      transform: [{ scale }]
+    }]}>
+        <ThemedText type="caption" color={isSelected ? '#ffffff' : theme.textSecondary}>{weekday}</ThemedText>
+        <ThemedText type="smallBold" color={isSelected ? '#ffffff' : theme.text}>{dayNumber}</ThemedText>
+      </Animated.View>
+    </Pressable>;
+}
 
 export function DateStrip({ selectedDate, onSelectDate, style }) {
   const theme = useTheme();
@@ -12,17 +36,7 @@ export function DateStrip({ selectedDate, onSelectDate, style }) {
       const dayNumber = Number(dateKey.split('-')[2]);
       const isSelected = dateKey === selectedDate;
       const isToday = dateKey === todayKey();
-      return <Pressable key={dateKey} onPress={() => onSelectDate(dateKey)} style={[styles.day, {
-        backgroundColor: isSelected ? theme.accent : 'transparent',
-        borderColor: !isSelected && isToday ? theme.accent : 'transparent'
-      }]}>
-            <ThemedText type="caption" color={isSelected ? '#ffffff' : theme.textSecondary}>
-              {weekdayLabel(dateKey)}
-            </ThemedText>
-            <ThemedText type="smallBold" color={isSelected ? '#ffffff' : theme.text}>
-              {dayNumber}
-            </ThemedText>
-          </Pressable>;
+      return <DayButton key={dateKey} isSelected={isSelected} isToday={isToday} onPress={() => onSelectDate(dateKey)} weekday={weekdayLabel(dateKey)} dayNumber={dayNumber} theme={theme} />;
     })}
     </View>;
 }
@@ -32,8 +46,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: Spacing.one
   },
+  dayWrapper: {
+    flex: 1
+  },
   day: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,

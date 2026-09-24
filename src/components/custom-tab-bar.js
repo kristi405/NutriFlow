@@ -1,7 +1,8 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SymbolView } from 'expo-symbols';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
@@ -30,6 +31,28 @@ export const TAB_BAR_HEIGHT = 64;
 // would end in a hard visible edge above the bar.
 const BLUR_STEPS = [6, 16, 30, 45, 60];
 
+function TabButton({ isFocused, onPress, icon, label, theme }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    if (!isFocused) return;
+    Animated.sequence([Animated.timing(scale, { toValue: 1.18, duration: 160, easing: Easing.out(Easing.quad), useNativeDriver: true }), Animated.spring(scale, { toValue: 1, friction: 4, tension: 140, useNativeDriver: true })]).start();
+  }, [isFocused]);
+  return <Pressable onPress={onPress} style={({ pressed }) => [styles.tabButton, pressed && styles.tabButtonPressed]}>
+      <Animated.View style={[styles.tabContent, { transform: [{ scale }] }]}>
+        {isFocused && <View style={[styles.activeBackground, { backgroundColor: theme.accentSoft, shadowColor: theme.accent }]} />}
+        <SymbolView name={icon} size={22} tintColor={isFocused ? theme.accent : theme.textSecondary} />
+        <ThemedText type="caption" color={isFocused ? theme.accent : theme.textSecondary} style={styles.label}>
+          {label}
+        </ThemedText>
+      </Animated.View>
+    </Pressable>;
+}
+
 export function CustomTabBar({ state, descriptors, navigation }) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -40,7 +63,7 @@ export function CustomTabBar({ state, descriptors, navigation }) {
         {BLUR_STEPS.map(intensity => <BlurView key={intensity} intensity={intensity} tint={theme.text === '#ffffff' ? 'dark' : 'light'} style={styles.blurStrip} />)}
         <LinearGradient colors={[`${theme.background}00`, `${theme.background}B3`]} style={StyleSheet.absoluteFill} />
       </View>
-      <View style={[styles.bar, { backgroundColor: theme.background, shadowColor: theme.text }]}>
+      <View style={[styles.bar, { backgroundColor: theme.background, shadowColor: '#000000' }]}>
         {visibleRoutes.map(route => {
         const routeIndex = state.routes.findIndex(item => item.key === route.key);
         const { options } = descriptors[route.key];
@@ -55,13 +78,7 @@ export function CustomTabBar({ state, descriptors, navigation }) {
           if (!isFocused && !event.defaultPrevented) navigation.navigate(route.name);
         }
 
-        return <Pressable key={route.key} onPress={handlePress} style={({ pressed }) => [styles.tabButton, pressed && styles.tabButtonPressed]}>
-              {isFocused && <View style={[styles.activeBackground, { backgroundColor: theme.accentSoft }]} />}
-              <SymbolView name={TAB_ICONS[iconKey]} size={22} tintColor={isFocused ? theme.accent : theme.textSecondary} />
-              <ThemedText type="caption" color={isFocused ? theme.accent : theme.textSecondary} style={styles.label}>
-                {label}
-              </ThemedText>
-            </Pressable>;
+        return <TabButton key={route.key} isFocused={isFocused} onPress={handlePress} icon={TAB_ICONS[iconKey]} label={label} theme={theme} />;
       })}
       </View>
     </View>;
@@ -77,7 +94,7 @@ const styles = StyleSheet.create({
   },
   fade: {
     position: 'absolute',
-    top: -28,
+    top: -10,
     left: 0,
     right: 0,
     bottom: 0
@@ -92,10 +109,10 @@ const styles = StyleSheet.create({
     height: TAB_BAR_HEIGHT,
     borderRadius: 32,
     paddingHorizontal: 8,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 8
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 16,
+    elevation: 12
   },
   tabButton: {
     flex: 1,
@@ -109,11 +126,23 @@ const styles = StyleSheet.create({
   },
   activeBackground: {
     position: 'absolute',
-    top: 8,
-    bottom: 8,
-    left: 6,
-    right: 6,
-    borderRadius: 24
+    top: 5,
+    bottom: 5,
+    left: -5,
+    right: -5,
+    borderRadius: 27,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3
+  },
+
+  tabContent: {
+    alignSelf: 'stretch',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2
   },
   label: {
     fontSize: 9,

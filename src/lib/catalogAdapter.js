@@ -146,11 +146,13 @@ export function adaptRecipe(raw, slugs) {
 }
 
 const CATEGORY_IMAGES = {
-  breakfast: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=800',
-  lunch: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
-  dinner: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800',
-  salad: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800',
-  snack: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800'
+  breakfast: 'https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=800',
+  lunch: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=800',
+  dinner: 'https://images.unsplash.com/photo-1529042410759-befb1204b468?w=800',
+  salad: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800',
+  snack: 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=800',
+  fruits: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=800',
+  fruit: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=800'
 };
 const DEFAULT_CATEGORY_IMAGE = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800';
 

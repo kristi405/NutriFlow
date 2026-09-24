@@ -4,34 +4,20 @@ import { PremiumCard } from '@/components/ui/premium-card';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { deletePhoto, pickProfilePhoto } from '@/lib/profilePhoto';
 import { authStore } from '@/store/authStore';
 import { foodLogStore } from '@/store/foodLogStore';
 import { mealPlanStore } from '@/store/mealPlanStore';
 import { profileStore } from '@/store/profileStore';
 import { notificationsStore } from '@/store/notificationsStore';
 import { themeStore } from '@/store/themeStore';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
 import { Alert, Linking, Modal, Pressable, StyleSheet, Switch, TextInput, View } from 'react-native';
 
-const GOAL_LABEL_KEYS = {
-  'lose-weight': 'onboarding.goal.loseWeight',
-  'maintain-weight': 'onboarding.goal.maintainWeight',
-  'gain-weight': 'onboarding.goal.gainWeight',
-  'build-muscle': 'onboarding.goal.buildMuscle',
-  'eat-healthier': 'onboarding.goal.eatHealthier',
-  'general-health': 'onboarding.goal.generalHealth'
-};
-const ACTIVITY_LABEL_KEYS = {
-  sedentary: 'onboarding.activity.sedentary',
-  light: 'onboarding.activity.light',
-  moderate: 'onboarding.activity.moderate',
-  active: 'onboarding.activity.active',
-  'very-active': 'onboarding.activity.veryActive',
-  'extra-active': 'onboarding.activity.extraActive'
-};
 const DIETARY_TAG_KEYS = {
   vegetarian: 'vegetarian',
   vegan: 'vegan',
@@ -69,6 +55,29 @@ function ProfileScreen() {
 
   if (!profile) return null;
 
+  async function handlePickPhoto(source) {
+    try {
+      const uri = await pickProfilePhoto(source);
+      if (!uri) return;
+      deletePhoto(profile.photoUri);
+      profileStore.updateProfile({ photoUri: uri });
+    } catch {
+      Alert.alert(t('common.errorTitle'), t('common.errorDefault'));
+    }
+  }
+
+  function handleEditPhoto() {
+    const actions = [{ text: t('recipes.takePhoto'), onPress: () => handlePickPhoto('camera') }, { text: t('recipes.chooseFromLibrary'), onPress: () => handlePickPhoto('library') }];
+    if (profile.photoUri) {
+      actions.push({ text: t('profile.removePhoto'), style: 'destructive', onPress: () => {
+        deletePhoto(profile.photoUri);
+        profileStore.updateProfile({ photoUri: null });
+      } });
+    }
+    actions.push({ text: t('common.cancel'), style: 'cancel' });
+    Alert.alert(t('profile.editPhoto'), undefined, actions);
+  }
+
   function showComingSoon(feature) {
     Alert.alert(feature, t('home.comingSoon'));
   }
@@ -103,35 +112,7 @@ function ProfileScreen() {
     year: 'numeric'
   }) : '—';
 
-  const goalType = profile.goal?.type;
-  const goalLabel = goalType ? t(GOAL_LABEL_KEYS[goalType] ?? '', { defaultValue: goalType }) : '—';
-  const activityLabel = profile.activityLevel ? t(ACTIVITY_LABEL_KEYS[profile.activityLevel] ?? '', { defaultValue: profile.activityLevel }) : '—';
 
-  const infoRows = [{
-    icon: { ios: 'flag.fill', android: 'flag', web: 'flag' },
-    label: t('profile.goal'),
-    value: goalLabel
-  }, {
-    icon: { ios: 'birthday.cake.fill', android: 'cake', web: 'cake' },
-    label: t('onboarding.personalInfo.age'),
-    value: profile.age
-  }, {
-    icon: { ios: 'ruler.fill', android: 'straighten', web: 'straighten' },
-    label: t('onboarding.personalInfo.height'),
-    value: `${profile.heightCm} cm`
-  }, {
-    icon: { ios: 'scalemass.fill', android: 'monitor_weight', web: 'monitor_weight' },
-    label: t('onboarding.personalInfo.weight'),
-    value: `${profile.weightKg} ${t('common.kg')}`
-  }, {
-    icon: { ios: 'target', android: 'target', web: 'target' },
-    label: t('onboarding.personalInfo.targetWeight'),
-    value: profile.targetWeightKg !== undefined ? `${profile.targetWeightKg} ${t('common.kg')}` : '—'
-  }, {
-    icon: { ios: 'figure.walk', android: 'directions_walk', web: 'directions_walk' },
-    label: t('profile.activityLevel'),
-    value: activityLabel
-  }];
 
   const dietaryTags = profile.preferences?.dietaryTags ?? [];
   const allergies = profile.preferences?.allergies ?? [];
@@ -139,10 +120,10 @@ function ProfileScreen() {
   return <ScreenScrollView gap={Spacing.three}>
       <View style={styles.heroSection}>
         <View style={styles.avatarWrapper}>
-          <View style={styles.avatar}>
-            <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={44} tintColor={theme.accent} />
-          </View>
-          <Pressable onPress={() => showComingSoon(t('profile.editPhoto'))} hitSlop={8} style={styles.avatarEditBadge}>
+          <Pressable onPress={handleEditPhoto} style={styles.avatar}>
+            {profile.photoUri ? <Image source={{ uri: profile.photoUri }} style={styles.avatarImage} contentFit="cover" /> : <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={44} tintColor={theme.accent} />}
+          </Pressable>
+          <Pressable onPress={handleEditPhoto} hitSlop={8} style={styles.avatarEditBadge}>
             <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={15} tintColor="#ffffff" />
           </Pressable>
         </View>
@@ -167,26 +148,13 @@ function ProfileScreen() {
         </View>
       </View>
 
-      <View style={styles.card}>
-        <View style={styles.cardHeaderRow}>
-          <View style={styles.cardTitleRow}>
-            <SymbolView name={{ ios: 'target', android: 'target', web: 'target' }} size={16} tintColor={theme.accent} />
-            <ThemedText type="smallBold" color={theme.text}>{t('profile.personalGoals')}</ThemedText>
-          </View>
-          <Pressable onPress={() => router.push('/edit-personal-goals')} hitSlop={8} style={styles.personalGoalsEditButton}>
-            <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={15} tintColor={theme.accent} />
-          </Pressable>
+      <Pressable onPress={() => router.push('/edit-personal-goals')} style={({ pressed }) => [styles.card, styles.linkCard, pressed && styles.linkCardPressed]}>
+        <View style={styles.cardTitleRow}>
+          <SymbolView name={{ ios: 'person.text.rectangle.fill', android: 'badge', web: 'badge' }} size={18} tintColor={theme.accent} />
+          <ThemedText type="smallBold" color={theme.text}>{t('profile.personalGoals')}</ThemedText>
         </View>
-        <View style={styles.infoList}>
-          {infoRows.map(row => <View key={row.label} style={styles.infoRow}>
-              <View style={styles.infoRowLeft}>
-                <SymbolView name={row.icon} size={14} tintColor={theme.textSecondary} />
-                <ThemedText type="small" color={theme.textSecondary}>{row.label}</ThemedText>
-              </View>
-              <ThemedText type="small" color={theme.text}>{row.value}</ThemedText>
-            </View>)}
-        </View>
-      </View>
+        <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={14} tintColor={theme.textSecondary} />
+      </Pressable>
 
       <View style={styles.card}>
         <View style={styles.cardHeaderRow}>
@@ -200,8 +168,8 @@ function ProfileScreen() {
         </View>
         <View style={styles.preferenceGroup}>
           <View style={styles.preferenceLabelRow}>
-            <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={13} tintColor={theme.textSecondary} />
-            <ThemedText type="caption" color={theme.textSecondary}>{t('profile.dietary')}</ThemedText>
+            <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={13} tintColor={theme.secondary} />
+            <ThemedText type="caption" color={theme.secondary} style={styles.preferenceTitle}>{t('profile.dietary')}</ThemedText>
           </View>
           <View style={styles.chipRow}>
             {dietaryTags.length === 0 ? <ThemedText type="small" color={theme.textSecondary}>{t('profile.noneSet')}</ThemedText> : dietaryTags.map(tag => <View key={tag} style={styles.chip}>
@@ -213,8 +181,8 @@ function ProfileScreen() {
         </View>
         <View style={styles.preferenceGroup}>
           <View style={styles.preferenceLabelRow}>
-            <SymbolView name={{ ios: 'exclamationmark.triangle.fill', android: 'warning', web: 'warning' }} size={13} tintColor={theme.textSecondary} />
-            <ThemedText type="caption" color={theme.textSecondary}>{t('profile.allergies')}</ThemedText>
+            <SymbolView name={{ ios: 'exclamationmark.triangle.fill', android: 'warning', web: 'warning' }} size={13} tintColor={theme.error} />
+            <ThemedText type="caption" color={theme.error} style={styles.preferenceTitle}>{t('profile.allergies')}</ThemedText>
           </View>
           <View style={styles.chipRow}>
             {allergies.length === 0 ? <ThemedText type="small" color={theme.textSecondary}>{t('profile.noneSet')}</ThemedText> : allergies.map(tag => <View key={tag} style={styles.chip}>
@@ -315,8 +283,16 @@ const createStyles = theme => StyleSheet.create({
     borderRadius: 56,
     // Always a light mint backdrop (not theme.primarySoft) so the icon stays visible in dark mode too.
     backgroundColor: '#E3F4EA',
+    borderWidth: 3,
+    borderColor: theme.accent,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 56
   },
   avatarEditBadge: {
     position: 'absolute',
@@ -348,7 +324,12 @@ const createStyles = theme => StyleSheet.create({
     gap: Spacing.one,
     alignItems: 'center',
     backgroundColor: theme.background,
-    borderColor: theme.border,
+    borderColor: theme.accent,
+    shadowColor: theme.accent,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 3,
     borderWidth: 1,
     borderRadius: 16,
     paddingVertical: Spacing.three,
@@ -362,10 +343,23 @@ const createStyles = theme => StyleSheet.create({
     width: '100%',
     textAlign: 'center'
   },
+  linkCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  linkCardPressed: {
+    opacity: 0.85
+  },
   card: {
     gap: Spacing.three,
     backgroundColor: theme.background,
-    borderColor: theme.border,
+    borderColor: theme.accent,
+    shadowColor: theme.accent,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 3,
     borderWidth: 1,
     borderRadius: 20,
     padding: Spacing.three
@@ -380,18 +374,8 @@ const createStyles = theme => StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.one
   },
-  infoList: {
-    gap: Spacing.two
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  },
-  infoRowLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.one
+  preferenceTitle: {
+    fontWeight: '700'
   },
   preferenceGroup: {
     gap: Spacing.two

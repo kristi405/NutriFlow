@@ -7,6 +7,8 @@ import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DateStrip } from '@/components/home/date-strip';
 import { MealRow } from '@/components/home/meal-row';
+import { ShoppingRangeModal } from '@/components/meal-plan/shopping-range-modal';
+import { WeeklyMenuModal } from '@/components/meal-plan/weekly-menu-modal';
 import { ThemedText } from '@/components/themed-text';
 import { MacroBar } from '@/components/ui/macro-bar';
 import { RecipeImage } from '@/components/ui/recipe-image';
@@ -120,12 +122,22 @@ function MealPlanScreen() {
   }
   const hasFullWeekPlanned = remainingWeekDays.every(day => mealPlanStore.itemsForDate(day).length > 0);
 
+  // Generation itself is instant, so the loader is held for a moment — otherwise
+  // the modal would flash and the user couldn't tell anything happened.
+  const [weekGenerationStatus, setWeekGenerationStatus] = useState(null);
+
   function handleGenerateWeek() {
-    remainingWeekDays.forEach(day => {
-      if (mealPlanStore.itemsForDate(day).length > 0) return;
-      const generated = generateDailyMealPlan(targets.calories);
-      generated.forEach(item => mealPlanStore.addItem({ date: day, ...item }));
-    });
+    if (weekGenerationStatus) return;
+    setWeekGenerationStatus('generating');
+    setTimeout(() => {
+      remainingWeekDays.forEach(day => {
+        if (mealPlanStore.itemsForDate(day).length > 0) return;
+        const generated = generateDailyMealPlan(targets.calories);
+        generated.forEach(item => mealPlanStore.addItem({ date: day, ...item }));
+      });
+    }, 300);
+    setTimeout(() => setWeekGenerationStatus('done'), 2200);
+    setTimeout(() => setWeekGenerationStatus(null), 4000);
   }
 
   const swapCandidates = useMemo(() => {
@@ -172,8 +184,11 @@ function MealPlanScreen() {
     setSwapMealType(null);
   }
 
-  function handleGenerateShoppingList() {
-    router.push('/shopping-list');
+  const [isShoppingRangeOpen, setIsShoppingRangeOpen] = useState(false);
+
+  function handleGenerateShoppingList(range) {
+    setIsShoppingRangeOpen(false);
+    router.push({ pathname: '/shopping-list', params: { range } });
   }
 
   function toggleEaten(item) {
@@ -241,13 +256,15 @@ function MealPlanScreen() {
       </View>
 
       <ScreenScrollView isTabScreen gap={Spacing.three} contentContainerStyle={{
+      // The header/calendar above already clears the status bar, so only a small gap is needed here.
+      paddingTop: Spacing.two,
       paddingBottom: tabBarOffset + (hasFullWeekPlanned ? Spacing.four : Spacing.six)
     }}>
       <View style={styles.topRow}>
         <View style={[styles.progressCard, allMealsEaten && styles.progressCardEaten]}>
           <MacroBar label={t('recipes.calories')} value={eatenCalories} target={targets.calories} unit={t('common.kcal')} color={theme.primary} />
         </View>
-        <Pressable onPress={handleGenerateShoppingList} style={styles.shoppingListButton}>
+        <Pressable onPress={() => setIsShoppingRangeOpen(true)} style={styles.shoppingListButton}>
           <SymbolView name="cart.fill" size={20} tintColor="#ffffff" />
           <ThemedText type="caption" style={styles.shoppingListButtonText} numberOfLines={2}>
             {t('home.shoppingList')}
@@ -329,6 +346,10 @@ function MealPlanScreen() {
             {t('mealPlan.weeklyMenu')}
           </ThemedText>
         </Pressable>}
+
+      <WeeklyMenuModal status={weekGenerationStatus} />
+
+      <ShoppingRangeModal visible={isShoppingRangeOpen} onSelect={handleGenerateShoppingList} onClose={() => setIsShoppingRangeOpen(false)} />
 
       <Modal visible={!!swapMealType} transparent animationType="slide" onRequestClose={() => setSwapMealType(null)}>
         <Pressable style={styles.modalBackdrop} onPress={() => setSwapMealType(null)}>

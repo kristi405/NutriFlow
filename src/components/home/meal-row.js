@@ -37,7 +37,7 @@ export function MealRow({
               <ThemedText type="caption" color={theme.textSecondary}>
                 {mealTypeLabel}
               </ThemedText>
-              <ThemedText type="smallBold" color={isEaten ? theme.textSecondary : theme.text} numberOfLines={1} style={isEaten && styles.strikethrough}>
+              <ThemedText type="smallBold" color={isEaten ? theme.textSecondary : theme.text} numberOfLines={1}>
                 {title}
               </ThemedText>
             </View>
@@ -67,9 +67,6 @@ const styles = StyleSheet.create({
   textWrapper: {
     flex: 1,
     gap: 2
-  },
-  strikethrough: {
-    textDecorationLine: 'line-through'
   },
   pressed: {
     opacity: 0.85

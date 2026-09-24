@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -39,7 +40,10 @@ function EditDietPreferencesScreen() {
   return <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
       <ScreenScrollView gap={Spacing.four} horizontalPadding={20} contentContainerStyle={styles.scrollContent}>
         <View style={styles.field}>
-          <ThemedText type="small" color={theme.textSecondary}>{t('profile.dietary')}</ThemedText>
+          <View style={styles.titleRow}>
+            <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={14} tintColor={theme.secondary} />
+            <ThemedText type="smallBold" color={theme.secondary}>{t('profile.dietary')}</ThemedText>
+          </View>
           <View style={styles.chipRow}>
             {DIETARY_OPTIONS.map(option => {
             const isActive = dietaryTags.includes(option.tag);
@@ -51,7 +55,10 @@ function EditDietPreferencesScreen() {
         </View>
 
         <View style={styles.field}>
-          <ThemedText type="small" color={theme.textSecondary}>{t('profile.allergies')}</ThemedText>
+          <View style={styles.titleRow}>
+            <SymbolView name={{ ios: 'exclamationmark.triangle.fill', android: 'warning', web: 'warning' }} size={14} tintColor={theme.error} />
+            <ThemedText type="smallBold" color={theme.error}>{t('profile.allergies')}</ThemedText>
+          </View>
           <View style={styles.chipRow}>
             {ALLERGEN_OPTIONS.map(option => {
             const isActive = allergies.includes(option.tag);
@@ -80,6 +87,11 @@ const createStyles = theme => StyleSheet.create({
   scrollContent: {
     paddingTop: Spacing.three,
     paddingBottom: Spacing.six
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6
   },
   field: {
     gap: Spacing.two

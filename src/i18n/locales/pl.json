@@ -1,7 +1,13 @@
 {
   "calculating": {
     "title": "Obliczanie Twoich celów kalorycznych...",
-    "steps": ["Analizujemy Twoje cele", "Obliczamy zapotrzebowanie kaloryczne", "Bilansujemy makroskładniki", "Tworzymy plan posiłków", "Przygotowujemy spersonalizowane zalecenia"]
+    "steps": [
+      "Analizujemy Twoje cele",
+      "Obliczamy zapotrzebowanie kaloryczne",
+      "Bilansujemy makroskładniki",
+      "Tworzymy plan posiłków",
+      "Przygotowujemy spersonalizowane zalecenia"
+    ]
   },
   "common": {
     "seeAll": "Zobacz wszystkie",
@@ -78,6 +84,13 @@
     },
     "apple": {
       "signIn": "Kontynuuj przez Apple"
+    },
+    "terms": {
+      "agreePrefix": "Akceptuję ",
+      "link": "Regulamin",
+      "agreeSuffix": " i wyrażam wyraźną zgodę na przetwarzanie moich danych osobowych i danych o zdrowiu.",
+      "close": "Zamknij",
+      "accept": "Akceptuję i kontynuuję"
     }
   },
   "onboarding": {
@@ -226,10 +239,11 @@
   "profile": {
     "editProfile": "Edytuj profil",
     "editPhoto": "Zmień zdjęcie",
+    "removePhoto": "Usuń zdjęcie",
     "mealsLogged": "Zapisane posiłki",
     "mealsPlanned": "Zaplanowane posiłki",
     "memberSince": "Członek od",
-    "personalGoals": "Cele osobiste",
+    "personalGoals": "Informacje osobiste",
     "goal": "Cel",
     "activityLevel": "Poziom aktywności",
     "dietPreferences": "Preferencje żywieniowe",
@@ -240,7 +254,7 @@
     "notifications": "Powiadomienia",
     "darkMode": "Tryb ciemny",
     "language": "Język",
-    "privacySecurity": "Prywatność i bezpieczeństwo",
+    "privacySecurity": "Regulamin",
     "helpSupport": "Pomoc i wsparcie",
     "helpModalTitle": "Skontaktuj się z pomocą",
     "helpModalSubtitle": "Napisz do nas w social media lub wyślij wiadomość",
@@ -269,13 +283,16 @@
     "range1y": "1R",
     "rangeAll": "Wszystko",
     "todayProgress": "Dzisiejszy postęp",
+    "showMore": "Pokaż więcej",
+    "showLess": "Pokaż mniej",
+    "detailedNutrition": "Szczegółowe odżywianie",
     "achievements": "Moje osiągnięcia",
     "achievementStreakTitle": "Passa 7 dni",
     "achievementStreakSubtitle": "Zapisywano posiłki każdego dnia w tym tygodniu",
     "achievementWaterTitle": "Bohater nawodnienia",
     "achievementWaterSubtitle": "Osiągnięto cel nawodnienia 5 razy",
     "achievementProteinTitle": "Mistrz białka",
-    "achievementProteinSubtitle": "Osiągnięto cel białkowy 10 razy",
+    "achievementProteinSubtitle": "Osiągnięto cel białkowy 7 razy",
     "achievementFirstRecipeTitle": "Pierwszy przepis",
     "achievementFirstRecipeSubtitle": "Ugotowano pierwszy przepis"
   },
@@ -284,6 +301,16 @@
     "subtitle": "Zaplanuj posiłki na dzień",
     "noMealPlanned": "Nic jeszcze nie zaplanowano",
     "weeklyMenu": "Menu tygodniowe",
+    "generatingWeekTitle": "Generowanie menu na tydzień…",
+    "generatingWeekMessage": "Dobieramy posiłki do Twojego celu kalorycznego",
+    "weekGeneratedTitle": "Menu na tydzień gotowe!",
+    "weekGeneratedMessage": "Menu na tydzień zostało wygenerowane.",
+    "shoppingRangeTitle": "Utwórz listę zakupów",
+    "shoppingRangeSubtitle": "Wybierz, na jaki okres utworzyć listę",
+    "shoppingRangeToday": "Na dziś",
+    "shoppingRangeTodayHint": "Składniki na dzisiejsze menu",
+    "shoppingRangeWeek": "Na tydzień",
+    "shoppingRangeWeekHint": "Składniki na pozostałe dni tego tygodnia",
     "swapTitle": "Zamień ten posiłek",
     "swapSubtitle": "Wybierz zamiennik z tej samej kategorii",
     "swapEmpty": "Brak innych przepisów w tej kategorii",
@@ -423,7 +450,8 @@
     "items": "pozycji",
     "allDone": "Wszystko gotowe — nic więcej do kupienia",
     "emptyTitle": "Na razie nie ma czego kupować",
-    "emptyMessage": "Najpierw zaplanuj dzisiejsze posiłki, a następnie wróć, aby utworzyć listę zakupów."
+    "emptyMessage": "Najpierw zaplanuj dzisiejsze posiłki, a następnie wróć, aby utworzyć listę zakupów.",
+    "emptyMessageWeek": "Najpierw zaplanuj posiłki na ten tydzień, potem wróć po listę zakupów."
   },
   "aiAnalysis": {
     "title": "Analiza AI",
@@ -469,45 +497,77 @@
     "disclaimer": "Tylko informacyjnie — to nie jest diagnoza medyczna. Omów wyniki z lekarzem."
   },
   "privacyPolicy": {
-    "title": "Prywatność i bezpieczeństwo",
-    "lastUpdated": "Ostatnia aktualizacja: styczeń 2026",
-    "intro": "NutriFlow („my”, „nasz”, „aplikacja”) szanuje Twoją prywatność. Ta polityka wyjaśnia, jakie informacje zbieramy, jak ich używamy i jaki masz wybór.",
+    "title": "Regulamin",
+    "lastUpdated": "Ostatnia aktualizacja: wrzesień 2026",
+    "intro": "Prosimy o uważne przeczytanie niniejszego Regulaminu i Informacji o prywatności (dalej: „Regulamin”). Stanowią one umowę prawną między Tobą a NutriFlow („my”, „aplikacja”) i określają zasady korzystania z aplikacji oraz sposób zbierania i przetwarzania Twoich danych osobowych, w tym danych dotyczących zdrowia.",
     "sections": [
       {
-        "heading": "Jakie informacje zbieramy",
-        "body": "Dane konta (adres email i metoda logowania); dane profilu, które podajesz (imię, płeć, wiek, wzrost, waga, docelowa waga, poziom aktywności, preferencje żywieniowe i alergie); aktywność żywieniowa (zapisane posiłki, spożycie wody, historia wagi, plany posiłków oraz oglądane i ulubione przepisy); wyniki badań, które przesyłasz do analizy AI; liczba kroków, jeśli udzielisz dostępu do czujników ruchu; oraz preferencje aplikacji, takie jak język, tryb ciemny i powiadomienia."
+        "heading": "1. Akceptacja Regulaminu",
+        "body": "Zakładając konto lub korzystając z NutriFlow, potwierdzasz, że przeczytałaś/eś, zrozumiałaś/eś i akceptujesz niniejszy Regulamin. Jeśli się z nim nie zgadzasz, nie korzystaj z aplikacji."
       },
       {
-        "heading": "Jak wykorzystujemy Twoje informacje",
-        "body": "Wykorzystujemy te informacje do obliczania Twoich celów kalorycznych i makroskładników, personalizacji rekomendacji przepisów i planów posiłków, śledzenia Twoich postępów, generowania wskazówek AI na podstawie przesłanych wyników badań oraz zapamiętywania Twoich preferencji aplikacji."
+        "heading": "2. O aplikacji; brak porad medycznych",
+        "body": "NutriFlow to narzędzie do śledzenia żywienia i dbania o zdrowie. Szacunki kalorii i składników odżywczych, przepisy, plany posiłków, artykuły oraz wskazówki generowane przez AI mają wyłącznie charakter informacyjny. Aplikacja nie jest wyrobem medycznym i nie zapewnia porad medycznych, diagnozy ani leczenia. Analiza wyników badań przez AI może zawierać błędy. Przed zmianą diety, rozpoczęciem ćwiczeń lub podjęciem jakiejkolwiek decyzji zdrowotnej skonsultuj się z lekarzem, zwłaszcza jeśli jesteś w ciąży, chorujesz, masz alergie pokarmowe lub przyjmujesz leki. Nigdy nie lekceważ zaleceń specjalistów z powodu informacji z aplikacji."
       },
       {
-        "heading": "Gdzie przechowywane są Twoje dane",
-        "body": "Twój profil, dziennik posiłków, historia wagi i preferencje są przechowywane lokalnie na Twoim urządzeniu. Jeśli logujesz się przez Google lub Apple, uwierzytelnianie jest obsługiwane bezpośrednio przez tego dostawcę."
+        "heading": "3. Wiek użytkownika",
+        "body": "Aby korzystać z NutriFlow, musisz mieć ukończone 16 lat. Osoby młodsze mogą korzystać z aplikacji tylko za weryfikowalną zgodą rodzica lub opiekuna prawnego, który akceptuje Regulamin w ich imieniu."
       },
       {
-        "heading": "Usługi zewnętrzne",
-        "body": "Korzystamy z logowania przez Google i logowania przez Apple jako opcjonalnych metod uwierzytelniania. Każda z nich podlega własnej polityce prywatności danego dostawcy, którą zachęcamy do zapoznania się."
+        "heading": "4. Twoje konto",
+        "body": "Odpowiadasz za prawdziwość podanych informacji i bezpieczeństwo danych logowania. Niezwłocznie poinformuj nas o nieautoryzowanym użyciu konta. Możesz logować się przez Google lub Apple; usługi te podlegają własnym warunkom."
       },
       {
-        "heading": "Udostępnianie danych",
-        "body": "Nie sprzedajemy Twoich danych osobowych ani nie udostępniamy Twoich danych zdrowotnych lub żywieniowych osobom trzecim, z wyjątkiem sytuacji niezbędnych do świadczenia wybranych przez Ciebie metod logowania."
+        "heading": "5. Jakie dane osobowe przetwarzamy",
+        "body": "Dane konta: adres e-mail i metoda logowania. Dane profilu: imię, zdjęcie profilowe, płeć, wiek, wzrost, waga, waga docelowa, poziom aktywności, cel, preferencje żywieniowe i alergie. Dane dotyczące zdrowia (szczególna kategoria danych): historia wagi, BMI, spożycie kalorii i składników odżywczych, spożycie wody, liczba kroków, alergie i ograniczenia żywieniowe oraz wyniki badań i raporty przesyłane do analizy. Dane o użytkowaniu i ustawieniach: wyświetlane i ulubione przepisy, plany posiłków, przeczytane artykuły, język, motyw i ustawienia powiadomień."
       },
       {
-        "heading": "Twoje prawa i wybory",
-        "body": "Możesz w dowolnym momencie przeglądać, edytować lub usuwać dane swojego profilu i preferencje bezpośrednio w aplikacji oraz wylogować się, aby zakończyć sesję. Skontaktuj się z nami, jeśli chcesz usunąć dane powiązane z Twoim kontem."
+        "heading": "6. Twoja zgoda na przetwarzanie danych osobowych i danych o zdrowiu",
+        "body": "Akceptując, zaznaczając zgodę lub kontynuując korzystanie z aplikacji, wyrażasz dobrowolną, konkretną, świadomą i wyraźną zgodę na zbieranie, przechowywanie i przetwarzanie Twoich danych osobowych, w tym danych dotyczących zdrowia, zgodnie z niniejszym Regulaminem. Obejmuje to zgodę na: (a) przechowywanie danych na Twoim urządzeniu oraz na serwerach naszych i naszych dostawców usług; (b) wykorzystanie ich do obliczania norm, personalizacji rekomendacji i śledzenia postępów; (c) przekazanie przesłanych wyników badań zewnętrznej usłudze AI wyłącznie w celu przygotowania żądanej analizy. Zgoda jest dobrowolna. Bez niej funkcje wymagające danych o zdrowiu nie mogą być świadczone. Zgodę możesz wycofać w każdej chwili zgodnie z punktem 12."
       },
       {
-        "heading": "Prywatność dzieci",
-        "body": "NutriFlow nie jest skierowany do dzieci poniżej 13 roku życia i świadomie nie zbieramy od nich informacji."
+        "heading": "7. Cele i podstawy prawne",
+        "body": "Przetwarzamy dane, aby: tworzyć konto i świadczyć usługi aplikacji (wykonanie umowy); obliczać normy żywieniowe, personalizować treści i generować wskazówki AI, co obejmuje dane o zdrowiu (Twoja wyraźna zgoda); zapewniać bezpieczeństwo, zapobiegać nadużyciom i naprawiać błędy (nasz prawnie uzasadniony interes); oraz wypełniać obowiązki prawne. Nie wykorzystujemy danych o zdrowiu do celów reklamowych."
       },
       {
-        "heading": "Zmiany w tej polityce",
-        "body": "Możemy od czasu do czasu aktualizować tę politykę. Przy aktualizacji zmienimy powyższą datę „ostatniej aktualizacji”."
+        "heading": "8. Przechowywanie, przetwarzanie przez AI i dostawcy usług",
+        "body": "Dane mogą być przechowywane na Twoim urządzeniu oraz na bezpiecznych serwerach prowadzonych przez nas lub naszych dostawców hostingu. Logowanie zapewniają Google i Apple. Przesłane wyniki badań są przekazywane zewnętrznemu dostawcy AI wyłącznie w celu przygotowania żądanej analizy; wymagamy, aby takie podmioty przetwarzały dane tylko na nasze polecenie. W przypadku przekazywania danych poza Twój kraj lub EOG stosujemy odpowiednie zabezpieczenia, np. standardowe klauzule umowne."
       },
       {
-        "heading": "Skontaktuj się z nami",
-        "body": "Jeśli masz pytania dotyczące tej polityki lub swoich danych, napisz do nas na 5507151kr@gmail.com lub skorzystaj z sekcji Pomoc i wsparcie w aplikacji."
+        "heading": "9. Udostępnianie danych",
+        "body": "Nie sprzedajemy Twoich danych osobowych i nie udostępniamy danych o zdrowiu reklamodawcom. Dane ujawniamy wyłącznie dostawcom usług działającym w naszym imieniu, jak opisano powyżej, lub gdy wymaga tego prawo albo ochrona praw."
+      },
+      {
+        "heading": "10. Okres przechowywania i usuwanie",
+        "body": "Przechowujemy dane, dopóki Twoje konto jest aktywne lub jest to potrzebne do świadczenia usług. W każdej chwili możesz usunąć dane lub poprosić o usunięcie konta. Po usunięciu w rozsądnym terminie usuniemy lub zanonimizujemy dane, chyba że prawo wymaga ich zachowania."
+      },
+      {
+        "heading": "11. Twoje prawa",
+        "body": "W zależności od miejsca zamieszkania (np. na podstawie RODO) masz prawo dostępu do danych, ich sprostowania, usunięcia, ograniczenia przetwarzania lub sprzeciwu, przenoszenia danych oraz wniesienia skargi do organu ochrony danych. Aby skorzystać z tych praw, skontaktuj się z nami, korzystając z danych z punktu 17."
+      },
+      {
+        "heading": "12. Wycofanie zgody",
+        "body": "Zgodę możesz wycofać w każdej chwili, usuwając odpowiednie dane w aplikacji, przestając korzystać z aplikacji lub pisząc do nas e-mail. Wycofanie zgody nie wpływa na zgodność z prawem przetwarzania dokonanego przed jej wycofaniem. Po wycofaniu zaprzestaniemy przetwarzania danych o zdrowiu i na żądanie je usuniemy, jednak niektóre funkcje mogą przestać być dostępne."
+      },
+      {
+        "heading": "13. Bezpieczeństwo",
+        "body": "Stosujemy odpowiednie środki techniczne i organizacyjne w celu ochrony danych. Żaden system nie jest całkowicie bezpieczny, dlatego nie możemy zagwarantować absolutnego bezpieczeństwa. Odpowiadasz za ochronę swojego urządzenia i konta."
+      },
+      {
+        "heading": "14. Dozwolone korzystanie i własność intelektualna",
+        "body": "Zobowiązujesz się nie nadużywać aplikacji, nie uzyskiwać nieuprawnionego dostępu, nie dekompilować jej ani nie wykorzystywać niezgodnie z prawem. Aplikacja, jej projekt, teksty, przepisy i inne treści należą do nas lub naszych licencjodawców i są chronione prawem. Udzielamy Ci ograniczonej, osobistej, niezbywalnej licencji na korzystanie z aplikacji. Dodane przez Ciebie treści pozostają Twoje; udzielasz nam praw niezbędnych do ich przechowywania i wyświetlania w ramach usługi."
+      },
+      {
+        "heading": "15. Wyłączenie gwarancji i ograniczenie odpowiedzialności",
+        "body": "Aplikacja jest udostępniana w stanie „takim, jaki jest”. W granicach dozwolonych prawem nie gwarantujemy, że informacje o żywieniu, przepisy lub analiza AI są kompletne, dokładne lub odpowiednie dla Ciebie, i nie odpowiadamy za szkody pośrednie ani za skutki zdrowotne wynikające z polegania na aplikacji. Nic w Regulaminie nie wyłącza odpowiedzialności, której nie można wyłączyć z mocy prawa, ani nie ogranicza Twoich bezwzględnie obowiązujących praw konsumenta."
+      },
+      {
+        "heading": "16. Zmiany Regulaminu",
+        "body": "Możemy okresowo aktualizować Regulamin. Zmienimy datę ostatniej aktualizacji, a przy istotnych zmianach lub zmianach dotyczących zgody poprosimy o zapoznanie się z nimi lub ponowne wyrażenie zgody. Dalsze korzystanie po zmianach oznacza akceptację zaktualizowanego Regulaminu."
+      },
+      {
+        "heading": "17. Prawo właściwe i kontakt",
+        "body": "Regulamin podlega prawu państwa, w którym siedzibę ma operator aplikacji, bez uszczerbku dla bezwzględnie obowiązujących przepisów o ochronie konsumentów państwa Twojego zamieszkania. W razie pytań, wniosków dotyczących danych lub wycofania zgody napisz na 5507151kr@gmail.com lub skorzystaj z sekcji Pomoc i wsparcie w aplikacji."
       }
     ]
   }

@@ -35,6 +35,10 @@ function ArticleScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  useEffect(() => {
+    if (id) articleStore.markRead(id);
+  }, [id]);
+
   if (isLoading) {
     return <View style={styles.centerFlex}>
         <ActivityIndicator color={theme.accent} />

@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Stack } from 'expo-router';
+import { useMemo } from 'react';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { SymbolView } from 'expo-symbols';
@@ -12,9 +12,10 @@ import { MacroBar } from '@/components/ui/macro-bar';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { todayKey } from '@/lib/date';
+import { todayKey, weekContaining } from '@/lib/date';
 import { buildShoppingList } from '@/lib/shoppingList';
 import { mealPlanStore } from '@/store/mealPlanStore';
+import { shoppingListStore } from '@/store/shoppingListStore';
 
 function escapeHtml(text) {
   return text.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -51,17 +52,20 @@ function ShoppingListScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const [checkedIds, setCheckedIds] = useState(() => new Set());
-  const planItems = mealPlanStore.itemsForDate(todayKey());
+  const { range } = useLocalSearchParams();
+  const isWeek = range === 'week';
+  const today = todayKey();
+  // "Week" = the rest of the current week (today onward), same span the weekly menu generator fills.
+  const days = isWeek ? weekContaining(today).filter(day => day >= today) : [today];
+  const planItems = days.flatMap(day => mealPlanStore.itemsForDate(day));
   const groups = buildShoppingList(planItems);
+  const scopeKey = isWeek ? `week@${weekContaining(today)[0]}` : `today@${today}`;
+  // Only ids still on the current list count, so removing a recipe from the plan can't leave phantom checks.
+  const checkedIds = new Set(shoppingListStore.checkedFor(scopeKey).filter(id => groups.some(group => group.items.some(item => item.ingredientId === id))));
   const totalCount = useMemo(() => groups.reduce((sum, group) => sum + group.items.length, 0), [groups]);
 
   function toggleChecked(ingredientId) {
-    setCheckedIds(current => {
-      const next = new Set(current);
-      if (next.has(ingredientId)) next.delete(ingredientId);else next.add(ingredientId);
-      return next;
-    });
+    shoppingListStore.toggle(scopeKey, ingredientId);
   }
 
   async function handleShare() {
@@ -93,7 +97,7 @@ function ShoppingListScreen() {
           </Pressable>
     }} />}
 
-      {groups.length === 0 ? <EmptyState icon="cart" title={t('shoppingList.emptyTitle')} message={t('shoppingList.emptyMessage')} /> : <>
+      {groups.length === 0 ? <EmptyState icon="cart" title={t('shoppingList.emptyTitle')} message={t(isWeek ? 'shoppingList.emptyMessageWeek' : 'shoppingList.emptyMessage')} /> : <>
           <View style={styles.progressCard}>
             <MacroBar label={t('shoppingList.progress')} value={checkedIds.size} target={totalCount} unit={t('shoppingList.items')} color={theme.accent} />
           </View>

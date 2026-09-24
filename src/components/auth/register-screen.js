@@ -1,13 +1,17 @@
 import { SymbolView } from 'expo-symbols';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
-import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
+import { Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { ThemedText } from '@/components/themed-text';
 import { Fonts, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { authStore } from '@/store/authStore';
 import { profileStore } from '@/store/profileStore';
+import { AppleSignInButton } from './apple-sign-in-button';
+import { GoogleSignInButton } from './google-sign-in-button';
+import { TermsLink } from './terms-consent';
+import { termsStore } from '@/store/termsStore';
 
 export function RegisterScreen({ onSwitchToLogin }) {
   const { t } = useTranslation();
@@ -20,6 +24,8 @@ export function RegisterScreen({ onSwitchToLogin }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [googleError, setGoogleError] = useState(null);
+  const [appleError, setAppleError] = useState(null);
   const canSubmit = email.trim().length > 0 && password.length > 0 && confirmPassword.length > 0;
 
   async function handleSubmit() {
@@ -35,6 +41,7 @@ export function RegisterScreen({ onSwitchToLogin }) {
     setIsSubmitting(true);
     try {
       await authStore.register(email, password);
+      termsStore.requireAcceptance();
       profileStore.resetOnboarding();
     } catch (err) {
       setError(err.message);
@@ -44,10 +51,6 @@ export function RegisterScreen({ onSwitchToLogin }) {
   }
 
   return <View style={styles.container}>
-      <Animated.View entering={ZoomIn.springify().duration(500)} style={styles.iconBadge}>
-        <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={24} tintColor="#ffffff" />
-      </Animated.View>
-
       <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.header}>
         <ThemedText type="title" style={styles.title} color={theme.text}>{t('auth.register.title')}</ThemedText>
         <ThemedText type="default" color={theme.textSecondary}>
@@ -100,34 +103,35 @@ export function RegisterScreen({ onSwitchToLogin }) {
           </ThemedText>
         </Pressable>
 
+        <View style={styles.googleSection}>
+          <GoogleSignInButton onError={setGoogleError} />
+          {googleError && <ThemedText type="small" color={theme.error}>{googleError}</ThemedText>}
+        </View>
+
+        {Platform.OS === 'ios' && <View style={styles.appleSection}>
+            <AppleSignInButton onError={setAppleError} />
+            {appleError && <ThemedText type="small" color={theme.error}>{appleError}</ThemedText>}
+          </View>}
+
         <Pressable onPress={onSwitchToLogin} hitSlop={8} style={styles.switchLink}>
           <ThemedText type="link" color={theme.textSecondary}>
             {t('auth.register.haveAccount')} <ThemedText type="linkPrimary" style={{ color: theme.accent, fontWeight: '600' }}>{t('auth.register.login')}</ThemedText>
           </ThemedText>
         </Pressable>
       </View>
+
+      <TermsLink />
     </View>;
 }
 
 const createStyles = theme => StyleSheet.create({
   container: {
-    gap: Spacing.five
+    flex: 1,
+    gap: Spacing.four,
+    marginTop: -Spacing.four
   },
   actions: {
     width: '100%'
-  },
-  iconBadge: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: theme.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: theme.accent,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4
   },
   header: {
     gap: Spacing.one
@@ -168,6 +172,14 @@ const createStyles = theme => StyleSheet.create({
   },
   buttonSpacing: {
     marginTop: Spacing.two
+  },
+  googleSection: {
+    marginTop: Spacing.six,
+    gap: Spacing.one
+  },
+  appleSection: {
+    marginTop: Spacing.two,
+    gap: Spacing.one
   },
   buttonShadow: {
     shadowColor: theme.accent,

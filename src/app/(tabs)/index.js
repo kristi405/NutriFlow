@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { ArticleCard } from '@/components/home/article-card';
 import { DateStrip } from '@/components/home/date-strip';
 import { MacroCard } from '@/components/home/macro-card';
@@ -11,11 +12,11 @@ import { NutritionScoreCard } from '@/components/home/nutrition-score-card';
 import { StepsCard } from '@/components/home/steps-card';
 import { WaterCard } from '@/components/home/water-card';
 import { WavingHand } from '@/components/home/waving-hand';
+import TermsAcceptanceModal from '@/components/terms-acceptance-modal';
 import { ThemedText } from '@/components/themed-text';
 import { CalorieRing } from '@/components/ui/calorie-ring';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PremiumCard } from '@/components/ui/premium-card';
-import { QuickAction } from '@/components/ui/quick-action';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { SectionHeader } from '@/components/ui/section-header';
 import { getIngredientById, getRecipeById } from '@/data/catalog';
@@ -45,9 +46,6 @@ function HomeScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  function showComingSoon(feature) {
-    Alert.alert(feature, t('home.comingSoon'));
-  }
   const profile = profileStore.profile;
   const [date, setDate] = useState(todayKey());
   const { total } = useDailyNutrition(date);
@@ -87,11 +85,13 @@ function HomeScreen() {
   if (!profile || !targets) return null;
   const consumedCalories = Math.round(total.nutrition.calories);
   const burnedCalories = Math.round(steps * profile.weightKg * 0.0005);
-  const remainingCalories = Math.max(0, targets.calories - consumedCalories + burnedCalories);
-  return <ScreenScrollView isTabScreen gap={Spacing.three}>
+  const remainingCalories = Math.max(0, targets.calories - consumedCalories);
+  return <>
+      <TermsAcceptanceModal />
+      <ScreenScrollView isTabScreen gap={Spacing.three}>
       <Pressable onPress={() => router.push('/profile')} style={styles.headerRow}>
         <View style={styles.avatar}>
-          <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={22} tintColor={theme.accent} />
+          {profile.photoUri ? <Image source={{ uri: profile.photoUri }} style={styles.avatarImage} contentFit="cover" /> : <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={22} tintColor={theme.accent} />}
         </View>
         <View style={styles.headerTextColumn}>
           <View style={styles.greetingRow}>
@@ -115,7 +115,7 @@ function HomeScreen() {
         <View style={styles.nutritionHeader}>
           <ThemedText type="smallBold" color={theme.text}>{t('home.dailyCalories')}</ThemedText>
           <View style={styles.calorieBadge}>
-            <ThemedText type="caption" style={styles.calorieBadgeText} color={theme.primary}>
+            <ThemedText type="caption" style={styles.calorieBadgeText} color={theme.accent}>
               {targets.calories} {t('home.kcalGoal')}
             </ThemedText>
           </View>
@@ -160,9 +160,6 @@ function HomeScreen() {
 
       {scoreResult && <NutritionScoreCard score={scoreResult.score} explanation={scoreResult.explanation} />}
 
-      <SectionHeader title={t('articles.title')} seeAllHref="/articles" />
-      <ArticleCard article={articleStore.todayArticle} onPress={() => router.push({ pathname: '/article/[id]', params: { id: articleStore.todayArticle.id } })} />
-
       <PremiumCard />
 
       {nextMeal ? <View style={styles.section}>
@@ -187,42 +184,10 @@ function HomeScreen() {
       }} title={t('home.emptyDayTitle')} message={t('home.emptyDayMessage')} actionLabel={t('home.browseRecipes')} onAction={() => router.push('/recipes')} />}
         </View>}
 
-      <View style={styles.section}>
-        <SectionHeader title={t('home.quickActions')} />
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickActionsRow}>
-          <QuickAction icon={{
-          ios: 'plus.circle.fill',
-          android: 'add_circle',
-          web: 'add_circle'
-        }} label={t('home.addMeal')} color={theme.accent} onPress={() => router.push('/recipes')} />
-          <QuickAction icon={{
-          ios: 'camera.fill',
-          android: 'photo_camera',
-          web: 'photo_camera'
-        }} label={t('home.scanFood')} color="#EB5757" onPress={() => showComingSoon(t('home.scanFood'))} />
-          <QuickAction icon={{
-          ios: 'sparkles',
-          android: 'auto_awesome',
-          web: 'auto_awesome'
-        }} label={t('home.aiRecipe')} color="#9B51E0" onPress={() => showComingSoon(t('home.aiRecipe'))} />
-          <QuickAction icon={{
-          ios: 'cart.fill',
-          android: 'shopping_cart',
-          web: 'shopping_cart'
-        }} label={t('home.shoppingList')} color="#F2994A" onPress={() => showComingSoon(t('home.shoppingList'))} />
-          <QuickAction icon={{
-          ios: 'scalemass.fill',
-          android: 'monitor_weight',
-          web: 'monitor_weight'
-        }} label={t('home.addWeight')} color="#5B6EE1" onPress={() => router.push('/progress')} />
-          <QuickAction icon={{
-          ios: 'drop.fill',
-          android: 'water_drop',
-          web: 'water_drop'
-        }} label={t('home.addWater')} color="#2F80ED" onPress={() => addWater(date, 250)} />
-        </ScrollView>
-      </View>
-    </ScreenScrollView>;
+      <SectionHeader title={t('articles.title')} seeAllHref="/articles" />
+      <ArticleCard article={articleStore.todayArticle} onPress={() => router.push({ pathname: '/article/[id]', params: { id: articleStore.todayArticle.id } })} />
+    </ScreenScrollView>
+    </>;
 }
 export default observer(HomeScreen);
 const createStyles = theme => StyleSheet.create({
@@ -231,7 +196,12 @@ const createStyles = theme => StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.three
   },
+  avatarImage: {
+    width: '100%',
+    height: '100%'
+  },
   avatar: {
+    overflow: 'hidden',
     width: 48,
     height: 48,
     borderRadius: 24,
@@ -266,7 +236,7 @@ const createStyles = theme => StyleSheet.create({
   },
   nutritionCard: {
     backgroundColor: theme.background,
-    borderColor: theme.border,
+    borderColor: theme.accent,
     borderWidth: 1,
     borderRadius: 20,
     padding: Spacing.three,
@@ -279,6 +249,8 @@ const createStyles = theme => StyleSheet.create({
   },
   calorieBadge: {
     backgroundColor: theme.accentSoft,
+    borderWidth: 1,
+    borderColor: theme.accent,
     borderRadius: 999,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one
@@ -313,11 +285,6 @@ const createStyles = theme => StyleSheet.create({
   },
   mealList: {
     gap: Spacing.two
-  },
-  quickActionsRow: {
-    flexDirection: 'row',
-    gap: Spacing.three,
-    paddingRight: Spacing.two
   },
   planCompleteCard: {
     alignItems: 'center',

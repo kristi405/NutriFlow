@@ -76,7 +76,10 @@ function ArticlesScreen() {
     return <View style={styles.list}>
         {visibleArticles.map(article => {
         const isFavorite = favoriteIds.includes(article.id);
-        return <Pressable key={article.id} onPress={() => router.push({ pathname: '/article/[id]', params: { id: article.id } })} style={({ pressed }) => [styles.card, { backgroundColor: theme.background, borderColor: theme.border, opacity: pressed ? 0.85 : 1 }]}>
+        return <Pressable key={article.id} onPress={() => {
+          articleStore.markRead(article.id);
+          router.push({ pathname: '/article/[id]', params: { id: article.id } });
+        }} style={({ pressed }) => [styles.card, { backgroundColor: theme.background, borderColor: articleStore.isRead(article.id) ? theme.border : theme.accent, opacity: pressed ? 0.85 : 1 }]}>
               {article.imageUrl ? <Image source={{ uri: article.imageUrl }} style={styles.thumbnail} contentFit="cover" /> : <View style={[styles.thumbnail, styles.thumbnailFallback, { backgroundColor: theme.accentSoft }]}>
                   <SymbolView name={{ ios: 'newspaper.fill', android: 'article', web: 'article' }} size={22} tintColor={theme.accent} />
                 </View>}
@@ -92,20 +95,24 @@ function ArticlesScreen() {
       </View>;
   }
 
-  return <ScreenScrollView gap={Spacing.three} horizontalPadding={20}>
+  return <ScreenScrollView isTabScreen gap={Spacing.three} horizontalPadding={20}>
       <ThemedText type="title" style={styles.title} color={theme.text}>{t('articles.title')}</ThemedText>
-      <View style={styles.segmentRow}>
-        {[{ key: false, label: t('articles.all') }, { key: true, label: t('articles.favorites') }].map(option => {
-        const isActive = showFavoritesOnly === option.key;
-        return <Pressable key={String(option.key)} onPress={() => setShowFavoritesOnly(option.key)} style={[styles.segment, { borderColor: isActive ? theme.accent : theme.border, backgroundColor: isActive ? theme.accent : theme.background }]}>
-              <ThemedText type="small" color={isActive ? '#ffffff' : theme.text}>{option.label}</ThemedText>
-            </Pressable>;
-      })}
-        <Pressable onPress={() => setIsTagSheetOpen(true)} style={[styles.segment, styles.tagsButton, { borderColor: selectedTagIds.length ? theme.accent : theme.border, backgroundColor: theme.background }]}>
-          <SymbolView name={{ ios: 'line.3.horizontal.decrease', android: 'filter_list', web: 'filter_list' }} size={14} tintColor={selectedTagIds.length ? theme.accent : theme.textSecondary} />
-          <ThemedText type="small" color={selectedTagIds.length ? theme.accent : theme.text}>
-            {selectedTagIds.length ? `${t('articles.tags')} · ${selectedTagIds.length}` : t('articles.tags')}
-          </ThemedText>
+      <View style={styles.controlsRow}>
+        <View style={[styles.segmentTrack, { backgroundColor: theme.backgroundElement }]}>
+          {[{ key: false, label: t('articles.all'), icon: { ios: 'square.grid.2x2.fill', android: 'grid_view', web: 'grid_view' } }, { key: true, label: t('articles.favorites'), icon: { ios: 'heart.fill', android: 'favorite', web: 'favorite' } }].map(option => {
+          const isActive = showFavoritesOnly === option.key;
+          const contentColor = isActive ? '#ffffff' : theme.textSecondary;
+          return <Pressable key={String(option.key)} onPress={() => setShowFavoritesOnly(option.key)} style={[styles.segment, isActive && { backgroundColor: theme.accent }]}>
+                <SymbolView name={option.icon} size={14} tintColor={option.key && !isActive ? FAVORITE_RED : contentColor} />
+                <ThemedText type="smallBold" color={contentColor}>{option.label}</ThemedText>
+              </Pressable>;
+        })}
+        </View>
+        <Pressable onPress={() => setIsTagSheetOpen(true)} accessibilityLabel={t('articles.tags')} style={[styles.filterButton, { borderColor: selectedTagIds.length ? theme.accent : theme.border, backgroundColor: selectedTagIds.length ? theme.accentSoft : theme.background }]}>
+          <SymbolView name={{ ios: 'line.3.horizontal.decrease', android: 'filter_list', web: 'filter_list' }} size={18} tintColor={selectedTagIds.length ? theme.accent : theme.textSecondary} />
+          {selectedTagIds.length > 0 && <View style={[styles.filterBadge, { backgroundColor: theme.accent }]}>
+              <ThemedText type="caption" color="#ffffff" style={styles.filterBadgeText}>{selectedTagIds.length}</ThemedText>
+            </View>}
         </Pressable>
       </View>
 
@@ -133,21 +140,49 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.six,
     alignItems: 'center'
   },
-  segmentRow: {
-    flexDirection: 'row',
-    gap: Spacing.two
-  },
-  segment: {
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.one
-  },
-  tagsButton: {
+  controlsRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: Spacing.two
+  },
+  segmentTrack: {
+    flex: 1,
+    flexDirection: 'row',
+    borderRadius: 999,
+    padding: 4
+  },
+  segment: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 6,
-    marginLeft: 'auto'
+    borderRadius: 999,
+    paddingVertical: Spacing.two
+  },
+  filterButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  filterBadgeText: {
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: '700'
   },
   chipRow: {
     flexDirection: 'row',

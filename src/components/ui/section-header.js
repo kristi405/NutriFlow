@@ -1,4 +1,4 @@
-import { Link } from 'expo-router';
+import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -8,7 +8,8 @@ export function SectionHeader({
   title,
   seeAllHref,
   actionLabel,
-  onAction
+  onAction,
+  right
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -17,21 +18,32 @@ export function SectionHeader({
       {onAction && <Pressable onPress={onAction} hitSlop={8} accessibilityLabel={actionLabel}>
           <SymbolView name={{ ios: 'xmark.circle.fill', android: 'cancel', web: 'cancel' }} size={20} tintColor={`${theme.textSecondary}80`} />
         </Pressable>}
-      {seeAllHref && <Link href={seeAllHref} asChild>
-          <Pressable hitSlop={8} style={styles.seeAllLink}>
-            <ThemedText type="linkPrimary">{t('common.seeAll')}</ThemedText>
-          </Pressable>
-        </Link>}
+      {right && <View style={styles.right}>{right}</View>}
+      {seeAllHref && <Pressable onPress={() => router.push(seeAllHref)} hitSlop={8} style={({ pressed }) => [styles.seeAllLink, { backgroundColor: theme.accentSoft, borderColor: theme.accent, opacity: pressed ? 0.7 : 1 }]}>
+          <ThemedText type="smallBold" color={theme.accent}>{t('common.seeAll')}</ThemedText>
+          <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={11} tintColor={theme.accent} />
+        </Pressable>}
     </View>;
 }
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
+    width: '100%',
     alignItems: 'center',
     gap: 6
   },
-  seeAllLink: {
+  right: {
     marginLeft: 'auto'
+  },
+  seeAllLink: {
+    marginLeft: 'auto',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 5
   },
   title: {
     fontSize: 18,

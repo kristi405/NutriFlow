@@ -10,6 +10,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SymbolView } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
+const FAVORITE_RED = '#E0245E';
+
 function RecipeCardComponent({
   recipe,
   calories,
@@ -35,7 +37,7 @@ function RecipeCardComponent({
                 </ThemedText>
               </View>}
             <Pressable onPress={() => favoritesStore.toggleFavorite(recipe.id)} hitSlop={8} style={styles.bookmarkButton}>
-              <SymbolView name={isFavorite ? { ios: 'bookmark.fill', android: 'bookmark', web: 'bookmark' } : { ios: 'bookmark', android: 'bookmark_border', web: 'bookmark_border' }} size={18} tintColor={isFavorite ? theme.primary : theme.text} />
+              <SymbolView name={isFavorite ? { ios: 'heart.fill', android: 'favorite', web: 'favorite' } : { ios: 'heart', android: 'favorite_border', web: 'favorite_border' }} size={18} tintColor={isFavorite ? FAVORITE_RED : theme.textSecondary} />
             </Pressable>
             <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.85)']} style={styles.scrim} pointerEvents="none">
               <ThemedText type="caption" color="#ffffff" style={styles.title} numberOfLines={2}>

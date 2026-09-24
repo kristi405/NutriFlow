@@ -1,7 +1,13 @@
 {
   "calculating": {
     "title": "Calculating your calorie targets...",
-    "steps": ["Analyzing your goals", "Calculating your calorie needs", "Balancing your macros", "Building your meal plan", "Personalizing recommendations"]
+    "steps": [
+      "Analyzing your goals",
+      "Calculating your calorie needs",
+      "Balancing your macros",
+      "Building your meal plan",
+      "Personalizing recommendations"
+    ]
   },
   "common": {
     "seeAll": "See all",
@@ -78,6 +84,13 @@
     },
     "apple": {
       "signIn": "Continue with Apple"
+    },
+    "terms": {
+      "agreePrefix": "I agree to the ",
+      "link": "Terms & Conditions",
+      "agreeSuffix": " and give my explicit consent to the processing of my personal and health data.",
+      "close": "Close",
+      "accept": "Accept and continue"
     }
   },
   "onboarding": {
@@ -226,10 +239,11 @@
   "profile": {
     "editProfile": "Edit Profile",
     "editPhoto": "Edit Photo",
+    "removePhoto": "Remove photo",
     "mealsLogged": "Meals Logged",
     "mealsPlanned": "Meals Planned",
     "memberSince": "Member Since",
-    "personalGoals": "Personal Goals",
+    "personalGoals": "Personal Information",
     "goal": "Goal",
     "activityLevel": "Activity Level",
     "dietPreferences": "Diet Preferences",
@@ -240,7 +254,7 @@
     "notifications": "Notifications",
     "darkMode": "Dark Mode",
     "language": "Language",
-    "privacySecurity": "Privacy & Security",
+    "privacySecurity": "Terms & Conditions",
     "helpSupport": "Help & Support",
     "helpModalTitle": "Contact support",
     "helpModalSubtitle": "Reach out on social or send us a message",
@@ -269,13 +283,16 @@
     "range1y": "1Y",
     "rangeAll": "All",
     "todayProgress": "Today's Progress",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "detailedNutrition": "Detailed nutrition",
     "achievements": "My Achievements",
     "achievementStreakTitle": "7-Day Streak",
     "achievementStreakSubtitle": "Logged meals every day this week",
     "achievementWaterTitle": "Hydration Hero",
     "achievementWaterSubtitle": "Hit your water goal 5 times",
     "achievementProteinTitle": "Protein Pro",
-    "achievementProteinSubtitle": "Reached your protein target 10 times",
+    "achievementProteinSubtitle": "Reached your protein target 7 times",
     "achievementFirstRecipeTitle": "First Recipe",
     "achievementFirstRecipeSubtitle": "Cooked your first recipe"
   },
@@ -284,6 +301,16 @@
     "subtitle": "Plan your meals for the day",
     "noMealPlanned": "No meal planned yet",
     "weeklyMenu": "Weekly menu",
+    "generatingWeekTitle": "Generating your weekly menu…",
+    "generatingWeekMessage": "Picking meals that fit your calorie goal",
+    "weekGeneratedTitle": "Weekly menu is ready!",
+    "weekGeneratedMessage": "Your meals for the week have been generated.",
+    "shoppingRangeTitle": "Create shopping list",
+    "shoppingRangeSubtitle": "Choose which meals to include",
+    "shoppingRangeToday": "For today",
+    "shoppingRangeTodayHint": "Ingredients for today's menu",
+    "shoppingRangeWeek": "For the week",
+    "shoppingRangeWeekHint": "Ingredients for the rest of this week",
     "swapTitle": "Swap this meal",
     "swapSubtitle": "Pick a replacement from the same category",
     "swapEmpty": "No other recipes in this category yet",
@@ -423,7 +450,8 @@
     "items": "items",
     "allDone": "All done — nothing left to buy",
     "emptyTitle": "Nothing to shop for yet",
-    "emptyMessage": "Plan today's meals first, then come back to generate your shopping list."
+    "emptyMessage": "Plan today's meals first, then come back to generate your shopping list.",
+    "emptyMessageWeek": "Plan some meals for this week first, then come back to generate your shopping list."
   },
   "aiAnalysis": {
     "title": "AI Analysis",
@@ -469,45 +497,77 @@
     "disclaimer": "For information only — not a medical diagnosis. Discuss your results with a doctor."
   },
   "privacyPolicy": {
-    "title": "Privacy & Security",
-    "lastUpdated": "Last updated: January 2026",
-    "intro": "NutriFlow (\"we\", \"our\", \"the app\") respects your privacy. This policy explains what information we collect, how we use it, and the choices you have.",
+    "title": "Terms & Conditions",
+    "lastUpdated": "Last updated: September 2026",
+    "intro": "Please read these Terms & Conditions and Privacy Notice (the \"Terms\") carefully. They form a legal agreement between you and NutriFlow (\"we\", \"us\", \"the app\") and explain the rules for using the app and how we collect and process your personal data, including data concerning your health.",
     "sections": [
       {
-        "heading": "Information we collect",
-        "body": "Account information (your email address and sign-in method); profile details you provide (name, sex, age, height, weight, target weight, activity level, dietary preferences and allergies); nutrition activity (meals you log, water intake, weight history, meal plans, and recipes you view or favorite); lab results you choose to upload for AI-powered analysis; step count, if you grant motion permission; and app preferences such as language, dark mode, and notification settings."
+        "heading": "1. Acceptance of the Terms",
+        "body": "By creating an account or using NutriFlow you confirm that you have read, understood and agree to these Terms. If you do not agree, please do not use the app."
       },
       {
-        "heading": "How we use your information",
-        "body": "We use this information to calculate your calorie and macronutrient targets, personalize recipe and meal-plan recommendations, track your progress over time, generate AI nutrition insights from lab results you upload, and remember your app preferences."
+        "heading": "2. About the app; no medical advice",
+        "body": "NutriFlow is a nutrition-tracking and wellness tool. It provides calorie and nutrient estimates, recipes, meal plans, articles and AI-generated insights for general informational purposes only. The app is not a medical device and does not provide medical advice, diagnosis or treatment. AI-generated analysis of lab results may contain errors. Always consult a qualified healthcare professional before changing your diet, starting an exercise programme, or making any health decision, especially if you are pregnant, have a medical condition, food allergies or take medication. Never disregard professional advice because of something you read in the app."
       },
       {
-        "heading": "Where your data is stored",
-        "body": "Your profile, meal logs, weight history, and preferences are stored locally on your device. If you sign in with Google or Apple, authentication is handled directly by that provider."
+        "heading": "3. Eligibility",
+        "body": "You must be at least 16 years old to use NutriFlow. If you are younger, you may use the app only with the verifiable consent of a parent or legal guardian, who accepts these Terms on your behalf."
       },
       {
-        "heading": "Third-party services",
-        "body": "We use Google Sign-In and Sign in with Apple as optional authentication methods. Each is governed by its own provider's privacy policy, which we encourage you to review."
+        "heading": "4. Your account",
+        "body": "You are responsible for the accuracy of the information you provide and for keeping your sign-in credentials secure. Notify us immediately of any unauthorised use of your account. You may sign in with Google or Apple; those services are governed by their own terms."
       },
       {
-        "heading": "Data sharing",
-        "body": "We do not sell your personal data, and we do not share your health or nutrition data with third parties, except as necessary to provide the sign-in services you choose to use."
+        "heading": "5. Personal data we process",
+        "body": "Account data: email address and sign-in method. Profile data: name, profile photo, sex, age, height, weight, target weight, activity level, goal, dietary preferences and allergies. Health-related data (special category data): weight history, BMI, calorie and nutrient intake, water intake, step count, allergies and dietary restrictions, and lab results and reports you choose to upload for analysis. Usage and preference data: recipes you view or favourite, meal plans, read articles, language, theme and notification settings."
       },
       {
-        "heading": "Your rights and choices",
-        "body": "You can view, edit, or delete your profile and preferences at any time from within the app, and sign out to end your session. Contact us if you would like any data associated with your account removed."
+        "heading": "6. Your consent to the processing of personal and health data",
+        "body": "By ticking, accepting or continuing to use the app you give your free, specific, informed and explicit consent to the collection, storage and processing of your personal data, including data concerning your health, as described in these Terms. This includes your consent to (a) storing this data on your device and on our servers and those of our service providers; (b) using it to calculate your targets, personalise recommendations and track your progress; and (c) sending lab results you upload to a third-party AI service solely to generate the analysis you request. Consent is voluntary. Without it, features that require health data cannot be provided. You may withdraw your consent at any time as described in section 12."
       },
       {
-        "heading": "Children's privacy",
-        "body": "NutriFlow is not directed at children under 13, and we do not knowingly collect information from them."
+        "heading": "7. Purposes and legal basis",
+        "body": "We process your data to: create and manage your account and provide the app (performance of a contract); calculate nutrition targets, personalise content and generate AI insights, which involves health data (your explicit consent); keep the app secure, prevent abuse and fix errors (our legitimate interests); and comply with legal obligations. We do not use your health data for advertising."
       },
       {
-        "heading": "Changes to this policy",
-        "body": "We may update this policy from time to time. We'll update the \"last updated\" date above when we do."
+        "heading": "8. Storage, AI processing and service providers",
+        "body": "Data may be stored on your device and on secure servers operated by us or our hosting providers. Sign-in is provided by Google and Apple. Lab results you upload are sent to a third-party AI provider only to produce the analysis you request; we ask such providers to process the data only on our instructions. Where data is transferred outside your country or the EEA, we rely on appropriate safeguards such as standard contractual clauses."
       },
       {
-        "heading": "Contact us",
-        "body": "If you have questions about this policy or your data, reach us at 5507151kr@gmail.com or via Help & Support in the app."
+        "heading": "9. Data sharing",
+        "body": "We do not sell your personal data and we do not share your health data with advertisers. We disclose data only to service providers acting on our behalf as described above, or where required by law or to protect legal rights."
+      },
+      {
+        "heading": "10. Retention and deletion",
+        "body": "We keep your data for as long as your account is active or as needed to provide the app. You may delete data or ask us to delete your account at any time. After deletion we remove or anonymise your data within a reasonable period, except where the law requires us to retain it."
+      },
+      {
+        "heading": "11. Your rights",
+        "body": "Depending on where you live (for example under the GDPR) you have the right to access your data, correct it, delete it, restrict or object to its processing, receive it in a portable format, and lodge a complaint with your data protection authority. To exercise these rights, contact us using the details in section 17."
+      },
+      {
+        "heading": "12. Withdrawing consent",
+        "body": "You may withdraw your consent at any time by deleting the relevant data in the app, stopping use of the app, or emailing us. Withdrawal does not affect the lawfulness of processing carried out before it. After withdrawal we will stop processing your health data and, on request, delete it, but some features may no longer be available."
+      },
+      {
+        "heading": "13. Security",
+        "body": "We use reasonable technical and organisational measures to protect your data. No system is completely secure, and we cannot guarantee absolute security. You are responsible for protecting your device and account."
+      },
+      {
+        "heading": "14. Acceptable use and intellectual property",
+        "body": "You agree not to misuse the app, attempt to gain unauthorised access, reverse engineer it, or use it unlawfully. The app, its design, text, recipes and other content are owned by us or our licensors and are protected by law. We grant you a limited, personal, non-transferable licence to use the app. Content you add remains yours, and you grant us the rights needed to store and display it to provide the service."
+      },
+      {
+        "heading": "15. Disclaimer and limitation of liability",
+        "body": "The app is provided \"as is\" and \"as available\". To the extent permitted by law, we do not guarantee that nutrition information, recipes or AI analysis are complete, accurate or suitable for you, and we are not liable for indirect or consequential loss or for any health outcome resulting from reliance on the app. Nothing in these Terms excludes liability that cannot be excluded by law or limits your mandatory consumer rights."
+      },
+      {
+        "heading": "16. Changes to these Terms",
+        "body": "We may update these Terms from time to time. We will update the \"last updated\" date and, where changes are material or affect your consent, ask you to review or renew it. Continued use after changes means you accept the updated Terms."
+      },
+      {
+        "heading": "17. Governing law and contact",
+        "body": "These Terms are governed by the laws of the country in which the app operator is established, without prejudice to mandatory consumer protection rules of your country of residence. For questions, data requests or to withdraw consent, contact us at 5507151kr@gmail.com or via Help & Support in the app."
       }
     ]
   }

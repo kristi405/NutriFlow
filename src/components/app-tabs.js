@@ -9,8 +9,8 @@ function AppTabs() {
       <Tabs.Screen name="index" options={{ title: t('tabs.home') }} />
       <Tabs.Screen name="recipes" options={{ title: t('tabs.recipes') }} />
       <Tabs.Screen name="meal-plan" options={{ title: t('tabs.mealPlan') }} />
-      <Tabs.Screen name="articles" options={{ title: t('tabs.articles') }} />
       <Tabs.Screen name="ai-analysis" options={{ title: t('tabs.aiAnalysis') }} />
+      <Tabs.Screen name="articles" options={{ title: t('tabs.articles') }} />
       <Tabs.Screen name="progress" options={{ title: t('tabs.progress') }} />
       <Tabs.Screen name="profile" />
     </Tabs>;

@@ -16,15 +16,25 @@ class ArticleStore {
   // Single source of truth for the heart state everywhere (list, card,
   // detail). Persisted so it's right on cold start before any fetch lands.
   favoriteIds = [];
+  // Locally tracked read state.
+  readIds = [];
   hasHydrated = false;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
-    persistStore(this, 'nutriflow.article', ['todayArticle', 'lastFetchedDate', 'lang', 'favoriteIds']);
+    persistStore(this, 'nutriflow.article', ['todayArticle', 'lastFetchedDate', 'lang', 'favoriteIds', 'readIds']);
   }
 
   isFavorite(id) {
     return this.favoriteIds.includes(id);
+  }
+
+  isRead(id) {
+    return this.readIds.includes(String(id));
+  }
+
+  markRead(id) {
+    if (!this.isRead(id)) this.readIds = [...this.readIds, String(id)];
   }
 
   setFavorite(id, value) {
