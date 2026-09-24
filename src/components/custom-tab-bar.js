@@ -1,3 +1,5 @@
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,12 +26,20 @@ const HIDDEN_ROUTES = new Set(['profile']);
 // see ScreenScrollView, which imports this.
 export const TAB_BAR_HEIGHT = 64;
 
+// Stacked strips of increasing blur fake a gradual blur — a single BlurView
+// would end in a hard visible edge above the bar.
+const BLUR_STEPS = [6, 16, 30, 45, 60];
+
 export function CustomTabBar({ state, descriptors, navigation }) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const visibleRoutes = state.routes.filter(route => !HIDDEN_ROUTES.has(route.name));
 
   return <View pointerEvents="box-none" style={[styles.wrapper, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+      <View pointerEvents="none" style={styles.fade}>
+        {BLUR_STEPS.map(intensity => <BlurView key={intensity} intensity={intensity} tint={theme.text === '#ffffff' ? 'dark' : 'light'} style={styles.blurStrip} />)}
+        <LinearGradient colors={[`${theme.background}00`, `${theme.background}B3`]} style={StyleSheet.absoluteFill} />
+      </View>
       <View style={[styles.bar, { backgroundColor: theme.background, shadowColor: theme.text }]}>
         {visibleRoutes.map(route => {
         const routeIndex = state.routes.findIndex(item => item.key === route.key);
@@ -64,6 +74,16 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     alignItems: 'center'
+  },
+  fade: {
+    position: 'absolute',
+    top: -28,
+    left: 0,
+    right: 0,
+    bottom: 0
+  },
+  blurStrip: {
+    flex: 1
   },
   bar: {
     flexDirection: 'row',

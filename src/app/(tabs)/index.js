@@ -88,7 +88,7 @@ function HomeScreen() {
   const consumedCalories = Math.round(total.nutrition.calories);
   const burnedCalories = Math.round(steps * profile.weightKg * 0.0005);
   const remainingCalories = Math.max(0, targets.calories - consumedCalories + burnedCalories);
-  return <ScreenScrollView gap={Spacing.three}>
+  return <ScreenScrollView isTabScreen gap={Spacing.three}>
       <Pressable onPress={() => router.push('/profile')} style={styles.headerRow}>
         <View style={styles.avatar}>
           <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={22} tintColor={theme.accent} />

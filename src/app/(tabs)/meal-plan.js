@@ -11,7 +11,8 @@ import { ThemedText } from '@/components/themed-text';
 import { MacroBar } from '@/components/ui/macro-bar';
 import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
-import { BottomTabInset, Spacing } from '@/constants/theme';
+import { TAB_BAR_HEIGHT } from '@/components/custom-tab-bar';
+import { Spacing } from '@/constants/theme';
 import { getIngredientById, getRecipeById, getRecipes } from '@/data/catalog';
 import { useTheme } from '@/hooks/use-theme';
 import { todayKey, weekContaining } from '@/lib/date';
@@ -61,6 +62,7 @@ function MealPlanScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
+  const tabBarOffset = TAB_BAR_HEIGHT + Math.max(insets.bottom, 12);
   const [date, setDate] = useState(todayKey());
   const [swapMealType, setSwapMealType] = useState(null);
   const [isAddSnackModalOpen, setIsAddSnackModalOpen] = useState(false);
@@ -238,8 +240,8 @@ function MealPlanScreen() {
         <DateStrip selectedDate={date} onSelectDate={setDate} />
       </View>
 
-      <ScreenScrollView gap={Spacing.three} contentContainerStyle={{
-      paddingBottom: BottomTabInset + (hasFullWeekPlanned ? Spacing.four : Spacing.six)
+      <ScreenScrollView isTabScreen gap={Spacing.three} contentContainerStyle={{
+      paddingBottom: tabBarOffset + (hasFullWeekPlanned ? Spacing.four : Spacing.six)
     }}>
       <View style={styles.topRow}>
         <View style={[styles.progressCard, allMealsEaten && styles.progressCardEaten]}>
@@ -320,7 +322,7 @@ function MealPlanScreen() {
       </ScreenScrollView>
 
       {!hasFullWeekPlanned && <Pressable onPress={handleGenerateWeek} style={[styles.weekButton, {
-      bottom: BottomTabInset + Spacing.five + Spacing.two
+      bottom: tabBarOffset + Spacing.three
     }]}>
           <SymbolView name={{ ios: 'calendar.badge.plus', android: 'calendar_add_on', web: 'calendar_add_on' }} size={16} tintColor="#ffffff" />
           <ThemedText type="smallBold" style={styles.weekButtonText}>

@@ -11,6 +11,7 @@ export function ScreenScrollView({
   contentContainerStyle,
   gap = Spacing.five,
   horizontalPadding = Spacing.four,
+  isTabScreen = false,
   ...rest
 }) {
   const theme = useTheme();
@@ -19,18 +20,21 @@ export function ScreenScrollView({
   // reserving its own layout space, so every scrollable screen needs enough
   // bottom clearance to scroll its last item out from underneath it.
   const tabBarClearance = TAB_BAR_HEIGHT + Math.max(safeAreaInsets.bottom, 12) + Spacing.two;
-  // Explicit on both platforms — the plain JS Tabs navigator (unlike
-  // NativeTabs) doesn't auto-adjust each screen's content for the status bar,
-  // so this can't rely on UIScrollView's implicit contentInset behavior.
+  // Tab screens have no native header, so the status bar / notch inset has to
+  // be padded explicitly. contentInset can't be used for that: it doesn't move
+  // the initial scroll offset, so content would start under the status bar.
+  // Screens pushed on the stack (native header, no tab bar) keep the old
+  // behavior — the header already covers the top and there's no bar to clear.
   const insets = {
-    top: safeAreaInsets.top + Spacing.two,
+    top: isTabScreen ? safeAreaInsets.top + Spacing.two : Spacing.two,
     left: safeAreaInsets.left,
     right: safeAreaInsets.right,
-    bottom: tabBarClearance
+    bottom: isTabScreen ? tabBarClearance : Spacing.three
   };
+  const tabScreenPadding = isTabScreen ? { paddingTop: insets.top, paddingBottom: insets.bottom } : null;
   const platformStyle = Platform.select({
     android: {
-      paddingTop: insets.top,
+      paddingTop: isTabScreen ? insets.top : safeAreaInsets.top + insets.top,
       paddingLeft: insets.left,
       paddingRight: insets.right,
       paddingBottom: insets.bottom
@@ -41,7 +45,7 @@ export function ScreenScrollView({
     }
   });
   return <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
-      <ScrollView style={styles.scrollView} contentInset={insets} contentContainerStyle={[styles.contentContainer, platformStyle, contentContainerStyle]} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} {...rest}>
+      <ScrollView style={styles.scrollView} contentInset={isTabScreen ? undefined : insets} contentContainerStyle={[styles.contentContainer, tabScreenPadding, platformStyle, contentContainerStyle]} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} {...rest}>
         <View style={[styles.container, { gap, paddingHorizontal: horizontalPadding }]}>{children}</View>
       </ScrollView>
       {Platform.OS === 'android' && <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.10)']} style={styles.tabBarShadow} pointerEvents="none" />}

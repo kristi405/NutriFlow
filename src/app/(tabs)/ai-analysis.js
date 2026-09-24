@@ -133,7 +133,7 @@ function AiAnalysisScreen() {
       </View>;
   }
 
-  return <ScreenScrollView gap={Spacing.three}>
+  return <ScreenScrollView isTabScreen gap={Spacing.three}>
       <View style={styles.header}>
         <ThemedText type="title" style={styles.title} color={theme.text}>
           {t('aiAnalysis.title')}

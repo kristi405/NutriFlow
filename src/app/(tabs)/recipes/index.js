@@ -98,7 +98,7 @@ function RecipesScreen() {
 
   const recentlyViewed = recentlyViewedStore.recipeIds.map(getRecipeById).filter(Boolean);
 
-  return <ScreenScrollView gap={Spacing.five} horizontalPadding={0}>
+  return <ScreenScrollView isTabScreen gap={Spacing.five} horizontalPadding={0}>
       <View style={styles.searchSection}>
         <View style={styles.searchRow}>
           <View style={styles.searchBar}>
