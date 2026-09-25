@@ -6,7 +6,8 @@ import { Animated, Easing, StyleSheet, View } from 'react-native';
 import { Fonts } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-const PROGRESS_DURATION = 5000;
+// How long the animation runs; also how long callers keep the screen up.
+export const CALCULATING_DURATION = 5000;
 
 export function CalculatingScreen() {
   const { t } = useTranslation();
@@ -19,7 +20,7 @@ export function CalculatingScreen() {
   useEffect(() => {
     Animated.timing(progress, {
       toValue: 1,
-      duration: PROGRESS_DURATION,
+      duration: CALCULATING_DURATION,
       easing: Easing.linear,
       useNativeDriver: false
     }).start();

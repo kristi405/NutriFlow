@@ -41,7 +41,7 @@ function EditPersonalGoalsScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
-  const profile = profileStore.profile;
+  const profile = profileStore.activeProfile;
   const [name, setName] = useState(profile?.name ?? '');
   const [goalType, setGoalType] = useState(profile?.goal?.type);
   const [age, setAge] = useState(String(profile?.age ?? ''));

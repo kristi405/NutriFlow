@@ -14,7 +14,9 @@ import { addDays, todayKey } from '@/lib/date';
 import { calculateBMI, calculateDailyTargets } from '@/lib/nutrition';
 import { displayWeight, weightUnitLabel } from '@/lib/units';
 import { useDailyNutrition } from '@/hooks/useDailyNutrition';
+import { PersonSwitcher } from '@/components/people/person-switcher';
 import { ACHIEVEMENT_GOALS, achievementsStore } from '@/store/achievementsStore';
+import { peopleStore } from '@/store/peopleStore';
 import { foodLogStore } from '@/store/foodLogStore';
 import { profileStore } from '@/store/profileStore';
 import { waterStore } from '@/store/waterStore';
@@ -155,7 +157,7 @@ function ProgressScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const profile = profileStore.profile;
+  const profile = profileStore.activeProfile;
   const { total } = useDailyNutrition(todayKey());
   const waterMl = waterStore.totalForDate(todayKey());
   const targets = useMemo(() => profile ? calculateDailyTargets(profile) : undefined, [profile]);
@@ -163,7 +165,7 @@ function ProgressScreen() {
     if (!targets) return;
     achievementsStore.sync({ waterTargetMl: targets.water, proteinTarget: targets.protein });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [foodLogStore.entries.length, waterStore.entries.length, targets?.water, targets?.protein]);
+  }, [foodLogStore.entries.length, waterStore.entries.length, targets?.water, targets?.protein, peopleStore.currentPersonId]);
   const [rangeKey, setRangeKey] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -174,7 +176,7 @@ function ProgressScreen() {
 
   useEffect(() => {
     weightLogStore.syncToday(currentWeightKg);
-  }, [currentWeightKg]);
+  }, [currentWeightKg, peopleStore.currentPersonId]);
 
   const activeRange = RANGE_OPTIONS.find(option => option.key === rangeKey);
   const historyEntries = activeRange?.days !== undefined ? weightLogStore.entriesSince(addDays(todayKey(), -activeRange.days)) : activeRange?.key === 'all' ? weightLogStore.sortedEntries : weightLogStore.entriesSince(addDays(todayKey(), -30));
@@ -197,6 +199,8 @@ function ProgressScreen() {
           {t('progress.subtitle')}
         </ThemedText>
       </View>
+
+      <PersonSwitcher />
 
       <View style={styles.statsGrid}>
         <StatCard theme={theme} styles={styles} icon={{ ios: 'scalemass.fill', android: 'monitor_weight', web: 'monitor_weight' }} label={t('progress.currentWeight')} value={displayWeight(currentWeightKg, profile.preferences?.units)} unit={unitLabel} />
@@ -246,7 +250,7 @@ function ProgressScreen() {
 
       {showDetails && <DetailedNutritionCard total={total} targets={targets} />}
 
-      <View style={[styles.card, styles.lastCard]}>
+      {peopleStore.currentPersonId === null && <View style={[styles.card, styles.lastCard]}>
         <ThemedText type="smallBold" color={theme.text}>
           {t('progress.achievements')}
         </ThemedText>
@@ -276,7 +280,7 @@ function ProgressScreen() {
             </View>;
         })}
         </View>
-      </View>
+      </View>}
     </ScreenScrollView>;
 }
 

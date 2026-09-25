@@ -79,6 +79,8 @@ export function adaptIngredient(raw, slugs) {
     imageUrl: raw.image_url ?? undefined,
     categoryId: FALLBACK_INGREDIENT_CATEGORY_ID,
     subcategoryId: undefined,
+    // The unit this ingredient is normally measured in (g, piece, tbsp, ...).
+    defaultUnit: raw.default_unit || 'g',
     gramsPerUnit: raw.grams_per_unit || {},
     per100g: { nutrition, vitamins, minerals },
     allergens: tagValuesByType(raw.tags, 'allergen', slugs)

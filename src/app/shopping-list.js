@@ -57,7 +57,7 @@ function ShoppingListScreen() {
   const today = todayKey();
   // "Week" = the rest of the current week (today onward), same span the weekly menu generator fills.
   const days = isWeek ? weekContaining(today).filter(day => day >= today) : [today];
-  const planItems = days.flatMap(day => mealPlanStore.itemsForDate(day));
+  const planItems = days.flatMap(day => mealPlanStore.itemsForShopping(day));
   const groups = buildShoppingList(planItems);
   const scopeKey = isWeek ? `week@${weekContaining(today)[0]}` : `today@${today}`;
   // Only ids still on the current list count, so removing a recipe from the plan can't leave phantom checks.

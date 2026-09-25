@@ -215,6 +215,28 @@
     "notFoundTitle": "Article not found",
     "notFoundMessage": "This article may have been removed."
   },
+  "units": {
+    "g": "g",
+    "kg": "kg",
+    "ml": "ml",
+    "l": "l",
+    "piece": "pcs",
+    "tbsp": "tbsp",
+    "tsp": "tsp",
+    "cup": "cup",
+    "slice": "slice",
+    "clove": "clove"
+  },
+  "people": {
+    "title": "People",
+    "you": "You",
+    "switchTitle": "Who are you tracking?",
+    "addPerson": "Add person",
+    "removeTitle": "Remove {{name}}?",
+    "removeMessage": "Their profile, logged meals, meal plans, water and weight history, and uploaded lab results will be deleted.",
+    "sharedMenu": "Same menu for everyone",
+    "sharedMenuHint": "Everyone gets the same dishes; portions are adjusted to each person's calorie goal. The shopping list covers everyone."
+  },
   "articles": {
     "title": "Articles",
     "all": "All",
@@ -332,7 +354,15 @@
       "soda": "Soda (can)",
       "proteinBar": "Protein bar",
       "nutsHandful": "Handful of nuts"
-    }
+    },
+    "regenerateTitle": "Regenerate today's menu?",
+    "regenerateMessage": "Today's current menu will be deleted and replaced with a new one. Any dishes you swapped or added will be lost.",
+    "regenerateMessageShared": "Today's current menu will be deleted for the whole family and replaced with a new one. Any dishes you swapped or added will be lost.",
+    "regenerateConfirm": "Regenerate",
+    "generatingDayTitle": "Generating today's menu…",
+    "generatingDayMessage": "Picking meals that fit your calorie goal",
+    "dayGeneratedTitle": "Today's menu is ready!",
+    "dayGeneratedMessage": "Your meals for today have been regenerated."
   },
   "recipes": {
     "title": "Recipes",
@@ -407,7 +437,9 @@
       "easy": "Easy",
       "medium": "Medium",
       "hard": "Hard"
-    }
+    },
+    "titleRequired": "Enter a name for the dish",
+    "ingredientsRequired": "Add at least one ingredient"
   },
   "nutrition": {
     "score": "Nutrition Score",

@@ -1,4 +1,5 @@
 import { makeAutoObservable } from 'mobx';
+import { belongsTo, peopleStore, personTag } from './peopleStore';
 import { persistStore } from './persist';
 
 class FoodLogStore {
@@ -14,6 +15,7 @@ class FoodLogStore {
     this.entries.push({
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       loggedAt: new Date().toISOString(),
+      ...personTag(),
       ...input,
     });
   }
@@ -28,7 +30,19 @@ class FoodLogStore {
   }
 
   entriesForDate(date) {
-    return this.entries.filter(entry => entry.date === date);
+    return this.entriesForDateOf(peopleStore.currentPersonId, date);
+  }
+
+  entriesForDateOf(personId, date) {
+    return this.entries.filter(entry => entry.date === date && belongsTo(entry, personId));
+  }
+
+  entriesOfPerson(personId) {
+    return this.entries.filter(entry => belongsTo(entry, personId));
+  }
+
+  removePersonData(personId) {
+    this.entries = this.entries.filter(entry => !belongsTo(entry, personId));
   }
 }
 

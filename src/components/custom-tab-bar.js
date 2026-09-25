@@ -2,7 +2,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SymbolView } from 'expo-symbols';
 import { useEffect, useRef } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
+import { Animated, Easing, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
@@ -26,6 +26,15 @@ const HIDDEN_ROUTES = new Set(['profile']);
 // so scrollable screens need to know how much bottom clearance to leave —
 // see ScreenScrollView, which imports this.
 export const TAB_BAR_HEIGHT = 64;
+
+// Space between the bar and the bottom edge of the screen. Android sits the
+// bar flush against the edge (its gesture-nav inset is tiny), so it gets an
+// extra lift; iOS already has the home-indicator inset. Screens reserve the
+// same amount below their content — see ScreenScrollView.
+const ANDROID_EXTRA_LIFT = 12;
+export function tabBarBottomGap(insetBottom) {
+  return Math.max(insetBottom, 12) + (Platform.OS === 'android' ? ANDROID_EXTRA_LIFT : 0);
+}
 
 // Stacked strips of increasing blur fake a gradual blur — a single BlurView
 // would end in a hard visible edge above the bar.
@@ -58,7 +67,7 @@ export function CustomTabBar({ state, descriptors, navigation }) {
   const insets = useSafeAreaInsets();
   const visibleRoutes = state.routes.filter(route => !HIDDEN_ROUTES.has(route.name));
 
-  return <View pointerEvents="box-none" style={[styles.wrapper, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+  return <View pointerEvents="box-none" style={[styles.wrapper, { paddingBottom: tabBarBottomGap(insets.bottom) }]}>
       <View pointerEvents="none" style={styles.fade}>
         {BLUR_STEPS.map(intensity => <BlurView key={intensity} intensity={intensity} tint={theme.text === '#ffffff' ? 'dark' : 'light'} style={styles.blurStrip} />)}
         <LinearGradient colors={[`${theme.background}00`, `${theme.background}B3`]} style={StyleSheet.absoluteFill} />

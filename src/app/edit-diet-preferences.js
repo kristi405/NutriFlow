@@ -24,7 +24,7 @@ function EditDietPreferencesScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
-  const profile = profileStore.profile;
+  const profile = profileStore.activeProfile;
   const [dietaryTags, setDietaryTags] = useState(profile?.preferences?.dietaryTags ?? []);
   const [allergies, setAllergies] = useState(profile?.preferences?.allergies ?? []);
 

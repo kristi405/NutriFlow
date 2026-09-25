@@ -18,7 +18,9 @@ import { PreferencesStep } from './preferences-step';
 
 const TOTAL_STEPS = 5;
 
-export function OnboardingFlow() {
+// With no props this is the account owner's first-run onboarding. `onComplete`
+// (+ `onCancel`) reuse the same steps to collect a profile for another person.
+export function OnboardingFlow({ onComplete, onCancel } = {}) {
   const { t } = useTranslation();
   const theme = useTheme();
   const completeOnboarding = profileStore.completeOnboarding;
@@ -68,6 +70,10 @@ export function OnboardingFlow() {
         units: personalInfo.system
       }
     };
+    if (onComplete) {
+      onComplete(profile);
+      return;
+    }
     completeOnboarding(profile);
     authStore.syncProfile(profile);
   }
@@ -102,6 +108,8 @@ export function OnboardingFlow() {
           setShowValidation(false);
         }} hitSlop={8}>
               <ThemedText type="link" color={theme.accent} style={{ fontWeight: '600' }}>{t('onboarding.back')}</ThemedText>
+            </Pressable> : onCancel ? <Pressable onPress={onCancel} hitSlop={8}>
+              <ThemedText type="link" color={theme.accent} style={{ fontWeight: '600' }}>{t('common.cancel')}</ThemedText>
             </Pressable> : <Pressable onPress={handleSkip} hitSlop={8}>
               <ThemedText type="link" color={theme.accent} style={{ fontWeight: '600' }}>{t('onboarding.skip')}</ThemedText>
             </Pressable>}

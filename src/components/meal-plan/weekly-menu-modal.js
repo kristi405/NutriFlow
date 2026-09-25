@@ -6,8 +6,8 @@ import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-// status: 'generating' | 'done' | null (hidden)
-export function WeeklyMenuModal({ status }) {
+// status: 'generating' | 'done' | null (hidden); scope: 'week' | 'day' picks the wording.
+export function WeeklyMenuModal({ status, scope = 'week' }) {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -52,10 +52,10 @@ export function WeeklyMenuModal({ status }) {
               <ActivityIndicator color={theme.accent} />
             </>}
           <ThemedText type="headline" color={theme.text} style={styles.centerText}>
-            {isDone ? t('mealPlan.weekGeneratedTitle') : t('mealPlan.generatingWeekTitle')}
+            {isDone ? t(`mealPlan.${scope}GeneratedTitle`) : t(`mealPlan.generating${scope === 'week' ? 'Week' : 'Day'}Title`)}
           </ThemedText>
           <ThemedText type="small" color={theme.textSecondary} style={styles.centerText}>
-            {isDone ? t('mealPlan.weekGeneratedMessage') : t('mealPlan.generatingWeekMessage')}
+            {isDone ? t(`mealPlan.${scope}GeneratedMessage`) : t(`mealPlan.generating${scope === 'week' ? 'Week' : 'Day'}Message`)}
           </ThemedText>
         </View>
       </View>

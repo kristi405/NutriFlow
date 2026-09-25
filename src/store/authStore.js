@@ -85,9 +85,11 @@ class AuthStore {
 
   // Pushes the local (camelCase) onboarding profile to the backend user record.
   // Silently does nothing without a real session — the SKIP_AUTH_FOR_TESTING guest
-  // path has no backend account to sync to.
-  async syncProfile(profile) {
-    if (!this.token) return;
+  // path has no backend account to sync to. `familyMembers` is only sent when
+  // given: the server keeps its stored members when the key is absent.
+  // Resolves to whether the server accepted it.
+  async syncProfile(profile, familyMembers) {
+    if (!this.token) return false;
     const body = {
       name: profile.name,
       sex: profile.sex,
@@ -99,13 +101,15 @@ class AuthStore {
       goal_type: profile.goal?.type,
       manual_calorie_target: profile.goal?.manualCalorieTarget,
       manual_macro_split: profile.goal?.manualMacroSplit,
-      preferences: profile.preferences
+      preferences: familyMembers ? { ...profile.preferences, familyMembers } : profile.preferences
     };
     try {
       this.currentUser = await apiRequest('/app/users/me', { method: 'PUT', token: this.token, body });
+      return true;
     } catch {
       // Best-effort — the onboarding flow already moved on locally; the next
       // successful sync (or a future explicit retry) will catch this up.
+      return false;
     }
   }
 

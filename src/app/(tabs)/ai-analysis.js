@@ -8,6 +8,7 @@ import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Modal, Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
+import { PersonSwitcher } from '@/components/people/person-switcher';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
@@ -73,7 +74,8 @@ function AiAnalysisScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [isSourceSheetOpen, setIsSourceSheetOpen] = useState(false);
-  const { reports, isLoading, isUploading, hasError } = labReportStore;
+  const { isLoading, isUploading, hasError } = labReportStore;
+  const reports = labReportStore.visibleReports;
   const locale = localeStore.language;
 
   useEffect(() => {
@@ -142,6 +144,8 @@ function AiAnalysisScreen() {
           {t('aiAnalysis.subtitle')}
         </ThemedText>
       </View>
+
+      <PersonSwitcher />
 
       <View style={styles.uploadCard}>
         <View style={styles.uploadIconWrapper}>

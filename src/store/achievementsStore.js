@@ -3,6 +3,7 @@ import { getIngredientById, getRecipeById } from '@/data/catalog';
 import { addDays, todayKey } from '@/lib/date';
 import { calculateRecipeNutrition, scaleForServings } from '@/lib/nutrition';
 import { foodLogStore } from './foodLogStore';
+import { peopleStore } from './peopleStore';
 import { persistStore } from './persist';
 import { waterStore } from './waterStore';
 
@@ -66,7 +67,10 @@ class AchievementsStore {
   // Re-derives which days hit each goal from the logs. Idempotent: only writes
   // when something changed, so calling it from an effect can't loop.
   sync({ waterTargetMl, proteinTarget }) {
-    const loggedDates = new Set([...foodLogStore.entries.map(entry => entry.date), ...waterStore.entries.map(entry => entry.date)]);
+    // Achievements belong to the account owner; the targets passed in are the
+    // active person's, so they only apply while that is "me".
+    if (peopleStore.currentPersonId !== null) return;
+    const loggedDates = new Set([...foodLogStore.entriesOfPerson(null).map(entry => entry.date), ...waterStore.entriesOfPerson(null).map(entry => entry.date)]);
     const streakDays = [];
     const waterDays = [];
     const proteinDays = [];
@@ -75,7 +79,7 @@ class AchievementsStore {
       if (waterTargetMl > 0 && waterStore.totalForDate(date) >= waterTargetMl) waterDays.push(date);
       if (proteinTarget > 0 && proteinForDate(date) >= proteinTarget) proteinDays.push(date);
     }
-    const hasCookedRecipe = foodLogStore.entries.some(entry => getRecipeById(entry.recipeId));
+    const hasCookedRecipe = foodLogStore.entriesOfPerson(null).some(entry => getRecipeById(entry.recipeId));
     const firstRecipeDays = hasCookedRecipe ? ['done'] : [];
 
     // Keep previously earned days even if the current data no longer proves them.

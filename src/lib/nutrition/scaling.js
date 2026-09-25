@@ -4,8 +4,17 @@
  * 1:1 (reasonable for the mostly water-based liquids in this dataset); every
  * other unit needs a `gramsPerUnit` conversion on the ingredient.
  */
+// Weight/volume units convert directly (ml/l assume water-like density, as
+// the server's recipe totals do); count-style units (piece, tbsp, ...) need
+// the ingredient's own grams-per-unit.
+const DIRECT_UNIT_GRAMS = { g: 1, ml: 1, kg: 1000, l: 1000 };
+
+export function canMeasureIn(ingredient, unit) {
+  return DIRECT_UNIT_GRAMS[unit] !== undefined || ingredient.gramsPerUnit[unit] !== undefined;
+}
+
 export function gramsForQuantity(ingredient, quantity, unit) {
-  if (unit === 'g' || unit === 'ml') return quantity;
+  if (DIRECT_UNIT_GRAMS[unit] !== undefined) return quantity * DIRECT_UNIT_GRAMS[unit];
   const perUnit = ingredient.gramsPerUnit[unit];
   if (perUnit === undefined) {
     throw new Error(`Ingredient "${ingredient.name}" has no gram conversion for unit "${unit}"`);

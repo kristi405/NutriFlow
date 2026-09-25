@@ -5,6 +5,7 @@ import { FlatList, Modal, Pressable, StyleSheet, TextInput, View } from 'react-n
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 
 /**
  * Multi-select tag picker in a bottom sheet. Built for long tag lists: a
@@ -15,6 +16,7 @@ import { useTheme } from '@/hooks/use-theme';
 export function TagFilterSheet({ visible, tags, selectedIds, onChange, onClose }) {
   const { t } = useTranslation();
   const theme = useTheme();
+  const keyboardHeight = useKeyboardHeight();
   const [query, setQuery] = useState('');
 
   const visibleTags = useMemo(() => {
@@ -32,7 +34,7 @@ export function TagFilterSheet({ visible, tags, selectedIds, onChange, onClose }
   }
 
   return <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
-      <Pressable style={styles.backdrop} onPress={handleClose}>
+      <Pressable style={[styles.backdrop, { paddingBottom: keyboardHeight }]} onPress={handleClose}>
         <Pressable style={[styles.sheet, { backgroundColor: theme.background }]} onPress={event => event.stopPropagation()}>
           <View style={styles.header}>
             <ThemedText type="smallBold" color={theme.text}>{t('articles.selectTags')}</ThemedText>

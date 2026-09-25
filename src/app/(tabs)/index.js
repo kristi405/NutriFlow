@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ArticleCard } from '@/components/home/article-card';
+import { PersonSwitcher } from '@/components/people/person-switcher';
 import { DateStrip } from '@/components/home/date-strip';
 import { MacroCard } from '@/components/home/macro-card';
 import { MealRow } from '@/components/home/meal-row';
@@ -25,6 +26,7 @@ import { useNutritionScore } from '@/hooks/useNutritionScore';
 import { useStepCount } from '@/hooks/useStepCount';
 import { calculateDailyTargets, calculateRecipeNutrition, scaleForServings } from '@/lib/nutrition';
 import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
+import { planningCalories } from '@/lib/mealPlanning';
 import { todayKey } from '@/lib/date';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -32,6 +34,7 @@ import { articleStore } from '@/store/articleStore';
 import { localeStore } from '@/store/localeStore';
 import { foodLogStore } from '@/store/foodLogStore';
 import { mealPlanStore } from '@/store/mealPlanStore';
+import { peopleStore } from '@/store/peopleStore';
 import { profileStore } from '@/store/profileStore';
 import { waterStore } from '@/store/waterStore';
 import { router } from 'expo-router';
@@ -46,7 +49,7 @@ function HomeScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const profile = profileStore.profile;
+  const profile = profileStore.activeProfile;
   const [date, setDate] = useState(todayKey());
   const { total } = useDailyNutrition(date);
   const scoreResult = useNutritionScore(date);
@@ -60,7 +63,7 @@ function HomeScreen() {
     if (!targets) return;
     const today = todayKey();
     if (mealPlanStore.itemsForDate(today).length > 0) return;
-    const generated = generateDailyMealPlan(targets.calories);
+    const generated = generateDailyMealPlan(planningCalories(targets));
     generated.forEach(item => mealPlanStore.addItem({ date: today, ...item }));
   }, [targets]);
   useEffect(() => {
@@ -84,7 +87,9 @@ function HomeScreen() {
   const allMealsEaten = planItems.length > 0 && planItems.every(item => loggedEntries.some(entry => entry.mealType === item.mealType && entry.recipeId === item.recipeId));
   if (!profile || !targets) return null;
   const consumedCalories = Math.round(total.nutrition.calories);
-  const burnedCalories = Math.round(steps * profile.weightKg * 0.0005);
+  // Steps come from this phone, so they only describe the account owner.
+  const isMe = peopleStore.currentPersonId === null;
+  const burnedCalories = isMe ? Math.round(steps * profile.weightKg * 0.0005) : 0;
   const remainingCalories = Math.max(0, targets.calories - consumedCalories);
   return <>
       <TermsAcceptanceModal />
@@ -108,6 +113,8 @@ function HomeScreen() {
           <SymbolView name={{ ios: 'gearshape', android: 'settings', web: 'settings' }} size={30} tintColor={theme.textSecondary} />
         </View>
       </Pressable>
+
+      <PersonSwitcher />
 
       <DateStrip selectedDate={date} onSelectDate={setDate} style={styles.dateStrip} />
 
@@ -156,7 +163,7 @@ function HomeScreen() {
 
       <WaterCard consumedMl={waterMl} targetMl={targets.water} onAdd={amount => addWater(date, amount)} />
 
-      <StepsCard />
+      {isMe && <StepsCard />}
 
       {scoreResult && <NutritionScoreCard score={scoreResult.score} explanation={scoreResult.explanation} />}
 

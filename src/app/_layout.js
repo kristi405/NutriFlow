@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { AuthFlow } from '@/components/auth/auth-flow';
-import { CalculatingScreen } from '@/components/calculating-screen';
+import { CALCULATING_DURATION, CalculatingScreen } from '@/components/calculating-screen';
 import { IntroScreen } from '@/components/intro-screen';
 import { OnboardingFlow } from '@/components/onboarding/onboarding-flow';
 import { ThemedView } from '@/components/themed-view';
@@ -16,17 +16,18 @@ import { queryClient } from '@/lib/query-client';
 import { authStore } from '@/store/authStore';
 import { catalogStore } from '@/store/catalogStore';
 import { localeStore } from '@/store/localeStore';
+import { syncFamilyMembers } from '@/store/peopleSync';
+import { peopleStore } from '@/store/peopleStore';
 import { profileStore } from '@/store/profileStore';
 import { themeStore } from '@/store/themeStore';
 SplashScreen.preventAutoHideAsync();
-const CALCULATING_DURATION = 5000;
 const SKIP_AUTH_FOR_TESTING = false;
 function TabLayout() {
   const { t } = useTranslation();
   const theme = useTheme();
   const [showIntro, setShowIntro] = useState(true);
   const [showCalculating, setShowCalculating] = useState(false);
-  const hasHydrated = profileStore.hasHydrated && authStore.hasHydrated;
+  const hasHydrated = profileStore.hasHydrated && authStore.hasHydrated && peopleStore.hasHydrated;
   const isAuthenticated = authStore.isAuthenticated || (SKIP_AUTH_FOR_TESTING && !authStore.hasLoggedOut);
   const hasOnboarded = profileStore.hasOnboarded;
   const prevHasOnboardedRef = useRef(hasOnboarded);
@@ -57,6 +58,11 @@ function TabLayout() {
   useEffect(() => {
     if (localeStore.hasHydrated) localeStore.fetchLanguages();
   }, [localeStore.hasHydrated]);
+  useEffect(() => {
+    // Also re-runs once onboarding finishes: pending member changes can only
+    // be uploaded when the owner's profile exists.
+    if (authStore.isAuthenticated && peopleStore.hasHydrated) syncFamilyMembers();
+  }, [authStore.isAuthenticated, peopleStore.hasHydrated, profileStore.hasOnboarded]);
   const catalogSyncReady = authStore.isAuthenticated && localeStore.hasHydrated && catalogStore.hasHydrated;
   const contentLanguage = localeStore.language;
   useEffect(() => {
@@ -153,6 +159,7 @@ function TabLayout() {
           headerTintColor: theme.text,
           headerTitleStyle: { fontWeight: '700' }
         }} />
+        <Stack.Screen name="add-person" options={{ presentation: 'modal' }} />
         <Stack.Screen name="lab-report/[id]" options={{
           headerShown: true,
           headerTitle: t('aiAnalysis.reportTitle'),

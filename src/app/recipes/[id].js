@@ -4,8 +4,11 @@ import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useFocusedRowScroll } from '@/hooks/useFocusedRowScroll';
+import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { getIngredientById, getIngredients, getRecipeById } from '@/data/catalog';
-import { calculateRecipeNutrition } from '@/lib/nutrition';
+import { defaultQuantityFor, formatQuantity, formatUnit, parseQuantity } from '@/lib/ingredientUnits';
+import { calculateRecipeNutrition, canMeasureIn } from '@/lib/nutrition';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -84,7 +87,7 @@ function swapPoolForIngredient(ingredient, unit, allIngredients) {
   let pool;
   if (ingredient.categoryId === 'meat') pool = allIngredients.filter(item => item.categoryId === 'meat');else if (ingredient.categoryId === 'fish') pool = allIngredients.filter(item => item.categoryId === 'fish');else if (ingredient.subcategoryId === 'vegetables') pool = allIngredients.filter(item => item.subcategoryId === 'vegetables');else if (ingredient.subcategoryId === 'grains') pool = allIngredients.filter(item => item.subcategoryId === 'grains');else return [];
   // Only offer substitutes that can be measured in the recipe line's existing unit.
-  return pool.filter(item => item.id !== ingredient.id && (unit === 'g' || unit === 'ml' || item.gramsPerUnit[unit] !== undefined));
+  return pool.filter(item => item.id !== ingredient.id && canMeasureIn(item, unit));
 }
 
 function RecipeDetailScreen() {
@@ -93,6 +96,9 @@ function RecipeDetailScreen() {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const STATS = useMemo(() => [{ key: 'calories', labelKey: 'recipes.calories', color: theme.primary }, { key: 'protein', labelKey: 'home.protein', color: WATER_BLUE }, { key: 'fat', labelKey: 'home.fat', color: '#F2994A' }, { key: 'carbs', labelKey: 'home.carbs', color: '#9B51E0' }], [theme]);
   const insets = useSafeAreaInsets();
+  const keyboardHeight = useKeyboardHeight();
+  const detailScrollRef = useRef(null);
+  const { rowProps, inputProps } = useFocusedRowScroll(detailScrollRef, keyboardHeight);
   const { width } = useWindowDimensions();
   const { id } = useLocalSearchParams();
   const recipe = getRecipeById(id);
@@ -106,6 +112,7 @@ function RecipeDetailScreen() {
   const [isScrolledPastImage, setIsScrolledPastImage] = useState(false);
   const [isEditingRecipe, setIsEditingRecipe] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
+  const [showEditErrors, setShowEditErrors] = useState(false);
   const [editedImageUri, setEditedImageUri] = useState(null);
   const [editedIngredients, setEditedIngredients] = useState([]);
   const [isIngredientPickerOpen, setIsIngredientPickerOpen] = useState(false);
@@ -125,8 +132,8 @@ function RecipeDetailScreen() {
     if (recipe.isUserRecipe && isEditingRecipe) {
       const liveIngredients = editedIngredients.map(line => ({
         ingredientId: line.ingredientId,
-        quantity: Math.max(1, Number(line.quantity) || 1),
-        unit: 'g'
+        quantity: parseQuantity(line.quantity),
+        unit: line.unit
       }));
       return calculateRecipeNutrition({
         ...recipe,
@@ -217,26 +224,33 @@ function RecipeDetailScreen() {
 
   function handleToggleEditRecipe() {
     if (isEditingRecipe) {
+      if (!editedTitle.trim() || editedIngredients.length === 0) {
+        setShowEditErrors(true);
+        return;
+      }
+      setShowEditErrors(false);
       myRecipesStore.updateRecipe(recipe.id, {
-        title: editedTitle.trim() || recipe.title,
+        title: editedTitle.trim(),
         imageUrl: editedImageUri,
-        ingredients: editedIngredients.map(line => ({ ingredientId: line.ingredientId, quantity: Math.max(1, Number(line.quantity) || 1), unit: 'g' }))
+        ingredients: editedIngredients.map(line => ({ ingredientId: line.ingredientId, quantity: parseQuantity(line.quantity), unit: line.unit }))
       });
       setIsEditingRecipe(false);
     } else {
+      setShowEditErrors(false);
       setEditedTitle(recipe.title);
       setEditedImageUri(recipe.imageUrl ?? null);
       setEditedIngredients(recipe.ingredients.map(line => ({
         ingredientId: line.ingredientId,
         name: getIngredientById(line.ingredientId)?.name ?? line.ingredientId,
-        quantity: String(Math.round(line.quantity))
+        unit: line.unit,
+        quantity: formatQuantity(line.quantity)
       })));
       setIsEditingRecipe(true);
     }
   }
 
   function handleAddEditedIngredient(ingredient) {
-    setEditedIngredients(current => [...current, { ingredientId: ingredient.id, name: ingredient.name, quantity: '100' }]);
+    setEditedIngredients(current => [...current, { ingredientId: ingredient.id, name: ingredient.name, unit: ingredient.defaultUnit, quantity: defaultQuantityFor(ingredient.defaultUnit) }]);
     setIsIngredientPickerOpen(false);
     setIngredientQuery('');
   }
@@ -273,7 +287,7 @@ function RecipeDetailScreen() {
     }
   });
 
-  return <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex1}>
+  return <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={[styles.flex1, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]}>
       <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
       <View style={[styles.fixedImageWrapper, {
       height: imageHeight
@@ -312,9 +326,10 @@ function RecipeDetailScreen() {
     }]} onLayout={event => setHeaderHeight(event.nativeEvent.layout.height)}>
         <View style={styles.paddedContainer}>
           <View style={styles.header}>
-            {isOwnRecipe && isEditingRecipe ? <TextInput value={editedTitle} onChangeText={setEditedTitle} style={styles.titleInput} placeholderTextColor={theme.textSecondary} /> : <ThemedText type="title" style={styles.title} color={theme.text}>
+            {isOwnRecipe && isEditingRecipe ? <TextInput value={editedTitle} onChangeText={setEditedTitle} placeholder={t('recipes.recipeTitlePlaceholder')} style={[styles.titleInput, showEditErrors && !editedTitle.trim() && { borderBottomColor: theme.error, borderBottomWidth: 2 }]} placeholderTextColor={theme.textSecondary} /> : <ThemedText type="title" style={styles.title} color={theme.text}>
                 {recipe.title}
               </ThemedText>}
+            {isOwnRecipe && isEditingRecipe && showEditErrors && !editedTitle.trim() && <ThemedText type="caption" color={theme.error}>{t('recipes.titleRequired')}</ThemedText>}
             <ThemedText type="small" color={theme.textSecondary}>
               {recipe.description}
             </ThemedText>
@@ -351,8 +366,8 @@ function RecipeDetailScreen() {
         </View>
       </Animated.View>
 
-      <Animated.ScrollView style={styles.flex1} showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16} contentContainerStyle={{
-      paddingBottom: insets.bottom + Spacing.four
+      <Animated.ScrollView ref={detailScrollRef} keyboardShouldPersistTaps="handled" style={styles.flex1} showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16} contentContainerStyle={{
+      paddingBottom: insets.bottom + Spacing.four + keyboardHeight
     }}>
         <View style={{
         height: imageHeight
@@ -375,15 +390,16 @@ function RecipeDetailScreen() {
               </View>
 
               {isOwnRecipe && isEditingRecipe ? <View style={styles.list}>
-                  {editedIngredients.map((line, index) => <View key={`${line.ingredientId}-${index}`} style={styles.editIngredientRow}>
+                  {editedIngredients.map((line, index) => <View key={`${line.ingredientId}-${index}`} {...rowProps(index)} style={styles.editIngredientRow}>
                       <ThemedText type="small" color={theme.text} style={styles.flex1} numberOfLines={1}>{line.name}</ThemedText>
-                      <TextInput value={line.quantity} onChangeText={value => handleEditedQuantityChange(index, value)} keyboardType="number-pad" style={styles.quantityInput} />
-                      <ThemedText type="caption" color={theme.textSecondary}>g</ThemedText>
+                      <TextInput value={line.quantity} onChangeText={value => handleEditedQuantityChange(index, value)} keyboardType="decimal-pad" {...inputProps(index)} style={styles.quantityInput} />
+                      <ThemedText type="caption" color={theme.textSecondary}>{formatUnit(t, line.unit)}</ThemedText>
                       <Pressable onPress={() => handleRemoveEditedIngredient(index)} hitSlop={8}>
                         <SymbolView name={{ ios: 'xmark.circle.fill', android: 'cancel', web: 'cancel' }} size={18} tintColor={theme.border} />
                       </Pressable>
                     </View>)}
-                  <Pressable onPress={() => setIsIngredientPickerOpen(true)} style={styles.addIngredientButton}>
+                  {showEditErrors && editedIngredients.length === 0 && <ThemedText type="caption" color={theme.error}>{t('recipes.ingredientsRequired')}</ThemedText>}
+                  <Pressable onPress={() => setIsIngredientPickerOpen(true)} style={[styles.addIngredientButton, showEditErrors && editedIngredients.length === 0 && { borderColor: theme.error }]}>
                     <SymbolView name={{ ios: 'plus.circle.fill', android: 'add_circle', web: 'add_circle' }} size={16} tintColor={theme.accent} />
                     <ThemedText type="small" color={theme.accent}>{t('common.add')}</ThemedText>
                   </Pressable>
@@ -404,7 +420,7 @@ function RecipeDetailScreen() {
                             {ingredient?.name ?? line.ingredientId}
                           </ThemedText>
                           <ThemedText type="small" color={theme.textSecondary}>
-                            {line.quantity} {line.unit}
+                            {formatQuantity(line.quantity)} {formatUnit(t, line.unit)}
                           </ThemedText>
                         </View>
                       </View>;
@@ -507,7 +523,7 @@ function RecipeDetailScreen() {
       </Modal>
 
       <Modal visible={isIngredientPickerOpen} transparent animationType="slide" onRequestClose={() => setIsIngredientPickerOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setIsIngredientPickerOpen(false)}>
+        <Pressable style={[styles.modalBackdrop, { paddingBottom: keyboardHeight }]} onPress={() => setIsIngredientPickerOpen(false)}>
           <Pressable style={styles.modalSheet} onPress={event => event.stopPropagation()}>
             <View style={styles.modalHeader}>
               <ThemedText type="smallBold" color={theme.text}>{t('recipes.addIngredientTitle')}</ThemedText>
@@ -737,7 +753,8 @@ const createStyles = theme => StyleSheet.create({
     borderTopRightRadius: 24,
     padding: Spacing.four,
     paddingBottom: Spacing.six,
-    gap: Spacing.three
+    gap: Spacing.three,
+    maxHeight: '90%'
   },
   modalHeader: {
     flexDirection: 'row',
@@ -846,7 +863,8 @@ const createStyles = theme => StyleSheet.create({
     color: theme.text
   },
   ingredientScroll: {
-    maxHeight: 320
+    maxHeight: 320,
+    flexShrink: 1
   },
   ingredientOption: {
     paddingVertical: Spacing.two,

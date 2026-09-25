@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -11,8 +11,11 @@ import { ThemedText } from '@/components/themed-text';
 import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { getCategories, getIngredients } from '@/data/catalog';
+import { defaultQuantityFor, formatUnit, parseQuantity } from '@/lib/ingredientUnits';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useFocusedRowScroll } from '@/hooks/useFocusedRowScroll';
+import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { myRecipesStore } from '@/store/myRecipesStore';
 
 const DIFFICULTIES = ['easy', 'medium', 'hard'];
@@ -25,6 +28,9 @@ function AddRecipeScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
+  const keyboardHeight = useKeyboardHeight();
+  const scrollRef = useRef(null);
+  const { rowProps, inputProps } = useFocusedRowScroll(scrollRef, keyboardHeight);
 
   const categories = getCategories();
   const ingredients = getIngredients();
@@ -67,7 +73,7 @@ function AddRecipeScreen() {
   }
 
   function handleAddIngredient(ingredient) {
-    setIngredientLines(current => [...current, { ingredientId: ingredient.id, name: ingredient.name, quantity: '100' }]);
+    setIngredientLines(current => [...current, { ingredientId: ingredient.id, name: ingredient.name, unit: ingredient.defaultUnit, quantity: defaultQuantityFor(ingredient.defaultUnit) }]);
     setIsIngredientModalOpen(false);
     setIngredientQuery('');
   }
@@ -81,9 +87,19 @@ function AddRecipeScreen() {
   }
 
   const canSave = title.trim().length > 0 && ingredientLines.length > 0;
+  // Errors only appear once the user has tried to save, and clear as they're fixed.
+  const [showValidation, setShowValidation] = useState(false);
+  const showTitleError = showValidation && title.trim().length === 0;
+  const showIngredientsError = showValidation && ingredientLines.length === 0;
 
   function handleSave() {
-    if (!canSave) return;
+    if (!canSave) {
+      setShowValidation(true);
+      // The title sits at the top of the form, the ingredients at the bottom.
+      if (title.trim().length === 0) scrollRef.current?.scrollTo({ y: 0, animated: true });
+      else scrollRef.current?.scrollToEnd({ animated: true });
+      return;
+    }
     const id = myRecipesStore.addRecipe({
       title: title.trim(),
       imageUrl: imageUri,
@@ -92,15 +108,15 @@ function AddRecipeScreen() {
       prepTimeMinutes: DEFAULT_PREP_TIME_MINUTES,
       cookTimeMinutes: DEFAULT_COOK_TIME_MINUTES,
       difficulty,
-      ingredients: ingredientLines.map(line => ({ ingredientId: line.ingredientId, quantity: Math.max(1, Number(line.quantity) || 1), unit: 'g' })),
+      ingredients: ingredientLines.map(line => ({ ingredientId: line.ingredientId, quantity: parseQuantity(line.quantity), unit: line.unit })),
       steps: []
     });
     router.replace({ pathname: '/recipes/[id]', params: { id } });
   }
 
-  return <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex1}>
+  return <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={[styles.flex1, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]}>
       <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
-      <ScreenScrollView gap={Spacing.four} horizontalPadding={20} contentContainerStyle={styles.scrollContent}>
+      <ScreenScrollView ref={scrollRef} gap={Spacing.four} horizontalPadding={20} contentContainerStyle={[styles.scrollContent, { paddingBottom: Spacing.six + keyboardHeight }]} keyboardShouldPersistTaps="handled">
         <Pressable onPress={handlePickPhoto} style={styles.photoWrapper}>
           <RecipeImage uri={imageUri} style={styles.photo} iconSize={36} />
           <View style={styles.photoEditBadge}>
@@ -108,7 +124,8 @@ function AddRecipeScreen() {
           </View>
         </Pressable>
 
-        <TextInput value={title} onChangeText={setTitle} placeholder={t('recipes.recipeTitlePlaceholder')} placeholderTextColor={theme.textSecondary} style={styles.input} />
+        <TextInput value={title} onChangeText={setTitle} placeholder={t('recipes.recipeTitlePlaceholder')} placeholderTextColor={theme.textSecondary} style={[styles.input, showTitleError && { borderColor: theme.error, borderWidth: 1.5 }]} />
+        {showTitleError && <ThemedText type="caption" color={theme.error}>{t('recipes.titleRequired')}</ThemedText>}
 
         <View style={styles.field}>
           <ThemedText type="small" color={theme.textSecondary}>{t('recipes.categoriesLabel')}</ThemedText>
@@ -142,11 +159,13 @@ function AddRecipeScreen() {
               <ThemedText type="small" color={theme.accent} style={styles.addChipText}>{t('common.add')}</ThemedText>
             </Pressable>
           </View>
-          {ingredientLines.length === 0 ? <ThemedText type="caption" color={theme.textSecondary} style={styles.emptyIngredientsText}>{t('recipes.noIngredientsYet')}</ThemedText> : <View style={styles.list}>
-              {ingredientLines.map((line, index) => <View key={`${line.ingredientId}-${index}`} style={styles.ingredientRow}>
+          {ingredientLines.length === 0 ? <View style={[styles.emptyIngredientsBox, showIngredientsError && { borderColor: theme.error }]}>
+              <ThemedText type="caption" color={showIngredientsError ? theme.error : theme.textSecondary} style={!showIngredientsError && styles.emptyIngredientsText}>{showIngredientsError ? t('recipes.ingredientsRequired') : t('recipes.noIngredientsYet')}</ThemedText>
+            </View> : <View style={styles.list}>
+              {ingredientLines.map((line, index) => <View key={`${line.ingredientId}-${index}`} {...rowProps(index)} style={styles.ingredientRow}>
                   <ThemedText type="small" color={theme.text} style={styles.flex1} numberOfLines={1}>{line.name}</ThemedText>
-                  <TextInput value={line.quantity} onChangeText={value => handleQuantityChange(index, value)} keyboardType="number-pad" style={styles.quantityInput} />
-                  <ThemedText type="caption" color={theme.textSecondary}>g</ThemedText>
+                  <TextInput value={line.quantity} onChangeText={value => handleQuantityChange(index, value)} keyboardType="decimal-pad" {...inputProps(index)} style={styles.quantityInput} />
+                  <ThemedText type="caption" color={theme.textSecondary}>{formatUnit(t, line.unit)}</ThemedText>
                   <Pressable onPress={() => handleRemoveIngredient(index)} hitSlop={8}>
                     <SymbolView name={{ ios: 'xmark.circle.fill', android: 'cancel', web: 'cancel' }} size={18} tintColor={theme.border} />
                   </Pressable>
@@ -156,13 +175,13 @@ function AddRecipeScreen() {
       </ScreenScrollView>
 
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + Spacing.two }]}>
-        <Pressable onPress={handleSave} disabled={!canSave} style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}>
+        <Pressable onPress={handleSave} style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}>
           <ThemedText type="default" color={canSave ? theme.accent : theme.textSecondary} style={styles.saveButtonText}>{t('common.save')}</ThemedText>
         </Pressable>
       </View>
 
       <Modal visible={isIngredientModalOpen} transparent animationType="slide" onRequestClose={() => setIsIngredientModalOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setIsIngredientModalOpen(false)}>
+        <Pressable style={[styles.modalBackdrop, { paddingBottom: keyboardHeight }]} onPress={() => setIsIngredientModalOpen(false)}>
           <Pressable style={styles.modalSheet} onPress={event => event.stopPropagation()}>
             <View style={styles.modalHeader}>
               <ThemedText type="smallBold" color={theme.text}>{t('recipes.addIngredientTitle')}</ThemedText>
@@ -267,6 +286,14 @@ const createStyles = theme => StyleSheet.create({
   emptyIngredientsText: {
     opacity: 0.6
   },
+  emptyIngredientsBox: {
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: 'transparent',
+    borderRadius: 12,
+    paddingVertical: Spacing.two,
+    paddingHorizontal: Spacing.three
+  },
   list: {
     gap: Spacing.two
   },
@@ -334,7 +361,8 @@ const createStyles = theme => StyleSheet.create({
     justifyContent: 'space-between'
   },
   ingredientScroll: {
-    maxHeight: 320
+    maxHeight: 320,
+    flexShrink: 1
   },
   ingredientOption: {
     paddingVertical: Spacing.two,

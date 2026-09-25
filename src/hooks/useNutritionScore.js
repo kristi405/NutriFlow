@@ -5,7 +5,7 @@ import { profileStore } from '@/store/profileStore';
 import { waterStore } from '@/store/waterStore';
 import { useDailyNutrition } from './useDailyNutrition';
 export function useNutritionScore(date = todayKey()) {
-  const profile = profileStore.profile;
+  const profile = profileStore.activeProfile;
   const {
     total
   } = useDailyNutrition(date);

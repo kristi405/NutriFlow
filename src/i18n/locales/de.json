@@ -215,6 +215,28 @@
     "notFoundTitle": "Artikel nicht gefunden",
     "notFoundMessage": "Dieser Artikel wurde möglicherweise entfernt."
   },
+  "units": {
+    "g": "g",
+    "kg": "kg",
+    "ml": "ml",
+    "l": "l",
+    "piece": "Stk.",
+    "tbsp": "EL",
+    "tsp": "TL",
+    "cup": "Tasse",
+    "slice": "Scheibe",
+    "clove": "Zehe"
+  },
+  "people": {
+    "title": "Personen",
+    "you": "Du",
+    "switchTitle": "Wen verfolgst du?",
+    "addPerson": "Person hinzufügen",
+    "removeTitle": "{{name}} entfernen?",
+    "removeMessage": "Profil, erfasste Mahlzeiten, Pläne, Wasser- und Gewichtsdaten sowie hochgeladene Laborbefunde werden gelöscht.",
+    "sharedMenu": "Gleiches Menü für alle",
+    "sharedMenuHint": "Alle bekommen dieselben Gerichte, die Portionen passen sich dem Kalorienziel jeder Person an. Die Einkaufsliste gilt für alle."
+  },
   "articles": {
     "title": "Artikel",
     "all": "Alle",
@@ -332,7 +354,15 @@
       "soda": "Limonade (Dose)",
       "proteinBar": "Proteinriegel",
       "nutsHandful": "Handvoll Nüsse"
-    }
+    },
+    "regenerateTitle": "Heutiges Menü neu erstellen?",
+    "regenerateMessage": "Das aktuelle Menü für heute wird gelöscht und durch ein neues ersetzt. Von dir getauschte oder hinzugefügte Gerichte gehen verloren.",
+    "regenerateMessageShared": "Das aktuelle Menü für heute wird für die ganze Familie gelöscht und durch ein neues ersetzt. Von dir getauschte oder hinzugefügte Gerichte gehen verloren.",
+    "regenerateConfirm": "Neu erstellen",
+    "generatingDayTitle": "Heutiges Menü wird erstellt…",
+    "generatingDayMessage": "Wir wählen Mahlzeiten passend zu deinem Kalorienziel",
+    "dayGeneratedTitle": "Heutiges Menü ist fertig!",
+    "dayGeneratedMessage": "Dein Menü für heute wurde neu erstellt."
   },
   "recipes": {
     "title": "Rezepte",
@@ -407,7 +437,9 @@
       "easy": "Einfach",
       "medium": "Mittel",
       "hard": "Schwer"
-    }
+    },
+    "titleRequired": "Gib einen Namen für das Gericht ein",
+    "ingredientsRequired": "Füge mindestens eine Zutat hinzu"
   },
   "nutrition": {
     "score": "Ernährungswert",

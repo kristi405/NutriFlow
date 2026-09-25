@@ -215,6 +215,28 @@
     "notFoundTitle": "Nie znaleziono artykułu",
     "notFoundMessage": "Ten artykuł mógł zostać usunięty."
   },
+  "units": {
+    "g": "g",
+    "kg": "kg",
+    "ml": "ml",
+    "l": "l",
+    "piece": "szt.",
+    "tbsp": "łyżka",
+    "tsp": "łyżeczka",
+    "cup": "szkl.",
+    "slice": "plaster",
+    "clove": "ząbek"
+  },
+  "people": {
+    "title": "Osoby",
+    "you": "Ty",
+    "switchTitle": "Kogo śledzisz?",
+    "addPerson": "Dodaj osobę",
+    "removeTitle": "Usunąć {{name}}?",
+    "removeMessage": "Profil, historia posiłków, plany, woda, waga oraz przesłane wyniki badań zostaną usunięte.",
+    "sharedMenu": "To samo menu dla wszystkich",
+    "sharedMenuHint": "Wszyscy jedzą te same dania, porcje dopasowane do celu kalorycznego każdej osoby. Lista zakupów obejmuje wszystkich."
+  },
   "articles": {
     "title": "Artykuły",
     "all": "Wszystkie",
@@ -332,7 +354,15 @@
       "soda": "Napój gazowany (puszka)",
       "proteinBar": "Baton proteinowy",
       "nutsHandful": "Garść orzechów"
-    }
+    },
+    "regenerateTitle": "Wygenerować dzisiejsze menu ponownie?",
+    "regenerateMessage": "Obecne dzisiejsze menu zostanie usunięte i zastąpione nowym. Dania, które zamieniono lub dodano ręcznie, przepadną.",
+    "regenerateMessageShared": "Obecne dzisiejsze menu zostanie usunięte dla całej rodziny i zastąpione nowym. Dania, które zamieniono lub dodano ręcznie, przepadną.",
+    "regenerateConfirm": "Wygeneruj ponownie",
+    "generatingDayTitle": "Generowanie dzisiejszego menu…",
+    "generatingDayMessage": "Dobieramy posiłki do Twojego celu kalorycznego",
+    "dayGeneratedTitle": "Dzisiejsze menu gotowe!",
+    "dayGeneratedMessage": "Dzisiejsze menu zostało wygenerowane ponownie."
   },
   "recipes": {
     "title": "Przepisy",
@@ -407,7 +437,9 @@
       "easy": "Łatwy",
       "medium": "Średni",
       "hard": "Trudny"
-    }
+    },
+    "titleRequired": "Wpisz nazwę dania",
+    "ingredientsRequired": "Dodaj przynajmniej jeden składnik"
   },
   "nutrition": {
     "score": "Ocena odżywiania",

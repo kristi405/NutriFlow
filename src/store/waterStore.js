@@ -1,4 +1,5 @@
 import { makeAutoObservable } from 'mobx';
+import { belongsTo, peopleStore, personTag } from './peopleStore';
 import { persistStore } from './persist';
 
 class WaterStore {
@@ -16,11 +17,24 @@ class WaterStore {
       date,
       amountMl,
       loggedAt: new Date().toISOString(),
+      ...personTag(),
     });
   }
 
   totalForDate(date) {
-    return this.entries.filter(entry => entry.date === date).reduce((sum, entry) => sum + entry.amountMl, 0);
+    return this.totalForDateOf(peopleStore.currentPersonId, date);
+  }
+
+  totalForDateOf(personId, date) {
+    return this.entries.filter(entry => entry.date === date && belongsTo(entry, personId)).reduce((sum, entry) => sum + entry.amountMl, 0);
+  }
+
+  entriesOfPerson(personId) {
+    return this.entries.filter(entry => belongsTo(entry, personId));
+  }
+
+  removePersonData(personId) {
+    this.entries = this.entries.filter(entry => !belongsTo(entry, personId));
   }
 }
 

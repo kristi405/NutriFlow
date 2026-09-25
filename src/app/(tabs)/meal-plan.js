@@ -3,9 +3,10 @@ import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DateStrip } from '@/components/home/date-strip';
+import { PersonSwitcher } from '@/components/people/person-switcher';
 import { MealRow } from '@/components/home/meal-row';
 import { ShoppingRangeModal } from '@/components/meal-plan/shopping-range-modal';
 import { WeeklyMenuModal } from '@/components/meal-plan/weekly-menu-modal';
@@ -13,16 +14,19 @@ import { ThemedText } from '@/components/themed-text';
 import { MacroBar } from '@/components/ui/macro-bar';
 import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
-import { TAB_BAR_HEIGHT } from '@/components/custom-tab-bar';
+import { TAB_BAR_HEIGHT, tabBarBottomGap } from '@/components/custom-tab-bar';
 import { Spacing } from '@/constants/theme';
 import { getIngredientById, getRecipeById, getRecipes } from '@/data/catalog';
 import { useTheme } from '@/hooks/use-theme';
+import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { todayKey, weekContaining } from '@/lib/date';
 import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
+import { planningCalories } from '@/lib/mealPlanning';
 import { calculateDailyTargets, calculateRecipeNutrition, scaleForServings } from '@/lib/nutrition';
 import { foodLogStore } from '@/store/foodLogStore';
 import { mealPlanStore } from '@/store/mealPlanStore';
 import { myRecipesStore } from '@/store/myRecipesStore';
+import { peopleStore } from '@/store/peopleStore';
 import { profileStore } from '@/store/profileStore';
 
 function shuffle(array) {
@@ -64,13 +68,19 @@ function MealPlanScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
-  const tabBarOffset = TAB_BAR_HEIGHT + Math.max(insets.bottom, 12);
+  const keyboardHeight = useKeyboardHeight();
+  const tabBarOffset = TAB_BAR_HEIGHT + tabBarBottomGap(insets.bottom);
   const [date, setDate] = useState(todayKey());
   const [swapMealType, setSwapMealType] = useState(null);
+  // Generation itself is instant, so the loader is held for a moment — otherwise
+  // the modal would flash and the user couldn't tell anything happened.
+  const [weekGenerationStatus, setWeekGenerationStatus] = useState(null);
+  const [generationScope, setGenerationScope] = useState('week');
   const [isAddSnackModalOpen, setIsAddSnackModalOpen] = useState(false);
   const [customSnackCalories, setCustomSnackCalories] = useState('');
   const [editingSnackId, setEditingSnackId] = useState(null);
-  const profile = profileStore.profile;
+  const [isShoppingRangeOpen, setIsShoppingRangeOpen] = useState(false);
+  const profile = profileStore.activeProfile;
   const targets = useMemo(() => profile ? calculateDailyTargets(profile) : undefined, [profile]);
   const planItems = mealPlanStore.itemsForDate(date);
   const loggedEntries = foodLogStore.entriesForDate(date);
@@ -114,30 +124,43 @@ function MealPlanScreen() {
   const today = todayKey();
   const remainingWeekDays = weekContaining(today).filter(day => day >= today);
 
+  // Replaces today's whole menu, including any dishes the user swapped in by
+  // hand — so ask first, unless there is nothing planned yet to lose.
   function handleRegenerateToday() {
-    mealPlanStore.removeItemsForDate(today);
-    const generated = generateDailyMealPlan(targets.calories);
-    generated.forEach(item => mealPlanStore.addItem({ date: today, ...item }));
-    if (date !== today) setDate(today);
+    if (mealPlanStore.itemsForDate(today).length === 0) {
+      regenerateToday();
+      return;
+    }
+    Alert.alert(t('mealPlan.regenerateTitle'), t(peopleStore.shareMenu && peopleStore.members.length > 0 ? 'mealPlan.regenerateMessageShared' : 'mealPlan.regenerateMessage'), [{ text: t('common.cancel'), style: 'cancel' }, { text: t('mealPlan.regenerateConfirm'), style: 'destructive', onPress: regenerateToday }]);
   }
   const hasFullWeekPlanned = remainingWeekDays.every(day => mealPlanStore.itemsForDate(day).length > 0);
 
-  // Generation itself is instant, so the loader is held for a moment — otherwise
-  // the modal would flash and the user couldn't tell anything happened.
-  const [weekGenerationStatus, setWeekGenerationStatus] = useState(null);
-
-  function handleGenerateWeek() {
+  function runGenerationWithPopup(scope, generate) {
     if (weekGenerationStatus) return;
+    setGenerationScope(scope);
     setWeekGenerationStatus('generating');
-    setTimeout(() => {
-      remainingWeekDays.forEach(day => {
-        if (mealPlanStore.itemsForDate(day).length > 0) return;
-        const generated = generateDailyMealPlan(targets.calories);
-        generated.forEach(item => mealPlanStore.addItem({ date: day, ...item }));
-      });
-    }, 300);
+    setTimeout(generate, 300);
     setTimeout(() => setWeekGenerationStatus('done'), 2200);
     setTimeout(() => setWeekGenerationStatus(null), 4000);
+  }
+
+  function regenerateToday() {
+    runGenerationWithPopup('day', () => {
+      mealPlanStore.removeItemsForDate(today);
+      const generated = generateDailyMealPlan(planningCalories(targets));
+      generated.forEach(item => mealPlanStore.addItem({ date: today, ...item }));
+      if (date !== today) setDate(today);
+    });
+  }
+
+  function handleGenerateWeek() {
+    runGenerationWithPopup('week', () => {
+      remainingWeekDays.forEach(day => {
+        if (mealPlanStore.itemsForDate(day).length > 0) return;
+        const generated = generateDailyMealPlan(planningCalories(targets));
+        generated.forEach(item => mealPlanStore.addItem({ date: day, ...item }));
+      });
+    });
   }
 
   const swapCandidates = useMemo(() => {
@@ -184,7 +207,6 @@ function MealPlanScreen() {
     setSwapMealType(null);
   }
 
-  const [isShoppingRangeOpen, setIsShoppingRangeOpen] = useState(false);
 
   function handleGenerateShoppingList(range) {
     setIsShoppingRangeOpen(false);
@@ -251,6 +273,8 @@ function MealPlanScreen() {
             <SymbolView name={{ ios: 'arrow.clockwise', android: 'refresh', web: 'refresh' }} size={18} tintColor={theme.accent} />
           </Pressable>
         </View>
+
+        <PersonSwitcher />
 
         <DateStrip selectedDate={date} onSelectDate={setDate} />
       </View>
@@ -347,9 +371,10 @@ function MealPlanScreen() {
           </ThemedText>
         </Pressable>}
 
-      <WeeklyMenuModal status={weekGenerationStatus} />
+      <WeeklyMenuModal status={weekGenerationStatus} scope={generationScope} />
 
       <ShoppingRangeModal visible={isShoppingRangeOpen} onSelect={handleGenerateShoppingList} onClose={() => setIsShoppingRangeOpen(false)} />
+
 
       <Modal visible={!!swapMealType} transparent animationType="slide" onRequestClose={() => setSwapMealType(null)}>
         <Pressable style={styles.modalBackdrop} onPress={() => setSwapMealType(null)}>
@@ -382,7 +407,7 @@ function MealPlanScreen() {
       </Modal>
 
       <Modal visible={isAddSnackModalOpen} transparent animationType="slide" onRequestClose={closeSnackModal}>
-        <Pressable style={styles.modalBackdrop} onPress={closeSnackModal}>
+        <Pressable style={[styles.modalBackdrop, { paddingBottom: keyboardHeight }]} onPress={closeSnackModal}>
           <Pressable style={styles.modalSheet} onPress={event => event.stopPropagation()}>
             <View style={styles.modalHeader}>
               <View>

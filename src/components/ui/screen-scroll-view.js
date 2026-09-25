@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TAB_BAR_HEIGHT } from '@/components/custom-tab-bar';
+import { TAB_BAR_HEIGHT, tabBarBottomGap } from '@/components/custom-tab-bar';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -19,7 +19,7 @@ export function ScreenScrollView({
   // The custom tab bar floats over content (position: absolute) instead of
   // reserving its own layout space, so every scrollable screen needs enough
   // bottom clearance to scroll its last item out from underneath it.
-  const tabBarClearance = TAB_BAR_HEIGHT + Math.max(safeAreaInsets.bottom, 12) + Spacing.two;
+  const tabBarClearance = TAB_BAR_HEIGHT + tabBarBottomGap(safeAreaInsets.bottom) + Spacing.two;
   // Tab screens have no native header, so the status bar / notch inset has to
   // be padded explicitly. contentInset can't be used for that: it doesn't move
   // the initial scroll offset, so content would start under the status bar.

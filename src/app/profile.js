@@ -4,10 +4,14 @@ import { PremiumCard } from '@/components/ui/premium-card';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { deletePhoto, pickProfilePhoto } from '@/lib/profilePhoto';
+import { PersonAvatar } from '@/components/people/person-avatar';
 import { authStore } from '@/store/authStore';
 import { foodLogStore } from '@/store/foodLogStore';
 import { mealPlanStore } from '@/store/mealPlanStore';
+import { peopleStore } from '@/store/peopleStore';
+import { removeFamilyMember } from '@/store/peopleActions';
 import { profileStore } from '@/store/profileStore';
 import { notificationsStore } from '@/store/notificationsStore';
 import { themeStore } from '@/store/themeStore';
@@ -48,10 +52,11 @@ function ProfileScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const profile = profileStore.profile;
+  const profile = profileStore.activeProfile;
   const account = authStore.currentUser;
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [helpMessage, setHelpMessage] = useState('');
+  const keyboardHeight = useKeyboardHeight();
 
   if (!profile) return null;
 
@@ -76,6 +81,14 @@ function ProfileScreen() {
     }
     actions.push({ text: t('common.cancel'), style: 'cancel' });
     Alert.alert(t('profile.editPhoto'), undefined, actions);
+  }
+
+  function handleRemovePerson(member) {
+    Alert.alert(t('people.removeTitle', { name: member.profile.name }), t('people.removeMessage'), [{ text: t('common.cancel'), style: 'cancel' }, {
+      text: t('common.delete'),
+      style: 'destructive',
+      onPress: () => removeFamilyMember(member.id)
+    }]);
   }
 
   function showComingSoon(feature) {
@@ -133,12 +146,12 @@ function ProfileScreen() {
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
           <SymbolView name={{ ios: 'fork.knife', android: 'restaurant_menu', web: 'restaurant_menu' }} size={20} tintColor={theme.accent} />
-          <ThemedText type="smallBold" color={theme.text} style={styles.statValue}>{foodLogStore.entries.length}</ThemedText>
+          <ThemedText type="smallBold" color={theme.text} style={styles.statValue}>{foodLogStore.entriesOfPerson(peopleStore.currentPersonId).length}</ThemedText>
           <ThemedText type="caption" color={theme.textSecondary} style={styles.statLabel}>{t('profile.mealsLogged')}</ThemedText>
         </View>
         <View style={styles.statCard}>
           <SymbolView name={{ ios: 'calendar', android: 'calendar_month', web: 'calendar_month' }} size={20} tintColor={theme.secondary} />
-          <ThemedText type="smallBold" color={theme.text} style={styles.statValue}>{mealPlanStore.items.length}</ThemedText>
+          <ThemedText type="smallBold" color={theme.text} style={styles.statValue}>{mealPlanStore.itemsOfPerson(peopleStore.currentPersonId).length}</ThemedText>
           <ThemedText type="caption" color={theme.textSecondary} style={styles.statLabel}>{t('profile.mealsPlanned')}</ThemedText>
         </View>
         <View style={styles.statCard}>
@@ -146,6 +159,40 @@ function ProfileScreen() {
           <ThemedText type="smallBold" color={theme.text} style={styles.statValue}>{memberSinceLabel}</ThemedText>
           <ThemedText type="caption" color={theme.textSecondary} style={styles.statLabel}>{t('profile.memberSince')}</ThemedText>
         </View>
+      </View>
+
+      <View style={styles.card}>
+        <View style={styles.cardTitleRow}>
+          <SymbolView name={{ ios: 'person.2.fill', android: 'group', web: 'group' }} size={18} tintColor={theme.accent} />
+          <ThemedText type="smallBold" color={theme.text}>{t('people.title')}</ThemedText>
+        </View>
+        {[{ id: null, profile: profileStore.profile, isMe: true }, ...peopleStore.members].map(person => {
+        const isActive = person.id === peopleStore.currentPersonId;
+        return <View key={person.id ?? 'me'} style={styles.peopleRow}>
+              <Pressable onPress={() => peopleStore.setActive(person.id)} style={styles.peoplePressable}>
+                <PersonAvatar profile={person.profile} size={34} />
+                <View style={styles.peopleText}>
+                  <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{person.profile.name}</ThemedText>
+                  {person.isMe ? <ThemedText type="caption" color={theme.textSecondary}>{t('people.you')}</ThemedText> : null}
+                </View>
+                {isActive ? <SymbolView name={{ ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }} size={20} tintColor={theme.accent} /> : null}
+              </Pressable>
+              {person.isMe ? null : <Pressable onPress={() => handleRemovePerson(person)} hitSlop={8}>
+                  <SymbolView name={{ ios: 'trash', android: 'delete', web: 'delete' }} size={18} tintColor={theme.textSecondary} />
+                </Pressable>}
+            </View>;
+      })}
+        {peopleStore.members.length > 0 && <View style={styles.shareMenuRow}>
+            <View style={styles.peopleText}>
+              <ThemedText type="smallBold" color={theme.text}>{t('people.sharedMenu')}</ThemedText>
+              <ThemedText type="caption" color={theme.textSecondary}>{t('people.sharedMenuHint')}</ThemedText>
+            </View>
+            <Switch value={peopleStore.shareMenu} onValueChange={peopleStore.setShareMenu} trackColor={{ true: theme.accent }} />
+          </View>}
+        {peopleStore.canAddMember && <Pressable onPress={() => router.push('/add-person')} style={[styles.addPersonButton, { borderColor: theme.accent }]}>
+          <SymbolView name={{ ios: 'plus.circle.fill', android: 'add_circle', web: 'add_circle' }} size={18} tintColor={theme.accent} />
+          <ThemedText type="smallBold" color={theme.accent}>{t('people.addPerson')}</ThemedText>
+        </Pressable>}
       </View>
 
       <Pressable onPress={() => router.push('/edit-personal-goals')} style={({ pressed }) => [styles.card, styles.linkCard, pressed && styles.linkCardPressed]}>
@@ -221,7 +268,7 @@ function ProfileScreen() {
       </Pressable>
 
       <Modal visible={isHelpModalOpen} transparent animationType="slide" onRequestClose={() => setIsHelpModalOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setIsHelpModalOpen(false)}>
+        <Pressable style={[styles.modalBackdrop, { paddingBottom: keyboardHeight }]} onPress={() => setIsHelpModalOpen(false)}>
           <Pressable style={styles.modalSheet} onPress={event => event.stopPropagation()}>
             <View style={styles.modalHeader}>
               <View>
@@ -268,6 +315,34 @@ function SettingsRow({ styles, theme, icon, label, onPress, right, last }) {
 export default observer(ProfileScreen);
 
 const createStyles = theme => StyleSheet.create({
+  peopleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three
+  },
+  peoplePressable: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three
+  },
+  peopleText: {
+    flex: 1
+  },
+  shareMenuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three
+  },
+  addPersonButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderWidth: 1.5,
+    borderRadius: 999,
+    paddingVertical: Spacing.two
+  },
   heroSection: {
     alignItems: 'center',
     gap: Spacing.two,
