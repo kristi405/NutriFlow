@@ -16,7 +16,7 @@ export function WaterCard({
   const theme = useTheme();
   const progress = targetMl > 0 ? Math.min(1, consumedMl / targetMl) : 0;
   // Matches exactly (rounded to 1 decimal place, same precision shown below) — not just "at or over".
-  const goalReached = targetMl > 0 && (consumedMl / 1000).toFixed(1) === (targetMl / 1000).toFixed(1);
+  const goalReached = targetMl > 0 && (consumedMl / 1000).toFixed(2) === (targetMl / 1000).toFixed(2);
   return <View style={[styles.card, {
     backgroundColor: theme.background,
     borderColor: goalReached ? WATER_BLUE : theme.border
@@ -29,7 +29,7 @@ export function WaterCard({
         </View>
         <View style={styles.headerRight}>
           <ThemedText type="small" color={theme.textSecondary}>
-            {(consumedMl / 1000).toFixed(1)} / {(targetMl / 1000).toFixed(1)} L
+            {(consumedMl / 1000).toFixed(2)} / {(targetMl / 1000).toFixed(2)} L
           </ThemedText>
           <Pressable onPress={() => onAdd(-Math.min(100, consumedMl))} hitSlop={8} disabled={consumedMl <= 0}>
             <SymbolView name={{ ios: 'minus.circle', android: 'remove_circle', web: 'remove_circle' }} size={18} tintColor={consumedMl <= 0 ? theme.border : WATER_BLUE} />

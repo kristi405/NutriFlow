@@ -610,5 +610,39 @@
         "body": "Regulamin podlega prawu państwa, w którym siedzibę ma operator aplikacji, bez uszczerbku dla bezwzględnie obowiązujących przepisów o ochronie konsumentów państwa Twojego zamieszkania. W razie pytań, wniosków dotyczących danych lub wycofania zgody napisz na 5507151kr@gmail.com lub skorzystaj z sekcji Pomoc i wsparcie w aplikacji."
       }
     ]
+  },
+  "paywall": {
+    "title": "NutriFlow Premium",
+    "subtitle": "Odblokuj pełnię możliwości śledzenia żywienia",
+    "features": [
+      "Analiza AI Twoich wyników badań",
+      "Statystyki i Today's Progress",
+      "Składniki odżywcze w każdym przepisie",
+      "Listy zakupów",
+      "Automatyczne generowanie menu"
+    ],
+    "monthly": "Miesięcznie",
+    "yearly": "Rocznie",
+    "bestValue": "Najlepsza oferta",
+    "freeTrial": "W zestawie okres próbny",
+    "continue": "Kontynuuj",
+    "restore": "Przywróć zakupy",
+    "restoreSuccess": "Dostęp do Premium został przywrócony.",
+    "restoreNone": "Nie znaleziono wcześniejszych zakupów.",
+    "purchaseFailed": "Nie udało się dokończyć zakupu. Spróbuj ponownie.",
+    "loadFailed": "Nie udało się wczytać planów subskrypcji.",
+    "unavailableTitle": "Subskrypcje wkrótce",
+    "unavailableMessage": "Plany Premium będą dostępne wkrótce.",
+    "activeTitle": "Masz Premium",
+    "activeMessage": "Dziękujemy za wsparcie NutriFlow. Wszystkie funkcje Premium są odblokowane.",
+    "legal": "Płatność zostanie pobrana z Twojego Apple ID po potwierdzeniu zakupu. Subskrypcja odnawia się automatycznie, chyba że zostanie anulowana co najmniej 24 godziny przed końcem bieżącego okresu. Możesz nią zarządzać lub ją anulować w ustawieniach Apple ID.",
+    "weekly": "Tygodniowo",
+    "lockedTitle": "Funkcja Premium",
+    "lockedMessage": "Odblokuj tę funkcję dzięki NutriFlow Premium.",
+    "unlock": "Odblokuj Premium",
+    "lockedAnalysis": "Analiza AI wyników badań jest dostępna w Premium.",
+    "lockedProgress": "Statystyki i Today's Progress są dostępne w Premium.",
+    "lockedNutrients": "Szczegółowe składniki odżywcze są dostępne w Premium.",
+    "lockedShopping": "Listy zakupów są dostępne w Premium."
   }
 }

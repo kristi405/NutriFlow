@@ -1,14 +1,18 @@
 import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
+import { LockedFeature } from '@/components/ui/locked-feature';
 import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
+import { getIngredientById, getIngredients, getRecipeById } from '@/data/catalog';
 import { useTheme } from '@/hooks/use-theme';
 import { useFocusedRowScroll } from '@/hooks/useFocusedRowScroll';
 import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
-import { getIngredientById, getIngredients, getRecipeById } from '@/data/catalog';
 import { defaultQuantityFor, formatQuantity, formatUnit, parseQuantity } from '@/lib/ingredientUnits';
 import { calculateRecipeNutrition, canMeasureIn } from '@/lib/nutrition';
+import { myRecipesStore } from '@/store/myRecipesStore';
+import { recentlyViewedStore } from '@/store/recentlyViewedStore';
+import { subscriptionStore } from '@/store/subscriptionStore';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -18,8 +22,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Animated, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Share, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { myRecipesStore } from '@/store/myRecipesStore';
-import { recentlyViewedStore } from '@/store/recentlyViewedStore';
 
 const WATER_BLUE = '#2F80ED';
 const TOP_BAR_CONTENT_HEIGHT = 52;
@@ -444,7 +446,9 @@ function RecipeDetailScreen() {
               </View>
             </View>}
 
-          {activeTab === 'nutrients' && nutrition && <View style={styles.nutrientsGroup}>
+          {activeTab === 'nutrients' && nutrition && !subscriptionStore.hasAccess && <LockedFeature message={t('paywall.lockedNutrients')} />}
+
+          {activeTab === 'nutrients' && nutrition && subscriptionStore.hasAccess && <View style={styles.nutrientsGroup}>
               <View style={styles.card}>
                 <ThemedText type="headline" color={theme.text} style={styles.cardTitle}>
                   {t('recipes.nutrients')}

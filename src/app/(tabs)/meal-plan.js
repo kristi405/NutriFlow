@@ -23,6 +23,7 @@ import { todayKey, weekContaining } from '@/lib/date';
 import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
 import { planningCalories } from '@/lib/mealPlanning';
 import { calculateDailyTargets, calculateRecipeNutrition, scaleForServings } from '@/lib/nutrition';
+import { ensurePremium } from '@/lib/premium';
 import { foodLogStore } from '@/store/foodLogStore';
 import { mealPlanStore } from '@/store/mealPlanStore';
 import { myRecipesStore } from '@/store/myRecipesStore';
@@ -136,7 +137,7 @@ function MealPlanScreen() {
   const hasFullWeekPlanned = remainingWeekDays.every(day => mealPlanStore.itemsForDate(day).length > 0);
 
   function runGenerationWithPopup(scope, generate) {
-    if (weekGenerationStatus) return;
+    if (weekGenerationStatus || !ensurePremium()) return;
     setGenerationScope(scope);
     setWeekGenerationStatus('generating');
     setTimeout(generate, 300);
@@ -269,7 +270,7 @@ function MealPlanScreen() {
               {t('mealPlan.subtitle')}
             </ThemedText>
           </View>
-          <Pressable onPress={handleRegenerateToday} hitSlop={8} style={styles.regenerateButton}>
+          <Pressable onPress={() => ensurePremium() && handleRegenerateToday()} hitSlop={8} style={styles.refreshButton}>
             <SymbolView name={{ ios: 'arrow.clockwise', android: 'refresh', web: 'refresh' }} size={18} tintColor={theme.accent} />
           </Pressable>
         </View>
@@ -288,7 +289,7 @@ function MealPlanScreen() {
         <View style={[styles.progressCard, allMealsEaten && styles.progressCardEaten]}>
           <MacroBar label={t('recipes.calories')} value={eatenCalories} target={targets.calories} unit={t('common.kcal')} color={theme.primary} />
         </View>
-        <Pressable onPress={() => setIsShoppingRangeOpen(true)} style={styles.shoppingListButton}>
+        <Pressable onPress={() => ensurePremium() && setIsShoppingRangeOpen(true)} style={styles.shoppingListButton}>
           <SymbolView name="cart.fill" size={20} tintColor="#ffffff" />
           <ThemedText type="caption" style={styles.shoppingListButtonText} numberOfLines={2}>
             {t('home.shoppingList')}
@@ -458,7 +459,7 @@ const createStyles = theme => StyleSheet.create({
     backgroundColor: theme.accent,
     borderRadius: 999,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
+    paddingVertical: 18,
     shadowColor: '#000',
     shadowOpacity: 0.15,
     shadowRadius: 8,
@@ -487,7 +488,7 @@ const createStyles = theme => StyleSheet.create({
     flex: 1,
     gap: Spacing.half
   },
-  regenerateButton: {
+  refreshButton: {
     width: 40,
     height: 40,
     borderRadius: 20,

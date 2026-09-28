@@ -610,5 +610,39 @@
         "body": "Diese Bedingungen unterliegen dem Recht des Staates, in dem der Betreiber der App niedergelassen ist, unbeschadet zwingender Verbraucherschutzvorschriften Ihres Wohnsitzlandes. Bei Fragen, Datenanfragen oder zum Widerruf der Einwilligung schreiben Sie an 5507151kr@gmail.com oder nutzen Sie Hilfe & Support in der App."
       }
     ]
+  },
+  "paywall": {
+    "title": "NutriFlow Premium",
+    "subtitle": "Schalten Sie das volle Potenzial Ihres Ernährungs-Trackings frei",
+    "features": [
+      "KI-Analyse Ihrer Laborwerte",
+      "Statistiken und Today's Progress",
+      "Nährstoffübersicht in jedem Rezept",
+      "Einkaufslisten",
+      "Automatische Menüerstellung"
+    ],
+    "monthly": "Monatlich",
+    "yearly": "Jährlich",
+    "bestValue": "Bester Preis",
+    "freeTrial": "Inklusive Testzeitraum",
+    "continue": "Weiter",
+    "restore": "Käufe wiederherstellen",
+    "restoreSuccess": "Ihr Premium-Zugang wurde wiederhergestellt.",
+    "restoreNone": "Es wurden keine früheren Käufe gefunden.",
+    "purchaseFailed": "Der Kauf konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+    "loadFailed": "Abo-Pläne konnten nicht geladen werden.",
+    "unavailableTitle": "Abos folgen in Kürze",
+    "unavailableMessage": "Premium-Pläne sind bald verfügbar.",
+    "activeTitle": "Sie haben Premium",
+    "activeMessage": "Danke, dass Sie NutriFlow unterstützen. Alle Premium-Funktionen sind freigeschaltet.",
+    "legal": "Die Zahlung wird bei Kaufbestätigung Ihrer Apple-ID belastet. Das Abo verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ende des aktuellen Zeitraums gekündigt wird. Sie können es in den Apple-ID-Einstellungen verwalten oder kündigen.",
+    "weekly": "Wöchentlich",
+    "lockedTitle": "Premium-Funktion",
+    "lockedMessage": "Schalten Sie diese Funktion mit NutriFlow Premium frei.",
+    "unlock": "Premium freischalten",
+    "lockedAnalysis": "Die KI-Analyse von Laborwerten ist mit Premium verfügbar.",
+    "lockedProgress": "Statistiken und Today's Progress sind mit Premium verfügbar.",
+    "lockedNutrients": "Die detaillierte Nährstoffübersicht ist mit Premium verfügbar.",
+    "lockedShopping": "Einkaufslisten sind mit Premium verfügbar."
   }
 }

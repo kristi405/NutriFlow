@@ -10,9 +10,11 @@ import { ActivityIndicator, Alert, Modal, Pressable, StyleSheet, View } from 're
 import { ThemedText } from '@/components/themed-text';
 import { PersonSwitcher } from '@/components/people/person-switcher';
 import { EmptyState } from '@/components/ui/empty-state';
+import { LockedFeature } from '@/components/ui/locked-feature';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { subscriptionStore } from '@/store/subscriptionStore';
 import { formatReportDate } from '@/lib/labReportAdapter';
 import { labReportStore } from '@/store/labReportStore';
 import { localeStore } from '@/store/localeStore';
@@ -133,6 +135,20 @@ function AiAnalysisScreen() {
             </Pressable>
           </Pressable>)}
       </View>;
+  }
+
+  if (!subscriptionStore.hasAccess) {
+    return <ScreenScrollView isTabScreen gap={Spacing.three}>
+      <View style={styles.header}>
+        <ThemedText type="title" style={styles.title} color={theme.text}>
+          {t('aiAnalysis.title')}
+        </ThemedText>
+        <ThemedText type="default" color={theme.textSecondary}>
+          {t('aiAnalysis.subtitle')}
+        </ThemedText>
+      </View>
+      <LockedFeature message={t('paywall.lockedAnalysis')} />
+    </ScreenScrollView>;
   }
 
   return <ScreenScrollView isTabScreen gap={Spacing.three}>

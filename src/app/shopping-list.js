@@ -9,6 +9,7 @@ import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MacroBar } from '@/components/ui/macro-bar';
+import { LockedFeature } from '@/components/ui/locked-feature';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -16,6 +17,7 @@ import { todayKey, weekContaining } from '@/lib/date';
 import { buildShoppingList } from '@/lib/shoppingList';
 import { mealPlanStore } from '@/store/mealPlanStore';
 import { shoppingListStore } from '@/store/shoppingListStore';
+import { subscriptionStore } from '@/store/subscriptionStore';
 
 function escapeHtml(text) {
   return text.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -88,6 +90,12 @@ function ShoppingListScreen() {
     } catch {
       Alert.alert(t('common.errorTitle'), t('common.errorDefault'));
     }
+  }
+
+  if (!subscriptionStore.hasAccess) {
+    return <ScreenScrollView gap={Spacing.four} horizontalPadding={20}>
+        <LockedFeature message={t('paywall.lockedShopping')} />
+      </ScreenScrollView>;
   }
 
   return <ScreenScrollView gap={Spacing.four} horizontalPadding={20}>

@@ -1,25 +1,27 @@
-import { QueryClientProvider } from '@tanstack/react-query';
-import '@/i18n';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { observer } from 'mobx-react-lite';
-import { useEffect, useRef, useState } from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
 import { AuthFlow } from '@/components/auth/auth-flow';
 import { CALCULATING_DURATION, CalculatingScreen } from '@/components/calculating-screen';
+import { HeaderBackButton } from '@/components/header-back-button';
 import { IntroScreen } from '@/components/intro-screen';
 import { OnboardingFlow } from '@/components/onboarding/onboarding-flow';
 import { ThemedView } from '@/components/themed-view';
 import { useTheme } from '@/hooks/use-theme';
+import '@/i18n';
 import { queryClient } from '@/lib/query-client';
 import { authStore } from '@/store/authStore';
 import { catalogStore } from '@/store/catalogStore';
 import { localeStore } from '@/store/localeStore';
-import { syncFamilyMembers } from '@/store/peopleSync';
 import { peopleStore } from '@/store/peopleStore';
+import { syncFamilyMembers } from '@/store/peopleSync';
 import { profileStore } from '@/store/profileStore';
+import { subscriptionStore } from '@/store/subscriptionStore';
 import { themeStore } from '@/store/themeStore';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { observer } from 'mobx-react-lite';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 SplashScreen.preventAutoHideAsync();
 const SKIP_AUTH_FOR_TESTING = false;
 function TabLayout() {
@@ -63,6 +65,10 @@ function TabLayout() {
     // be uploaded when the owner's profile exists.
     if (authStore.isAuthenticated && peopleStore.hasHydrated) syncFamilyMembers();
   }, [authStore.isAuthenticated, peopleStore.hasHydrated, profileStore.hasOnboarded]);
+  const userId = authStore.currentUser?.id;
+  useEffect(() => {
+    if (userId) subscriptionStore.init(userId);else subscriptionStore.logOut();
+  }, [userId]);
   const catalogSyncReady = authStore.isAuthenticated && localeStore.hasHydrated && catalogStore.hasHydrated;
   const contentLanguage = localeStore.language;
   useEffect(() => {
@@ -88,7 +94,7 @@ function TabLayout() {
     if (!isAuthenticated) return <AuthFlow key="auth" />;
     if (!hasOnboarded) return <OnboardingFlow key="onboarding" />;
     if (showCalculating) return <CalculatingScreen key="calculating" />;
-    return <Stack key="tabs" screenOptions={{ headerShown: false }}>
+    return <Stack key="tabs" screenOptions={{ headerShown: false, headerLeft: () => <HeaderBackButton /> }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="recipes/[id]" />
         <Stack.Screen name="profile" options={{
@@ -138,6 +144,13 @@ function TabLayout() {
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,
           headerTitleStyle: { fontWeight: '700' }
+        }} />
+        <Stack.Screen name="paywall" options={{
+          headerShown: true,
+          headerTitle: '',
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text
         }} />
         <Stack.Screen name="privacy-policy" options={{
           headerShown: true,

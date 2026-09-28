@@ -1,18 +1,23 @@
 import { useMemo } from 'react';
 import { SymbolView } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { router } from 'expo-router';
+import { observer } from 'mobx-react-lite';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { subscriptionStore } from '@/store/subscriptionStore';
 
-export function PremiumCard({ style }) {
+function PremiumCardBase({ style }) {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
+  if (subscriptionStore.isPremium) return null;
+
   function handlePress() {
-    Alert.alert(t('profile.premiumCta'), t('home.comingSoon'));
+    router.push('/paywall');
   }
 
   return <Pressable onPress={handlePress} style={[styles.card, style]}>
@@ -26,6 +31,8 @@ export function PremiumCard({ style }) {
       <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={16} tintColor="#ffffff" />
     </Pressable>;
 }
+
+export const PremiumCard = observer(PremiumCardBase);
 
 const createStyles = theme => StyleSheet.create({
   card: {

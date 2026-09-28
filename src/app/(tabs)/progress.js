@@ -7,6 +7,7 @@ import Svg, { Circle, Line, Polyline, Text as SvgText } from 'react-native-svg';
 import { ThemedText } from '@/components/themed-text';
 import { DetailedNutritionCard } from '@/components/progress/detailed-nutrition-card';
 import { MacroBar } from '@/components/ui/macro-bar';
+import { LockedFeature } from '@/components/ui/locked-feature';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -20,6 +21,7 @@ import { peopleStore } from '@/store/peopleStore';
 import { foodLogStore } from '@/store/foodLogStore';
 import { profileStore } from '@/store/profileStore';
 import { waterStore } from '@/store/waterStore';
+import { subscriptionStore } from '@/store/subscriptionStore';
 import { weightLogStore } from '@/store/weightLogStore';
 
 const CHART_WIDTH = 300;
@@ -189,6 +191,20 @@ function ProgressScreen() {
   const weightLostKg = startWeightKg !== undefined && currentWeightKg !== undefined ? Math.abs(startWeightKg - currentWeightKg) : undefined;
 
   if (!profile || !targets) return null;
+
+  if (!subscriptionStore.hasAccess) {
+    return <ScreenScrollView isTabScreen gap={Spacing.three}>
+      <View style={styles.header}>
+        <ThemedText type="title" style={styles.title} color={theme.text}>
+          {t('progress.title')}
+        </ThemedText>
+        <ThemedText type="default" color={theme.textSecondary}>
+          {t('progress.subtitle')}
+        </ThemedText>
+      </View>
+      <LockedFeature message={t('paywall.lockedProgress')} />
+    </ScreenScrollView>;
+  }
 
   return <ScreenScrollView isTabScreen gap={Spacing.three}>
       <View style={styles.header}>

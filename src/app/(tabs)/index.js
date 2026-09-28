@@ -32,6 +32,7 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { articleStore } from '@/store/articleStore';
 import { localeStore } from '@/store/localeStore';
+import { subscriptionStore } from '@/store/subscriptionStore';
 import { foodLogStore } from '@/store/foodLogStore';
 import { mealPlanStore } from '@/store/mealPlanStore';
 import { peopleStore } from '@/store/peopleStore';
@@ -60,12 +61,12 @@ function HomeScreen() {
   const loggedEntries = foodLogStore.entriesForDate(date);
   const targets = useMemo(() => profile ? calculateDailyTargets(profile) : undefined, [profile]);
   useEffect(() => {
-    if (!targets) return;
+    if (!targets || !subscriptionStore.hasAccess) return;
     const today = todayKey();
     if (mealPlanStore.itemsForDate(today).length > 0) return;
     const generated = generateDailyMealPlan(planningCalories(targets));
     generated.forEach(item => mealPlanStore.addItem({ date: today, ...item }));
-  }, [targets]);
+  }, [targets, subscriptionStore.hasAccess]);
   useEffect(() => {
     if (!localeStore.hasHydrated) return;
     articleStore.ensureTodayArticle(todayKey(), localeStore.language);
