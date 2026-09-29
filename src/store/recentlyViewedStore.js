@@ -19,6 +19,10 @@ class RecentlyViewedStore {
   clear() {
     this.recipeIds = [];
   }
+
+  removeRecipe(recipeId) {
+    this.recipeIds = this.recipeIds.filter(id => id !== recipeId);
+  }
 }
 
 export const recentlyViewedStore = new RecentlyViewedStore();

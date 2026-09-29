@@ -3,7 +3,7 @@ import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
@@ -130,7 +130,7 @@ function PaywallScreen() {
         <ThemedText type="smallBold" color={isAvailable ? theme.accent : theme.textSecondary}>{t('paywall.restore')}</ThemedText>
       </Pressable>
 
-      <ThemedText type="caption" color={theme.textSecondary} style={styles.center}>{t('paywall.legal')}</ThemedText>
+      <ThemedText type="caption" color={theme.textSecondary} style={styles.center}>{t(Platform.OS === 'android' ? 'paywall.legalAndroid' : 'paywall.legalIos')}</ThemedText>
       <Pressable onPress={() => router.push('/privacy-policy')} hitSlop={8} style={styles.restore}>
         <ThemedText type="caption" color={theme.accent} style={styles.link}>{t('auth.terms.link')}</ThemedText>
       </Pressable>

@@ -27,6 +27,9 @@
     "save": "Save",
     "send": "Send",
     "cancel": "Cancel",
+    "selectTags": "Filter by tags",
+    "searchTags": "Search tags",
+    "noTagsFound": "No tags found",
     "delete": "Delete",
     "or": "or"
   },
@@ -227,6 +230,16 @@
     "slice": "slice",
     "clove": "clove"
   },
+  "ingredients": {
+    "title": "Ingredients",
+    "perAmount": "Per {{amount}}",
+    "measuredIn": "Measured in",
+    "defaultUnit": "Default unit",
+    "searchPlaceholder": "Search ingredients",
+    "count": "{{count}} ingredients",
+    "noResultsTitle": "No ingredients found",
+    "noResultsMessage": "Try a different search or clear the filters."
+  },
   "people": {
     "title": "People",
     "you": "You",
@@ -425,6 +438,7 @@
     "takePhoto": "Take Photo",
     "chooseFromLibrary": "Choose from Library",
     "recipeTitle": "Recipe name",
+    "refresh": "Refresh recipes",
     "recipeTitlePlaceholder": "e.g. Grandma's Pancakes",
     "prepTime": "Prep (min)",
     "cookTime": "Cook (min)",
@@ -439,7 +453,9 @@
       "hard": "Hard"
     },
     "titleRequired": "Enter a name for the dish",
-    "ingredientsRequired": "Add at least one ingredient"
+    "ingredientsRequired": "Add at least one ingredient",
+    "deleteRecipeTitle": "Delete this recipe?",
+    "deleteRecipeMessage": "This recipe was created on this device and will be permanently deleted, including from any meal plans."
   },
   "nutrition": {
     "score": "Nutrition Score",
@@ -635,7 +651,8 @@
     "unavailableMessage": "Premium plans will be available shortly.",
     "activeTitle": "You're Premium",
     "activeMessage": "Thank you for supporting NutriFlow. All Premium features are unlocked.",
-    "legal": "Payment is charged to your Apple ID at confirmation of purchase. The subscription renews automatically unless cancelled at least 24 hours before the end of the current period. You can manage or cancel it in your Apple ID settings.",
+    "legalIos": "Payment is charged to your Apple ID at confirmation of purchase. The subscription renews automatically unless cancelled at least 24 hours before the end of the current period. You can manage or cancel it in your Apple ID settings.",
+    "legalAndroid": "Payment is charged to your Google Play account at confirmation of purchase. The subscription renews automatically unless cancelled at least 24 hours before the end of the current period. You can manage or cancel it in your Google Play subscriptions settings.",
     "weekly": "Weekly",
     "lockedTitle": "Premium feature",
     "lockedMessage": "Unlock this feature with NutriFlow Premium.",

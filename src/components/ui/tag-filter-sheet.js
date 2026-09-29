@@ -37,15 +37,15 @@ export function TagFilterSheet({ visible, tags, selectedIds, onChange, onClose }
       <Pressable style={[styles.backdrop, { paddingBottom: keyboardHeight }]} onPress={handleClose}>
         <Pressable style={[styles.sheet, { backgroundColor: theme.background }]} onPress={event => event.stopPropagation()}>
           <View style={styles.header}>
-            <ThemedText type="smallBold" color={theme.text}>{t('articles.selectTags')}</ThemedText>
+            <ThemedText type="smallBold" color={theme.text}>{t('common.selectTags')}</ThemedText>
             <Pressable onPress={handleClose} hitSlop={8} style={[styles.closeButton, { backgroundColor: theme.accentSoft }]}>
               <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={theme.accent} />
             </Pressable>
           </View>
 
-          <TextInput value={query} onChangeText={setQuery} placeholder={t('articles.searchTags')} placeholderTextColor={theme.textSecondary} style={[styles.search, { borderColor: theme.border, color: theme.text }]} returnKeyType="search" />
+          <TextInput value={query} onChangeText={setQuery} placeholder={t('common.searchTags')} placeholderTextColor={theme.textSecondary} style={[styles.search, { borderColor: theme.border, color: theme.text }]} returnKeyType="search" />
 
-          <FlatList data={visibleTags} keyExtractor={tag => tag.id} keyboardShouldPersistTaps="handled" style={styles.list} ListEmptyComponent={<ThemedText type="small" color={theme.textSecondary} style={styles.empty}>{t('articles.noTags')}</ThemedText>} renderItem={({ item }) => {
+          <FlatList data={visibleTags} keyExtractor={tag => tag.id} keyboardShouldPersistTaps="handled" style={styles.list} ListEmptyComponent={<ThemedText type="small" color={theme.textSecondary} style={styles.empty}>{t('common.noTagsFound')}</ThemedText>} renderItem={({ item }) => {
           const isSelected = selectedIds.includes(item.id);
           return <Pressable onPress={() => toggle(item.id)} style={[styles.row, { borderBottomColor: theme.border }]}>
                 <SymbolView name={isSelected ? { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' } : { ios: 'circle', android: 'radio_button_unchecked', web: 'radio_button_unchecked' }} size={22} tintColor={isSelected ? theme.accent : theme.border} />
@@ -56,10 +56,10 @@ export function TagFilterSheet({ visible, tags, selectedIds, onChange, onClose }
 
           <View style={styles.footer}>
             <Pressable onPress={() => onChange([])} disabled={selectedIds.length === 0} style={[styles.footerButton, { borderColor: theme.border, opacity: selectedIds.length === 0 ? 0.5 : 1 }]}>
-              <ThemedText type="smallBold" color={theme.text}>{t('articles.clear')}</ThemedText>
+              <ThemedText type="smallBold" color={theme.text}>{t('common.clear')}</ThemedText>
             </Pressable>
             <Pressable onPress={handleClose} style={[styles.footerButton, styles.doneButton, { backgroundColor: theme.accent, borderColor: theme.accent }]}>
-              <ThemedText type="smallBold" color="#ffffff">{t('articles.done')}</ThemedText>
+              <ThemedText type="smallBold" color="#ffffff">{t('common.done')}</ThemedText>
             </Pressable>
           </View>
         </Pressable>

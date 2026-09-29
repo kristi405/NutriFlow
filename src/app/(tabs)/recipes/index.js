@@ -4,7 +4,7 @@ import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-spe
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { Alert, Animated, Easing, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Easing, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
 import { RecentRecipeRow } from '@/components/ui/recent-recipe-row';
@@ -16,8 +16,11 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { getCategories, getIngredientById, getRecipeById, getRecipes } from '@/data/catalog';
 import { calculateRecipeNutrition } from '@/lib/nutrition';
+import { authStore } from '@/store/authStore';
+import { catalogStore } from '@/store/catalogStore';
 import { favoritesStore } from '@/store/favoritesStore';
 import { myRecipesStore } from '@/store/myRecipesStore';
+import { localeStore } from '@/store/localeStore';
 import { recentlyViewedStore } from '@/store/recentlyViewedStore';
 
 const FAVORITE_RED = '#E0245E';
@@ -124,9 +127,21 @@ function RecipesScreen() {
 
   const recentlyViewed = recentlyViewedStore.recipeIds.map(getRecipeById).filter(Boolean);
 
+  function handleRefresh() {
+    // The backend now reports deletions in the delta too (deletedIds), so a
+    // plain sync is enough — no need to force a full re-fetch just to catch
+    // removed recipes. myRecipesStore (the user's own recipes) is a separate
+    // store this never touches. `manual: true` silently caps rapid repeat
+    // taps — no spinner flash, no message, the extra tap just does nothing.
+    catalogStore.sync(authStore.token, localeStore.language, { manual: true });
+  }
+
   return <ScreenScrollView isTabScreen gap={Spacing.five} horizontalPadding={0}>
       <View style={styles.searchSection}>
         <View style={styles.searchRow}>
+          <Pressable onPress={handleRefresh} disabled={catalogStore.isSyncing} hitSlop={8} accessibilityLabel={t('recipes.refresh')} style={[styles.refreshButton, catalogStore.isSyncing && styles.refreshButtonActive]}>
+            {catalogStore.isSyncing ? <ActivityIndicator size="small" color={theme.textSecondary} /> : <SymbolView name={{ ios: 'arrow.clockwise', android: 'refresh', web: 'refresh' }} size={18} tintColor={theme.textSecondary} />}
+          </Pressable>
           <View style={styles.searchBar}>
             <SymbolView name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} size={16} tintColor={theme.textSecondary} />
             <TextInput value={query} onChangeText={setQuery} placeholder={t('recipes.searchPlaceholder')} placeholderTextColor={theme.textSecondary} style={styles.searchInput} returnKeyType="search" />
@@ -173,6 +188,16 @@ function RecipesScreen() {
               </ThemedText>
             </PulseItem>)}
         </ScrollView>
+      </View>
+
+      <View style={styles.paddedX}>
+        <Pressable onPress={() => router.push('/ingredients')} style={({ pressed }) => [styles.ingredientsBanner, { backgroundColor: theme.background, borderColor: theme.border, opacity: pressed ? 0.85 : 1 }]}>
+          <View style={[styles.ingredientsBannerIcon, { backgroundColor: theme.accentSoft }]}>
+            <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={16} tintColor={theme.accent} />
+          </View>
+          <ThemedText type="smallBold" color={theme.text} style={styles.ingredientsBannerText}>{t('ingredients.title')}</ThemedText>
+          <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={14} tintColor={theme.textSecondary} />
+        </Pressable>
       </View>
 
       {recentlyViewed.length > 0 && <View style={[styles.section, styles.recentlyViewedSection]}>
@@ -227,6 +252,37 @@ const createStyles = theme => StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.two,
     marginHorizontal: CONTAINER_PADDING
+  },
+  refreshButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.backgroundElement
+  },
+  refreshButtonActive: {
+    opacity: 0.6
+  },
+  ingredientsBanner: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingVertical: Spacing.one,
+    paddingHorizontal: Spacing.three
+  },
+  ingredientsBannerIcon: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  ingredientsBannerText: {
+    marginRight: 2
   },
   searchBar: {
     flex: 1,

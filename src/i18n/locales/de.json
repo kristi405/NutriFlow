@@ -27,6 +27,9 @@
     "save": "Speichern",
     "send": "Senden",
     "cancel": "Abbrechen",
+    "selectTags": "Nach Tags filtern",
+    "searchTags": "Tags suchen",
+    "noTagsFound": "Keine Tags gefunden",
     "delete": "Löschen",
     "or": "oder"
   },
@@ -227,6 +230,16 @@
     "slice": "Scheibe",
     "clove": "Zehe"
   },
+  "ingredients": {
+    "title": "Zutaten",
+    "perAmount": "Pro {{amount}}",
+    "measuredIn": "Maßeinheiten",
+    "defaultUnit": "Standardeinheit",
+    "searchPlaceholder": "Zutaten suchen",
+    "count": "{{count}} Zutaten gefunden",
+    "noResultsTitle": "Keine Zutaten gefunden",
+    "noResultsMessage": "Ändere die Suche oder setze die Filter zurück."
+  },
   "people": {
     "title": "Personen",
     "you": "Du",
@@ -425,6 +438,7 @@
     "takePhoto": "Foto aufnehmen",
     "chooseFromLibrary": "Aus Mediathek wählen",
     "recipeTitle": "Rezeptname",
+    "refresh": "Rezepte aktualisieren",
     "recipeTitlePlaceholder": "z. B. Omas Pfannkuchen",
     "prepTime": "Vorbereitung (Min)",
     "cookTime": "Kochzeit (Min)",
@@ -439,7 +453,9 @@
       "hard": "Schwer"
     },
     "titleRequired": "Gib einen Namen für das Gericht ein",
-    "ingredientsRequired": "Füge mindestens eine Zutat hinzu"
+    "ingredientsRequired": "Füge mindestens eine Zutat hinzu",
+    "deleteRecipeTitle": "Dieses Rezept löschen?",
+    "deleteRecipeMessage": "Dieses Rezept wurde auf diesem Gerät erstellt und wird endgültig gelöscht, auch aus allen Essensplänen."
   },
   "nutrition": {
     "score": "Ernährungswert",
@@ -635,7 +651,8 @@
     "unavailableMessage": "Premium-Pläne sind bald verfügbar.",
     "activeTitle": "Sie haben Premium",
     "activeMessage": "Danke, dass Sie NutriFlow unterstützen. Alle Premium-Funktionen sind freigeschaltet.",
-    "legal": "Die Zahlung wird bei Kaufbestätigung Ihrer Apple-ID belastet. Das Abo verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ende des aktuellen Zeitraums gekündigt wird. Sie können es in den Apple-ID-Einstellungen verwalten oder kündigen.",
+    "legalIos": "Die Zahlung wird bei Kaufbestätigung deiner Apple-ID belastet. Das Abo verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ende des aktuellen Zeitraums gekündigt wird. Du kannst es in den Einstellungen deiner Apple-ID verwalten oder kündigen.",
+    "legalAndroid": "Die Zahlung wird bei Kaufbestätigung deinem Google Play-Konto belastet. Das Abo verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ende des aktuellen Zeitraums gekündigt wird. Du kannst es in den Google Play-Abo-Einstellungen verwalten oder kündigen.",
     "weekly": "Wöchentlich",
     "lockedTitle": "Premium-Funktion",
     "lockedMessage": "Schalten Sie diese Funktion mit NutriFlow Premium frei.",

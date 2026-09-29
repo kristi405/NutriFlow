@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { TagFilterSheet } from '@/components/articles/tag-filter-sheet';
+import { TagFilterSheet } from '@/components/ui/tag-filter-sheet';
 import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';

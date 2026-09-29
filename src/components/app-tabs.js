@@ -12,7 +12,6 @@ function AppTabs() {
       <Tabs.Screen name="ai-analysis" options={{ title: t('tabs.aiAnalysis') }} />
       <Tabs.Screen name="articles" options={{ title: t('tabs.articles') }} />
       <Tabs.Screen name="progress" options={{ title: t('tabs.progress') }} />
-      <Tabs.Screen name="profile" />
     </Tabs>;
 }
 

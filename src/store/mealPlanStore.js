@@ -96,6 +96,10 @@ class MealPlanStore {
     return this.items.filter(item => belongsTo(item, personId));
   }
 
+  removeItemsForRecipe(recipeId) {
+    this.items = this.items.filter(item => item.recipeId !== recipeId);
+  }
+
   removePersonData(personId) {
     this.items = this.items.filter(item => !belongsTo(item, personId));
   }

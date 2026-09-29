@@ -100,7 +100,6 @@ function TabLayout() {
         <Stack.Screen name="profile" options={{
           headerShown: true,
           headerTitle: t('tabs.profile'),
-          headerBackTitle: t('common.back'),
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,
@@ -109,7 +108,6 @@ function TabLayout() {
         <Stack.Screen name="shopping-list" options={{
           headerShown: true,
           headerTitle: t('shoppingList.title'),
-          headerBackTitle: t('common.back'),
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,
@@ -118,8 +116,6 @@ function TabLayout() {
         <Stack.Screen name="edit-personal-goals" options={{
           headerShown: true,
           headerTitle: t('profile.personalGoals'),
-          headerBackTitle: t('common.back'),
-          headerBackTitleStyle: { fontSize: 14 },
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,
@@ -128,8 +124,6 @@ function TabLayout() {
         <Stack.Screen name="edit-diet-preferences" options={{
           headerShown: true,
           headerTitle: t('profile.dietPreferences'),
-          headerBackTitle: t('common.back'),
-          headerBackTitleStyle: { fontSize: 14 },
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,
@@ -138,8 +132,6 @@ function TabLayout() {
         <Stack.Screen name="select-language" options={{
           headerShown: true,
           headerTitle: t('profile.language'),
-          headerBackTitle: t('common.back'),
-          headerBackTitleStyle: { fontSize: 14 },
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,
@@ -155,8 +147,6 @@ function TabLayout() {
         <Stack.Screen name="privacy-policy" options={{
           headerShown: true,
           headerTitle: t('privacyPolicy.title'),
-          headerBackTitle: t('common.back'),
-          headerBackTitleStyle: { fontSize: 14 },
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,
@@ -165,19 +155,30 @@ function TabLayout() {
         <Stack.Screen name="add-recipe" options={{
           headerShown: true,
           headerTitle: t('recipes.addRecipe'),
-          headerBackTitle: t('common.back'),
-          headerBackTitleStyle: { fontSize: 14 },
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,
           headerTitleStyle: { fontWeight: '700' }
         }} />
+        <Stack.Screen name="ingredients" options={{
+          headerShown: true,
+          headerTitle: t('ingredients.title'),
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+          headerTitleStyle: { fontWeight: '700' }
+        }} />
+        <Stack.Screen name="ingredient/[id]" options={{
+          headerShown: true,
+          headerTitle: '',
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text
+        }} />
         <Stack.Screen name="add-person" options={{ presentation: 'modal' }} />
         <Stack.Screen name="lab-report/[id]" options={{
           headerShown: true,
           headerTitle: t('aiAnalysis.reportTitle'),
-          headerBackTitle: t('common.back'),
-          headerBackTitleStyle: { fontSize: 14 },
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,
@@ -186,8 +187,6 @@ function TabLayout() {
         <Stack.Screen name="lab-report/indicator" options={{
           headerShown: true,
           headerTitle: t('aiAnalysis.indicatorTitle'),
-          headerBackTitle: t('common.back'),
-          headerBackTitleStyle: { fontSize: 14 },
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,
@@ -196,8 +195,6 @@ function TabLayout() {
         <Stack.Screen name="lab-report/history" options={{
           headerShown: true,
           headerTitle: t('aiAnalysis.historyTitle'),
-          headerBackTitle: t('common.back'),
-          headerBackTitleStyle: { fontSize: 14 },
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,
@@ -206,8 +203,6 @@ function TabLayout() {
         <Stack.Screen name="article/[id]" options={{
           headerShown: true,
           headerTitle: t('articles.title'),
-          headerBackTitle: t('common.back'),
-          headerBackTitleStyle: { fontSize: 14 },
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,

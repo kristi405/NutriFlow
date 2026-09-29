@@ -44,6 +44,10 @@ class FoodLogStore {
   removePersonData(personId) {
     this.entries = this.entries.filter(entry => !belongsTo(entry, personId));
   }
+
+  removeEntriesForRecipe(recipeId) {
+    this.entries = this.entries.filter(entry => entry.recipeId !== recipeId);
+  }
 }
 
 export const foodLogStore = new FoodLogStore();

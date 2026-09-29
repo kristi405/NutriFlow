@@ -83,7 +83,10 @@ export function adaptIngredient(raw, slugs) {
     defaultUnit: raw.default_unit || 'g',
     gramsPerUnit: raw.grams_per_unit || {},
     per100g: { nutrition, vitamins, minerals },
-    allergens: tagValuesByType(raw.tags, 'allergen', slugs)
+    allergens: tagValuesByType(raw.tags, 'allergen', slugs),
+    // Kept alongside `allergens` (slugs, used by existing logic) with real
+    // ids/localized names — the ingredients screen's tag filter needs those.
+    tags: (raw.tags || []).map(({ id, name }) => ({ id, name }))
   };
 }
 
@@ -119,7 +122,13 @@ function parseCookTimeMinutes(cookTimeText) {
 
 export function adaptRecipe(raw, slugs) {
   const tags = raw.tags || [];
-  const [categoryId] = tagValuesByType(tags, 'category', slugs);
+  const mealTypes = tagValuesByType(tags, 'meal_type', slugs);
+  // Recipes are grouped on-screen by category tag, but not every recipe in
+  // the admin panel gets one assigned (meal_type alone is common) — falling
+  // back to the first meal type (they share almost the same slugs, e.g.
+  // "breakfast"/"dinner") keeps such a recipe from silently vanishing from
+  // every category view instead of just not getting a "Salad"-style label.
+  const [categoryId = mealTypes[0]] = tagValuesByType(tags, 'category', slugs);
 
   return {
     id: raw.id,
@@ -128,7 +137,7 @@ export function adaptRecipe(raw, slugs) {
     imageUrl: raw.image_url ?? undefined,
     servings: raw.servings || 1,
     categoryId,
-    mealTypes: tagValuesByType(tags, 'meal_type', slugs),
+    mealTypes,
     dietaryTags: tagValuesByType(tags, 'dietary', slugs),
     allergens: tagValuesByType(tags, 'allergen', slugs),
     // No backend equivalent yet — undefined lets the UI's existing

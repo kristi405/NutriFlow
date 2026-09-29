@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 import i18next from '@/i18n';
 import { apiRequest, setUnauthorizedHandler } from '@/lib/api';
 import { persistStore } from './persist';
@@ -62,9 +62,11 @@ class AuthStore {
     } catch (error) {
       throw new Error(mapRegisterError(error.message));
     }
-    this.token = data.session.token;
-    this.currentUser = data.user;
-    this.hasLoggedOut = false;
+    runInAction(() => {
+      this.token = data.session.token;
+      this.currentUser = data.user;
+      this.hasLoggedOut = false;
+    });
   }
 
   async login(email, password) {
@@ -74,9 +76,11 @@ class AuthStore {
     } catch (error) {
       throw new Error(mapLoginError(error.message));
     }
-    this.token = data.session.token;
-    this.currentUser = data.user;
-    this.hasLoggedOut = false;
+    runInAction(() => {
+      this.token = data.session.token;
+      this.currentUser = data.user;
+      this.hasLoggedOut = false;
+    });
   }
 
   async requestPasswordReset(email) {
@@ -104,7 +108,10 @@ class AuthStore {
       preferences: familyMembers ? { ...profile.preferences, familyMembers } : profile.preferences
     };
     try {
-      this.currentUser = await apiRequest('/app/users/me', { method: 'PUT', token: this.token, body });
+      const updated = await apiRequest('/app/users/me', { method: 'PUT', token: this.token, body });
+      runInAction(() => {
+        this.currentUser = updated;
+      });
       return true;
     } catch {
       // Best-effort — the onboarding flow already moved on locally; the next
@@ -120,9 +127,11 @@ class AuthStore {
     } catch (error) {
       throw new Error(error.message);
     }
-    this.token = data.session.token;
-    this.currentUser = data.user;
-    this.hasLoggedOut = false;
+    runInAction(() => {
+      this.token = data.session.token;
+      this.currentUser = data.user;
+      this.hasLoggedOut = false;
+    });
   }
 
   async loginWithApple({ identityToken, email, fullName }) {
@@ -136,9 +145,11 @@ class AuthStore {
     } catch (error) {
       throw new Error(error.message);
     }
-    this.token = data.session.token;
-    this.currentUser = data.user;
-    this.hasLoggedOut = false;
+    runInAction(() => {
+      this.token = data.session.token;
+      this.currentUser = data.user;
+      this.hasLoggedOut = false;
+    });
   }
 
   async logout() {

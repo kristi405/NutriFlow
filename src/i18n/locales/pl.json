@@ -27,6 +27,9 @@
     "save": "Zapisz",
     "send": "Wyślij",
     "cancel": "Anuluj",
+    "selectTags": "Filtruj według tagów",
+    "searchTags": "Szukaj tagów",
+    "noTagsFound": "Nie znaleziono tagów",
     "delete": "Usuń",
     "or": "lub"
   },
@@ -227,6 +230,16 @@
     "slice": "plaster",
     "clove": "ząbek"
   },
+  "ingredients": {
+    "title": "Składniki",
+    "perAmount": "Na {{amount}}",
+    "measuredIn": "Jednostki miary",
+    "defaultUnit": "Domyślna jednostka",
+    "searchPlaceholder": "Szukaj składników",
+    "count": "Znaleziono: {{count}}",
+    "noResultsTitle": "Nie znaleziono składników",
+    "noResultsMessage": "Zmień wyszukiwanie lub wyczyść filtry."
+  },
   "people": {
     "title": "Osoby",
     "you": "Ty",
@@ -425,6 +438,7 @@
     "takePhoto": "Zrób zdjęcie",
     "chooseFromLibrary": "Wybierz z biblioteki",
     "recipeTitle": "Nazwa przepisu",
+    "refresh": "Odśwież przepisy",
     "recipeTitlePlaceholder": "np. Naleśniki babci",
     "prepTime": "Przygotowanie (min)",
     "cookTime": "Gotowanie (min)",
@@ -439,7 +453,9 @@
       "hard": "Trudny"
     },
     "titleRequired": "Wpisz nazwę dania",
-    "ingredientsRequired": "Dodaj przynajmniej jeden składnik"
+    "ingredientsRequired": "Dodaj przynajmniej jeden składnik",
+    "deleteRecipeTitle": "Usunąć ten przepis?",
+    "deleteRecipeMessage": "Ten przepis został utworzony na tym urządzeniu i zostanie trwale usunięty, także z planów posiłków."
   },
   "nutrition": {
     "score": "Ocena odżywiania",
@@ -635,7 +651,8 @@
     "unavailableMessage": "Plany Premium będą dostępne wkrótce.",
     "activeTitle": "Masz Premium",
     "activeMessage": "Dziękujemy za wsparcie NutriFlow. Wszystkie funkcje Premium są odblokowane.",
-    "legal": "Płatność zostanie pobrana z Twojego Apple ID po potwierdzeniu zakupu. Subskrypcja odnawia się automatycznie, chyba że zostanie anulowana co najmniej 24 godziny przed końcem bieżącego okresu. Możesz nią zarządzać lub ją anulować w ustawieniach Apple ID.",
+    "legalIos": "Płatność zostanie pobrana z Twojego Apple ID w momencie potwierdzenia zakupu. Subskrypcja odnawia się automatycznie, jeśli nie zostanie anulowana co najmniej 24 godziny przed końcem bieżącego okresu. Możesz zarządzać subskrypcją lub ją anulować w ustawieniach Apple ID.",
+    "legalAndroid": "Płatność zostanie pobrana z Twojego konta Google Play w momencie potwierdzenia zakupu. Subskrypcja odnawia się automatycznie, jeśli nie zostanie anulowana co najmniej 24 godziny przed końcem bieżącego okresu. Możesz zarządzać subskrypcją lub ją anulować w ustawieniach subskrypcji Google Play.",
     "weekly": "Tygodniowo",
     "lockedTitle": "Funkcja Premium",
     "lockedMessage": "Odblokuj tę funkcję dzięki NutriFlow Premium.",
