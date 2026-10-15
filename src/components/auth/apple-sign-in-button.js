@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   button: {
     flexDirection: 'row',
     width: '100%',
-    height: 48,
+    height: 54,
     borderRadius: 16,
     borderWidth: 1,
     alignItems: 'center',

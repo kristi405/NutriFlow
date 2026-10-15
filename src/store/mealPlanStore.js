@@ -62,6 +62,17 @@ class MealPlanStore {
     if (item) item.recipeId = recipeId;
   }
 
+  // Which of this plan entry's ingredients were removed/swapped on the recipe
+  // screen — kept per plan item (not on the recipe itself), so it's specific
+  // to this one meal and doesn't touch the catalog recipe shown elsewhere.
+  updateIngredientEdits(id, { excludedIngredientIds, substitutions }) {
+    const item = this.items.find(item => item.id === id);
+    if (item) {
+      item.excludedIngredientIds = excludedIngredientIds;
+      item.substitutions = substitutions;
+    }
+  }
+
   moveItem(id, date, mealType) {
     const item = this.items.find(item => item.id === id);
     if (item) {

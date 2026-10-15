@@ -34,50 +34,10 @@
     "or": "lub"
   },
   "auth": {
-    "login": {
-      "title": "Witaj ponownie",
-      "subtitle": "Zaloguj się, aby kontynuować.",
-      "emailPlaceholder": "Email",
-      "passwordPlaceholder": "Hasło",
-      "forgotPassword": "Nie pamiętasz hasła?",
-      "submit": "Zaloguj się",
-      "noAccount": "Nie masz konta?",
-      "register": "Zarejestruj się",
-      "validationEmpty": "Podaj email i hasło.",
-      "submitting": "Logowanie…"
-    },
-    "register": {
-      "title": "Utwórz konto",
-      "subtitle": "Załóż konto, aby zapisywać swoje postępy.",
-      "emailPlaceholder": "Email",
-      "passwordPlaceholder": "Hasło",
-      "confirmPasswordPlaceholder": "Potwierdź hasło",
-      "submit": "Utwórz konto",
-      "haveAccount": "Masz już konto?",
-      "login": "Zaloguj się",
-      "passwordsDontMatch": "Hasła nie są takie same.",
-      "validationEmpty": "Wypełnij wszystkie pola.",
-      "submitting": "Tworzenie konta…"
-    },
-    "forgotPassword": {
-      "title": "Resetuj hasło",
-      "subtitle": "Podaj swój email, a wyślemy Ci link do zresetowania hasła.",
-      "emailPlaceholder": "Email",
-      "submit": "Wyślij link",
-      "submitting": "Wysyłanie…",
-      "rememberedIt": "Przypomniałeś sobie hasło?",
-      "login": "Zaloguj się",
-      "validationEmpty": "Podaj email.",
-      "doneTitle": "Sprawdź swoją skrzynkę",
-      "doneSubtitle": "Jeśli konto z tym adresem email istnieje, wysłaliśmy link do zresetowania hasła.",
-      "backToLogin": "Powrót do logowania"
+    "entry": {
+      "titlePrefix": "Witaj w"
     },
     "errors": {
-      "invalidEmail": "Podaj prawidłowy adres email.",
-      "passwordTooShort": "Hasło musi mieć co najmniej 6 znaków.",
-      "emailTaken": "Konto z tym adresem email już istnieje.",
-      "incorrectCredentials": "Nieprawidłowy email lub hasło.",
-      "noAccountFound": "Nie znaleziono konta z tym adresem email.",
       "appleSignInFailed": "Logowanie przez Apple nie powiodło się. Spróbuj ponownie.",
       "accountBlocked": "To konto zostało zablokowane.",
       "googleSignInFailed": "Logowanie przez Google nie powiodło się. Spróbuj ponownie."
@@ -238,7 +198,8 @@
     "searchPlaceholder": "Szukaj składników",
     "count": "Znaleziono: {{count}}",
     "noResultsTitle": "Nie znaleziono składników",
-    "noResultsMessage": "Zmień wyszukiwanie lub wyczyść filtry."
+    "noResultsMessage": "Zmień wyszukiwanie lub wyczyść filtry.",
+    "bannerSubtitle": "Wartości odżywcze każdego składnika"
   },
   "people": {
     "title": "Osoby",
@@ -375,7 +336,14 @@
     "generatingDayTitle": "Generowanie dzisiejszego menu…",
     "generatingDayMessage": "Dobieramy posiłki do Twojego celu kalorycznego",
     "dayGeneratedTitle": "Dzisiejsze menu gotowe!",
-    "dayGeneratedMessage": "Dzisiejsze menu zostało wygenerowane ponownie."
+    "dayGeneratedMessage": "Dzisiejsze menu zostało wygenerowane ponownie.",
+    "chooseOtherDish": "Wybierz inne danie",
+    "showFewerDishes": "Pokaż mniej dań",
+    "chooseDish": "Wybierz danie",
+    "chooseIngredient": "Wybierz składnik",
+    "searchDishPlaceholder": "Szukaj dań",
+    "searchIngredientPlaceholder": "Szukaj składników",
+    "howMuchEaten": "Ile zjadłeś?"
   },
   "recipes": {
     "title": "Przepisy",
@@ -455,7 +423,8 @@
     "titleRequired": "Wpisz nazwę dania",
     "ingredientsRequired": "Dodaj przynajmniej jeden składnik",
     "deleteRecipeTitle": "Usunąć ten przepis?",
-    "deleteRecipeMessage": "Ten przepis został utworzony na tym urządzeniu i zostanie trwale usunięty, także z planów posiłków."
+    "deleteRecipeMessage": "Ten przepis został utworzony na tym urządzeniu i zostanie trwale usunięty, także z planów posiłków.",
+    "omega9": "Omega-9"
   },
   "nutrition": {
     "score": "Ocena odżywiania",
@@ -550,7 +519,9 @@
     "view": "Zobacz",
     "about": "O wskaźniku",
     "indicatorTitle": "Wskaźnik",
-    "noDetails": "Brak dodatkowych informacji o tym wskaźniku."
+    "noDetails": "Brak dodatkowych informacji o tym wskaźniku.",
+    "limitReachedTitle": "Osiągnięto limit analiz",
+    "limitReachedMessage": "Wykorzystano wszystkie analizy dostępne w Twoim planie. Kolejna będzie dostępna {{date}}. Zakup dodatkowych analiz pojawi się wkrótce."
   },
   "privacyPolicy": {
     "title": "Regulamin",
@@ -632,10 +603,10 @@
     "subtitle": "Odblokuj pełnię możliwości śledzenia żywienia",
     "features": [
       "Analiza AI Twoich wyników badań",
-      "Statystyki i Today's Progress",
       "Składniki odżywcze w każdym przepisie",
       "Listy zakupów",
-      "Automatyczne generowanie menu"
+      "Automatyczne generowanie menu",
+      "Osiągnięcia i odznaki postępu"
     ],
     "monthly": "Miesięcznie",
     "yearly": "Rocznie",
@@ -657,9 +628,11 @@
     "lockedTitle": "Funkcja Premium",
     "lockedMessage": "Odblokuj tę funkcję dzięki NutriFlow Premium.",
     "unlock": "Odblokuj Premium",
-    "lockedAnalysis": "Analiza AI wyników badań jest dostępna w Premium.",
-    "lockedProgress": "Statystyki i Today's Progress są dostępne w Premium.",
+    "lockedProgress": "Osiągnięcia są dostępne w Premium.",
     "lockedNutrients": "Szczegółowe składniki odżywcze są dostępne w Premium.",
     "lockedShopping": "Listy zakupów są dostępne w Premium."
+  },
+  "allergens": {
+    "containsWarning": "Zawiera: {{allergens}}"
   }
 }

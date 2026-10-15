@@ -34,50 +34,10 @@
     "or": "or"
   },
   "auth": {
-    "login": {
-      "title": "Welcome back",
-      "subtitle": "Log in to pick up where you left off.",
-      "emailPlaceholder": "Email",
-      "passwordPlaceholder": "Password",
-      "forgotPassword": "Forgot password?",
-      "submit": "Log In",
-      "noAccount": "Don't have an account?",
-      "register": "Register",
-      "validationEmpty": "Enter your email and password.",
-      "submitting": "Logging in…"
-    },
-    "register": {
-      "title": "Create account",
-      "subtitle": "Set up your account to save your progress.",
-      "emailPlaceholder": "Email",
-      "passwordPlaceholder": "Password",
-      "confirmPasswordPlaceholder": "Confirm password",
-      "submit": "Create Account",
-      "haveAccount": "Already have an account?",
-      "login": "Log in",
-      "passwordsDontMatch": "Passwords do not match.",
-      "validationEmpty": "Fill in all fields.",
-      "submitting": "Creating account…"
-    },
-    "forgotPassword": {
-      "title": "Reset password",
-      "subtitle": "Enter your email and we will send you a link to reset your password.",
-      "emailPlaceholder": "Email",
-      "submit": "Send reset link",
-      "submitting": "Sending…",
-      "rememberedIt": "Remembered it?",
-      "login": "Log in",
-      "validationEmpty": "Enter your email.",
-      "doneTitle": "Check your email",
-      "doneSubtitle": "If an account exists for that email, we sent a link to reset your password.",
-      "backToLogin": "Back to log in"
+    "entry": {
+      "titlePrefix": "Welcome to"
     },
     "errors": {
-      "invalidEmail": "Enter a valid email address.",
-      "passwordTooShort": "Password must be at least 6 characters.",
-      "emailTaken": "An account with this email already exists.",
-      "incorrectCredentials": "Incorrect email or password.",
-      "noAccountFound": "No account found with that email.",
       "appleSignInFailed": "Apple sign in failed. Please try again.",
       "accountBlocked": "This account has been blocked.",
       "googleSignInFailed": "Google sign-in failed. Please try again."
@@ -238,7 +198,8 @@
     "searchPlaceholder": "Search ingredients",
     "count": "{{count}} ingredients",
     "noResultsTitle": "No ingredients found",
-    "noResultsMessage": "Try a different search or clear the filters."
+    "noResultsMessage": "Try a different search or clear the filters.",
+    "bannerSubtitle": "Nutrition facts for every ingredient"
   },
   "people": {
     "title": "People",
@@ -375,7 +336,14 @@
     "generatingDayTitle": "Generating today's menu…",
     "generatingDayMessage": "Picking meals that fit your calorie goal",
     "dayGeneratedTitle": "Today's menu is ready!",
-    "dayGeneratedMessage": "Your meals for today have been regenerated."
+    "dayGeneratedMessage": "Your meals for today have been regenerated.",
+    "chooseOtherDish": "Choose another dish",
+    "showFewerDishes": "Show fewer dishes",
+    "chooseDish": "Choose dish",
+    "chooseIngredient": "Choose ingredient",
+    "searchDishPlaceholder": "Search dishes",
+    "searchIngredientPlaceholder": "Search ingredients",
+    "howMuchEaten": "How much did you eat?"
   },
   "recipes": {
     "title": "Recipes",
@@ -455,7 +423,8 @@
     "titleRequired": "Enter a name for the dish",
     "ingredientsRequired": "Add at least one ingredient",
     "deleteRecipeTitle": "Delete this recipe?",
-    "deleteRecipeMessage": "This recipe was created on this device and will be permanently deleted, including from any meal plans."
+    "deleteRecipeMessage": "This recipe was created on this device and will be permanently deleted, including from any meal plans.",
+    "omega9": "Omega-9"
   },
   "nutrition": {
     "score": "Nutrition Score",
@@ -550,7 +519,9 @@
     "view": "View",
     "about": "About",
     "indicatorTitle": "Indicator",
-    "noDetails": "No additional information is available for this indicator."
+    "noDetails": "No additional information is available for this indicator.",
+    "limitReachedTitle": "Analysis limit reached",
+    "limitReachedMessage": "You've used all the analyses included with your plan for now. The next one will be available on {{date}}. Buying extra analyses will be available soon."
   },
   "privacyPolicy": {
     "title": "Terms & Conditions",
@@ -632,10 +603,10 @@
     "subtitle": "Unlock the full power of your nutrition tracking",
     "features": [
       "AI analysis of your lab results",
-      "Statistics and Today's Progress",
       "Nutrients breakdown in every recipe",
       "Shopping lists",
-      "Automatic menu generation"
+      "Automatic menu generation",
+      "Achievements and progress badges"
     ],
     "monthly": "Monthly",
     "yearly": "Yearly",
@@ -657,9 +628,11 @@
     "lockedTitle": "Premium feature",
     "lockedMessage": "Unlock this feature with NutriFlow Premium.",
     "unlock": "Unlock Premium",
-    "lockedAnalysis": "AI analysis of lab results is available with Premium.",
-    "lockedProgress": "Statistics and Today's Progress are available with Premium.",
+    "lockedProgress": "Achievements are available with Premium.",
     "lockedNutrients": "The detailed nutrients breakdown is available with Premium.",
     "lockedShopping": "Shopping lists are available with Premium."
+  },
+  "allergens": {
+    "containsWarning": "Contains: {{allergens}}"
   }
 }

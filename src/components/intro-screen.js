@@ -77,7 +77,7 @@ export function IntroScreen({ onFinish }) {
         opacity: titleOpacity,
         transform: [{ translateY: titleTranslateY }]
       }]}>
-          NOURVIA
+          NUTRI FLOW
         </Animated.Text>
       </Animated.View>
     </View>;
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 36,
-    letterSpacing: 4,
+    letterSpacing: 3,
     fontWeight: '700',
     fontFamily: Fonts.rounded,
     color: '#ffffff'

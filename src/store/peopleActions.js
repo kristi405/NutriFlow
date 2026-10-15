@@ -1,3 +1,4 @@
+import { achievementsStore } from './achievementsStore';
 import { foodLogStore } from './foodLogStore';
 import { labReportStore } from './labReportStore';
 import { mealPlanStore } from './mealPlanStore';
@@ -11,6 +12,7 @@ export function purgePersonData(id) {
   mealPlanStore.removePersonData(id);
   waterStore.removePersonData(id);
   weightLogStore.removePersonData(id);
+  achievementsStore.removePersonData(id);
 }
 
 export async function removeFamilyMember(id) {

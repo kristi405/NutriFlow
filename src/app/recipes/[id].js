@@ -9,8 +9,10 @@ import { useTheme } from '@/hooks/use-theme';
 import { useFocusedRowScroll } from '@/hooks/useFocusedRowScroll';
 import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { defaultQuantityFor, formatQuantity, formatUnit, parseQuantity } from '@/lib/ingredientUnits';
-import { calculateRecipeNutrition, canMeasureIn } from '@/lib/nutrition';
-import { formatNutrientAmount, MINERAL_ROWS, NUTRIENT_ROWS, VITAMIN_ROWS } from '@/lib/nutrientRows';
+import { guessIngredientCategory } from '@/lib/ingredientImage';
+import { calculateRecipeNutrition, canMeasureIn, scaleForServings } from '@/lib/nutrition';
+import { formatNutrientAmount, MINERAL_ROWS, NUTRIENT_ROWS, nonZeroRows, VITAMIN_ROWS } from '@/lib/nutrientRows';
+import { mealPlanStore } from '@/store/mealPlanStore';
 import { myRecipesStore } from '@/store/myRecipesStore';
 import { deleteUserRecipe } from '@/store/recipeActions';
 import { recentlyViewedStore } from '@/store/recentlyViewedStore';
@@ -36,16 +38,25 @@ const TABS = [
 
 
 // Swapping is only offered for ingredient groups that have several interchangeable
-// options in the dataset — meat, fish, vegetables, and grain-based sides.
+// options in the dataset — meat, fish, vegetables, and grain-based sides. The
+// backend doesn't tag ingredients with a real category (categoryId/subcategoryId
+// are always a generic fallback), so the group comes from guessIngredientCategory
+// instead, which classifies by the ingredient's name.
+const PROTEIN_CATEGORIES = new Set(['poultry', 'redMeat', 'seafood']);
+
 function isSwappableIngredient(ingredient) {
   if (!ingredient) return false;
-  return ingredient.categoryId === 'meat' || ingredient.categoryId === 'fish' || ingredient.subcategoryId === 'vegetables' || ingredient.subcategoryId === 'grains';
+  const category = guessIngredientCategory(ingredient);
+  return PROTEIN_CATEGORIES.has(category) || category === 'vegetables' || category === 'grains';
 }
 
 function swapPoolForIngredient(ingredient, unit, allIngredients) {
   if (!ingredient) return [];
+  const category = guessIngredientCategory(ingredient);
   let pool;
-  if (ingredient.categoryId === 'meat') pool = allIngredients.filter(item => item.categoryId === 'meat');else if (ingredient.categoryId === 'fish') pool = allIngredients.filter(item => item.categoryId === 'fish');else if (ingredient.subcategoryId === 'vegetables') pool = allIngredients.filter(item => item.subcategoryId === 'vegetables');else if (ingredient.subcategoryId === 'grains') pool = allIngredients.filter(item => item.subcategoryId === 'grains');else return [];
+  // Meat and fish share one pool — either is a reasonable protein swap for the
+  // other. Vegetables and grains stay within their own category.
+  if (PROTEIN_CATEGORIES.has(category)) pool = allIngredients.filter(item => PROTEIN_CATEGORIES.has(guessIngredientCategory(item)));else if (category === 'vegetables' || category === 'grains') pool = allIngredients.filter(item => guessIngredientCategory(item) === category);else return [];
   // Only offer substitutes that can be measured in the recipe line's existing unit.
   return pool.filter(item => item.id !== ingredient.id && canMeasureIn(item, unit));
 }
@@ -60,12 +71,21 @@ function RecipeDetailScreen() {
   const detailScrollRef = useRef(null);
   const { rowProps, inputProps } = useFocusedRowScroll(detailScrollRef, keyboardHeight);
   const { width } = useWindowDimensions();
-  const { id } = useLocalSearchParams();
+  const { id, servings: planServingsParam, planItemId } = useLocalSearchParams();
   const recipe = getRecipeById(id);
+  // When opened from a meal-plan entry whose serving size was scaled to fit the
+  // calorie target (see mealPlanGenerator), show this instance's actual gram
+  // amounts and totals instead of the recipe's own base numbers.
+  const planServings = Number(planServingsParam);
+  const hasPlanServings = Number.isFinite(planServings) && planServings > 0;
+  // Ingredient removals/swaps are saved onto this plan entry (see
+  // mealPlanStore.updateIngredientEdits), so reopening the same meal shows
+  // them instead of the recipe's unedited ingredient list.
+  const planItem = planItemId ? mealPlanStore.items.find(item => item.id === planItemId) : null;
   const ingredients = getIngredients();
-  const [excludedIngredientIds, setExcludedIngredientIds] = useState(() => new Set());
+  const [excludedIngredientIds, setExcludedIngredientIds] = useState(() => new Set(planItem?.excludedIngredientIds ?? []));
   const [isEditingIngredients, setIsEditingIngredients] = useState(false);
-  const [substitutions, setSubstitutions] = useState({});
+  const [substitutions, setSubstitutions] = useState(() => planItem?.substitutions ?? {});
   const [swapIngredientId, setSwapIngredientId] = useState(null);
   const [activeTab, setActiveTab] = useState('ingredients');
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -109,9 +129,18 @@ function RecipeDetailScreen() {
       ingredients: activeIngredients
     }, getIngredientById);
   }, [recipe, excludedIngredientIds, substitutions, isEditingRecipe, editedIngredients]);
-  const nutrition = profile?.nutrition;
-  const vitamins = profile?.vitamins;
-  const minerals = profile?.minerals;
+  // Only while actually editing your own recipe do we show its true base
+  // numbers — everywhere else, a meal-plan serving size above/below 1 scales
+  // the whole view (KBJU, nutrients, vitamins, minerals and ingredient grams)
+  // to what this specific plan entry represents.
+  const shouldScalePortion = hasPlanServings && !(recipe?.isUserRecipe && isEditingRecipe);
+  const scaledProfile = useMemo(() => {
+    if (!profile || !shouldScalePortion) return profile;
+    return scaleForServings(profile, planServings);
+  }, [profile, shouldScalePortion, planServings]);
+  const nutrition = scaledProfile?.nutrition;
+  const vitamins = scaledProfile?.vitamins;
+  const minerals = scaledProfile?.minerals;
 
   const swapLine = swapIngredientId ? recipe?.ingredients.find(line => line.ingredientId === swapIngredientId) : undefined;
   const swapCurrentIngredient = swapLine ? getIngredientById(substitutions[swapLine.ingredientId] ?? swapLine.ingredientId) : undefined;
@@ -121,16 +150,18 @@ function RecipeDetailScreen() {
     setExcludedIngredientIds(current => {
       const next = new Set(current);
       if (next.has(ingredientId)) next.delete(ingredientId);else next.add(ingredientId);
+      if (planItemId) mealPlanStore.updateIngredientEdits(planItemId, { excludedIngredientIds: [...next], substitutions });
       return next;
     });
   }
 
   function handleSelectSwap(newIngredientId) {
     if (swapIngredientId) {
-      setSubstitutions(current => ({
-        ...current,
-        [swapIngredientId]: newIngredientId
-      }));
+      setSubstitutions(current => {
+        const next = { ...current, [swapIngredientId]: newIngredientId };
+        if (planItemId) mealPlanStore.updateIngredientEdits(planItemId, { excludedIngredientIds: [...excludedIngredientIds], substitutions: next });
+        return next;
+      });
     }
     setSwapIngredientId(null);
   }
@@ -151,6 +182,17 @@ function RecipeDetailScreen() {
 
   const totalTime = recipe.prepTimeMinutes + recipe.cookTimeMinutes;
   const isOwnRecipe = recipe.isUserRecipe === true;
+  // Removing/swapping a catalog recipe's ingredients only makes sense for the
+  // specific instance of it that's actually in a meal plan (Meal Plan or
+  // Home's "next meal", both of which pass `servings`) — browsing it from the
+  // Recipes tab is read-only. My Recipes keeps its own separate full edit mode
+  // (isEditingRecipe) regardless of where it was opened from.
+  const canEditCatalogIngredients = !isOwnRecipe && hasPlanServings;
+  // The ingredient list always shows quantities for the recipe's own batch
+  // (recipe.servings people) regardless of servings eaten — a meal-plan serving
+  // size above/below 1 just scales that same batch by the same factor as the
+  // nutrition figures above, so a 1.5x plan entry shows 1.5x the usual grams.
+  const ingredientGramScale = shouldScalePortion ? planServings : 1;
 
   function handleDeleteRecipe() {
     Alert.alert(t('recipes.deleteRecipeTitle'), t('recipes.deleteRecipeMessage'), [{ text: t('common.cancel'), style: 'cancel' }, {
@@ -310,7 +352,7 @@ function RecipeDetailScreen() {
           </View>
 
           <View style={styles.metaRow}>
-            <MetaItem styles={styles} icon={{ ios: 'clock', android: 'schedule', web: 'schedule' }} label={recipe.cookTimeText ?? `${totalTime} ${t('common.min')}`} color={WATER_BLUE} />
+            {!isOwnRecipe && <MetaItem styles={styles} icon={{ ios: 'clock', android: 'schedule', web: 'schedule' }} label={recipe.cookTimeText ?? `${totalTime} ${t('common.min')}`} color={WATER_BLUE} />}
             <MetaItem styles={styles} icon={{ ios: 'person.2.fill', android: 'group', web: 'group' }} label={`${recipe.servings} ${t('recipes.servings')}`} color={theme.textSecondary} />
             {recipe.difficulty && <MetaItem styles={styles} icon={{ ios: 'chart.bar.fill', android: 'bar_chart', web: 'bar_chart' }} label={t(`recipes.difficulty.${recipe.difficulty}`, { defaultValue: recipe.difficulty })} color={recipe.difficulty === 'easy' ? theme.primary : theme.textSecondary} />}
           </View>
@@ -355,7 +397,7 @@ function RecipeDetailScreen() {
           {activeTab === 'ingredients' && <View style={styles.section}>
               <View style={styles.sectionHeaderRow}>
                 <ThemedText type="headline" color={theme.text}>{t('recipes.ingredients')}</ThemedText>
-                {!isOwnRecipe && <Pressable onPress={() => setIsEditingIngredients(current => !current)} hitSlop={8} style={[styles.editButton, isEditingIngredients && styles.editButtonActive]}>
+                {canEditCatalogIngredients && <Pressable onPress={() => setIsEditingIngredients(current => !current)} hitSlop={8} style={[styles.editButton, isEditingIngredients && styles.editButtonActive]}>
                     <SymbolView name={isEditingIngredients ? { ios: 'checkmark', android: 'check', web: 'check' } : { ios: 'square.and.pencil', android: 'edit_square', web: 'edit_square' }} size={15} tintColor={isEditingIngredients ? '#ffffff' : theme.accent} />
                     <ThemedText type="small" color={isEditingIngredients ? '#ffffff' : theme.accent}>
                       {isEditingIngredients ? t('common.done') : t('common.edit')}
@@ -383,10 +425,10 @@ function RecipeDetailScreen() {
                   const ingredient = getIngredientById(effectiveIngredientId);
                   const isExcluded = excludedIngredientIds.has(line.ingredientId);
                   return <View key={line.ingredientId} style={styles.ingredientRow}>
-                        {!isOwnRecipe && isEditingIngredients && <Pressable onPress={() => toggleIngredient(line.ingredientId)} hitSlop={8}>
+                        {canEditCatalogIngredients && isEditingIngredients && <Pressable onPress={() => toggleIngredient(line.ingredientId)} hitSlop={8}>
                             <SymbolView name={isExcluded ? { ios: 'circle', android: 'radio_button_unchecked', web: 'radio_button_unchecked' } : { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }} size={22} tintColor={isExcluded ? theme.border : theme.primary} />
                           </Pressable>}
-                        {!isOwnRecipe && isEditingIngredients && !isExcluded && isSwappableIngredient(ingredient) && <Pressable onPress={() => setSwapIngredientId(line.ingredientId)} hitSlop={8}>
+                        {canEditCatalogIngredients && isEditingIngredients && !isExcluded && isSwappableIngredient(ingredient) && <Pressable onPress={() => setSwapIngredientId(line.ingredientId)} hitSlop={8}>
                             <SymbolView name={{ ios: 'arrow.triangle.2.circlepath', android: 'sync', web: 'sync' }} size={20} tintColor={theme.accent} />
                           </Pressable>}
                         <View style={styles.ingredientCard}>
@@ -394,7 +436,7 @@ function RecipeDetailScreen() {
                             {ingredient?.name ?? line.ingredientId}
                           </ThemedText>
                           <ThemedText type="small" color={theme.textSecondary}>
-                            {formatQuantity(line.quantity)} {formatUnit(t, line.unit)}
+                            {formatQuantity(line.quantity * ingredientGramScale)} {formatUnit(t, line.unit)}
                           </ThemedText>
                         </View>
                       </View>;
@@ -425,8 +467,8 @@ function RecipeDetailScreen() {
                 <ThemedText type="headline" color={theme.text} style={styles.cardTitle}>
                   {t('recipes.nutrients')}
                 </ThemedText>
-                {NUTRIENT_ROWS.map((row, index) => {
-                const isLast = index === NUTRIENT_ROWS.length - 1;
+                {nonZeroRows(NUTRIENT_ROWS, nutrition).map((row, index, visibleRows) => {
+                const isLast = index === visibleRows.length - 1;
                 return <View key={row.key} style={[styles.listRow, isLast && styles.listRowLast]}>
                       <ThemedText type="small" color={theme.text}>{t(row.labelKey)}</ThemedText>
                       <ThemedText type="small" color={theme.textSecondary}>
@@ -440,8 +482,8 @@ function RecipeDetailScreen() {
                 <ThemedText type="headline" color={theme.text} style={styles.cardTitle}>
                   {t('recipes.vitamins')}
                 </ThemedText>
-                {VITAMIN_ROWS.map((row, index) => {
-                const isLast = index === VITAMIN_ROWS.length - 1;
+                {nonZeroRows(VITAMIN_ROWS, vitamins).map((row, index, visibleRows) => {
+                const isLast = index === visibleRows.length - 1;
                 return <View key={row.key} style={[styles.listRow, isLast && styles.listRowLast]}>
                       <ThemedText type="small" color={theme.text}>{t(row.labelKey)}</ThemedText>
                       <ThemedText type="small" color={theme.textSecondary}>
@@ -455,8 +497,8 @@ function RecipeDetailScreen() {
                 <ThemedText type="headline" color={theme.text} style={styles.cardTitle}>
                   {t('recipes.minerals')}
                 </ThemedText>
-                {MINERAL_ROWS.map((row, index) => {
-                const isLast = index === MINERAL_ROWS.length - 1;
+                {nonZeroRows(MINERAL_ROWS, minerals).map((row, index, visibleRows) => {
+                const isLast = index === visibleRows.length - 1;
                 return <View key={row.key} style={[styles.listRow, isLast && styles.listRowLast]}>
                       <ThemedText type="small" color={theme.text}>{t(row.labelKey)}</ThemedText>
                       <ThemedText type="small" color={theme.textSecondary}>
@@ -482,18 +524,20 @@ function RecipeDetailScreen() {
               </Pressable>
             </View>
 
-            {swapCandidates.length === 0 ? <ThemedText type="small" color={theme.textSecondary}>{t('recipes.swapEmpty')}</ThemedText> : <View style={styles.swapList}>
-                {swapCandidates.map(item => <Pressable key={item.id} onPress={() => handleSelectSwap(item.id)} style={styles.swapRow}>
-                    <View style={styles.swapIconWrapper}>
-                      <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={16} tintColor={theme.accent} />
-                    </View>
-                    <View style={styles.swapTextWrapper}>
-                      <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{item.name}</ThemedText>
-                      <ThemedText type="small" color={theme.textSecondary}>{Math.round(item.per100g.nutrition.calories)} {t('common.kcal')} / 100g</ThemedText>
-                    </View>
-                    <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={16} tintColor={theme.textSecondary} />
-                  </Pressable>)}
-              </View>}
+            {swapCandidates.length === 0 ? <ThemedText type="small" color={theme.textSecondary}>{t('recipes.swapEmpty')}</ThemedText> : <ScrollView style={styles.ingredientScroll}>
+                <View style={styles.swapList}>
+                  {swapCandidates.map(item => <Pressable key={item.id} onPress={() => handleSelectSwap(item.id)} style={styles.swapRow}>
+                      <View style={styles.swapIconWrapper}>
+                        <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={16} tintColor={theme.accent} />
+                      </View>
+                      <View style={styles.swapTextWrapper}>
+                        <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{item.name}</ThemedText>
+                        <ThemedText type="small" color={theme.textSecondary}>{Math.round(item.per100g.nutrition.calories)} {t('common.kcal')} / 100g</ThemedText>
+                      </View>
+                      <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={16} tintColor={theme.textSecondary} />
+                    </Pressable>)}
+                </View>
+              </ScrollView>}
           </Pressable>
         </Pressable>
       </Modal>

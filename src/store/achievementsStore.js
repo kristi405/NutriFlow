@@ -15,9 +15,34 @@ export const ACHIEVEMENT_GOALS = {
   firstRecipe: 1
 };
 
-function proteinForDate(date) {
+// Object keys must be strings — the account owner (personId === null) lives under "me".
+function keyFor(personId) {
+  return personId ?? 'me';
+}
+
+function emptyPersonData() {
+  return {
+    daysByKey: { streak: [], water: [], protein: [], firstRecipe: [] },
+    unlocked: {}
+  };
+}
+
+function streakFromDays(days) {
+  const set = new Set(days);
+  const today = todayKey();
+  // Today may not be logged yet — that shouldn't zero out yesterday's streak.
+  let cursor = set.has(today) ? today : addDays(today, -1);
+  let streak = 0;
+  while (set.has(cursor)) {
+    streak += 1;
+    cursor = addDays(cursor, -1);
+  }
+  return streak;
+}
+
+function proteinForDate(personId, date) {
   let total = 0;
-  for (const entry of foodLogStore.entriesForDate(date)) {
+  for (const entry of foodLogStore.entriesForDateOf(personId, date)) {
     const recipe = getRecipeById(entry.recipeId);
     if (!recipe) continue;
     total += scaleForServings(calculateRecipeNutrition(recipe, getIngredientById), entry.servings).nutrition.protein;
@@ -30,75 +55,93 @@ function sameList(a, b) {
 }
 
 class AchievementsStore {
-  // Dates (YYYY-MM-DD) on which each goal was hit — persisted, so progress
+  // Progress is per person (each family member earns achievements on their own
+  // logs, not the owner's) — keyed by keyFor(personId). Persisted, so progress
   // survives restarts and a later change of targets doesn't erase earned days.
-  daysByKey = { streak: [], water: [], protein: [], firstRecipe: [] };
-  // Achievement key -> ISO date it was completed. Once set, never unset.
-  unlocked = {};
+  byPerson = {};
   hasHydrated = false;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
-    persistStore(this, 'nutriflow.achievements', ['daysByKey', 'unlocked']);
+    persistStore(this, 'nutriflow.achievements', ['byPerson']);
   }
 
-  // Filled cells for an achievement. The streak shows the *current* run (it
-  // resets when broken); the others are cumulative.
+  dataFor(personId) {
+    return this.byPerson[keyFor(personId)] ?? emptyPersonData();
+  }
+
+  get current() {
+    return this.dataFor(peopleStore.currentPersonId);
+  }
+
+  get unlocked() {
+    return this.current.unlocked;
+  }
+
+  // Filled cells for an achievement, for the currently active person. The
+  // streak shows the *current* run (it resets when broken); the others are
+  // cumulative.
   progressFor(key) {
+    const data = this.current;
     const goal = ACHIEVEMENT_GOALS[key];
-    if (this.unlocked[key]) return goal;
+    if (data.unlocked[key]) return goal;
     if (key === 'streak') return Math.min(this.currentStreak(), goal);
-    return Math.min(this.daysByKey[key].length, goal);
+    return Math.min(data.daysByKey[key].length, goal);
   }
 
   currentStreak() {
-    const days = new Set(this.daysByKey.streak);
-    const today = todayKey();
-    // Today may not be logged yet — that shouldn't zero out yesterday's streak.
-    let cursor = days.has(today) ? today : addDays(today, -1);
-    let streak = 0;
-    while (days.has(cursor)) {
-      streak += 1;
-      cursor = addDays(cursor, -1);
-    }
-    return streak;
+    return streakFromDays(this.current.daysByKey.streak);
   }
 
-  // Re-derives which days hit each goal from the logs. Idempotent: only writes
-  // when something changed, so calling it from an effect can't loop.
+  // Re-derives which days hit each goal from the logs, for whichever person is
+  // currently active. Idempotent: only writes when something changed, so
+  // calling it from an effect can't loop.
   sync({ waterTargetMl, proteinTarget }) {
-    // Achievements belong to the account owner; the targets passed in are the
-    // active person's, so they only apply while that is "me".
-    if (peopleStore.currentPersonId !== null) return;
-    const loggedDates = new Set([...foodLogStore.entriesOfPerson(null).map(entry => entry.date), ...waterStore.entriesOfPerson(null).map(entry => entry.date)]);
+    const personId = peopleStore.currentPersonId;
+    const key = keyFor(personId);
+    const data = this.dataFor(personId);
+
+    const loggedDates = new Set([...foodLogStore.entriesOfPerson(personId).map(entry => entry.date), ...waterStore.entriesOfPerson(personId).map(entry => entry.date)]);
     const streakDays = [];
     const waterDays = [];
     const proteinDays = [];
     for (const date of [...loggedDates].sort()) {
-      if (foodLogStore.entriesForDate(date).length > 0) streakDays.push(date);
-      if (waterTargetMl > 0 && waterStore.totalForDate(date) >= waterTargetMl) waterDays.push(date);
-      if (proteinTarget > 0 && proteinForDate(date) >= proteinTarget) proteinDays.push(date);
+      if (foodLogStore.entriesForDateOf(personId, date).length > 0) streakDays.push(date);
+      if (waterTargetMl > 0 && waterStore.totalForDateOf(personId, date) >= waterTargetMl) waterDays.push(date);
+      if (proteinTarget > 0 && proteinForDate(personId, date) >= proteinTarget) proteinDays.push(date);
     }
-    const hasCookedRecipe = foodLogStore.entriesOfPerson(null).some(entry => getRecipeById(entry.recipeId));
+    const hasCookedRecipe = foodLogStore.entriesOfPerson(personId).some(entry => getRecipeById(entry.recipeId));
     const firstRecipeDays = hasCookedRecipe ? ['done'] : [];
 
     // Keep previously earned days even if the current data no longer proves them.
     const merge = (previous, next) => [...new Set([...previous, ...next])].sort();
     const nextDays = {
-      streak: merge(this.daysByKey.streak, streakDays),
-      water: merge(this.daysByKey.water, waterDays),
-      protein: merge(this.daysByKey.protein, proteinDays),
-      firstRecipe: merge(this.daysByKey.firstRecipe, firstRecipeDays)
+      streak: merge(data.daysByKey.streak, streakDays),
+      water: merge(data.daysByKey.water, waterDays),
+      protein: merge(data.daysByKey.protein, proteinDays),
+      firstRecipe: merge(data.daysByKey.firstRecipe, firstRecipeDays)
     };
-    for (const key of Object.keys(nextDays)) {
-      if (!sameList(nextDays[key], this.daysByKey[key])) this.daysByKey[key] = nextDays[key];
+
+    const nextUnlocked = { ...data.unlocked };
+    for (const goalKey of Object.keys(ACHIEVEMENT_GOALS)) {
+      if (nextUnlocked[goalKey]) continue;
+      const count = goalKey === 'streak' ? streakFromDays(nextDays.streak) : nextDays[goalKey].length;
+      if (count >= ACHIEVEMENT_GOALS[goalKey]) nextUnlocked[goalKey] = new Date().toISOString();
     }
 
-    for (const key of Object.keys(ACHIEVEMENT_GOALS)) {
-      if (this.unlocked[key]) continue;
-      const count = key === 'streak' ? this.currentStreak() : this.daysByKey[key].length;
-      if (count >= ACHIEVEMENT_GOALS[key]) this.unlocked[key] = new Date().toISOString();
+    const daysChanged = Object.keys(nextDays).some(goalKey => !sameList(nextDays[goalKey], data.daysByKey[goalKey]));
+    const unlockedChanged = Object.keys(nextUnlocked).length !== Object.keys(data.unlocked).length;
+    if (daysChanged || unlockedChanged) {
+      this.byPerson = { ...this.byPerson, [key]: { daysByKey: nextDays, unlocked: nextUnlocked } };
     }
+  }
+
+  removePersonData(personId) {
+    const key = keyFor(personId);
+    if (!(key in this.byPerson)) return;
+    const next = { ...this.byPerson };
+    delete next[key];
+    this.byPerson = next;
   }
 }
 

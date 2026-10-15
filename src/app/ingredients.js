@@ -12,6 +12,8 @@ import { TagFilterSheet } from '@/components/ui/tag-filter-sheet';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { getIngredients } from '@/data/catalog';
+import { guessIngredientImage } from '@/lib/ingredientImage';
+import { ensurePremium } from '@/lib/premium';
 
 function IngredientsScreen() {
   const { t } = useTranslation();
@@ -81,8 +83,8 @@ function IngredientsScreen() {
       <ThemedText type="caption" color={theme.textSecondary}>{t('ingredients.count', { count: visibleIngredients.length })}</ThemedText>
 
       {visibleIngredients.length === 0 ? <EmptyState icon={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} title={t('ingredients.noResultsTitle')} message={t('ingredients.noResultsMessage')} actionLabel={hasFilters ? t('articles.clearFilters') : undefined} onAction={hasFilters ? clearFilters : undefined} /> : <View style={styles.list}>
-          {visibleIngredients.map(ingredient => <Pressable key={ingredient.id} onPress={() => router.push({ pathname: '/ingredient/[id]', params: { id: ingredient.id } })} style={({ pressed }) => [styles.row, { backgroundColor: theme.background, borderColor: theme.border, opacity: pressed ? 0.85 : 1 }]}>
-              <RecipeImage uri={ingredient.imageUrl} style={styles.thumbnail} iconSize={18} />
+          {visibleIngredients.map(ingredient => <Pressable key={ingredient.id} onPress={() => ensurePremium() && router.push({ pathname: '/ingredient/[id]', params: { id: ingredient.id } })} style={({ pressed }) => [styles.row, { backgroundColor: theme.background, borderColor: theme.border, opacity: pressed ? 0.85 : 1 }]}>
+              <RecipeImage uri={guessIngredientImage(ingredient)} style={styles.thumbnail} iconSize={18} />
               <View style={styles.rowBody}>
                 <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{ingredient.name}</ThemedText>
                 {ingredient.tags.length > 0 && <View style={styles.allergenRow}>
@@ -92,6 +94,7 @@ function IngredientsScreen() {
               <ThemedText type="caption" color={theme.textSecondary}>
                 {Math.round(ingredient.per100g.nutrition.calories)} {t('common.kcal')} / 100{ingredient.defaultUnit === 'ml' || ingredient.defaultUnit === 'l' ? 'ml' : 'g'}
               </ThemedText>
+              <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={14} tintColor={theme.textSecondary} />
             </Pressable>)}
         </View>}
 

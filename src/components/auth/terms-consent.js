@@ -41,8 +41,8 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   link: {
-    fontSize: 12,
-    lineHeight: 15,
+    fontSize: 14,
+    lineHeight: 18,
     fontWeight: '700',
     textDecorationLine: 'underline'
   },

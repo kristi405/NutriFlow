@@ -8,16 +8,19 @@ import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Modal, Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
+import { PersonAvatar } from '@/components/people/person-avatar';
 import { PersonSwitcher } from '@/components/people/person-switcher';
 import { EmptyState } from '@/components/ui/empty-state';
-import { LockedFeature } from '@/components/ui/locked-feature';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { subscriptionStore } from '@/store/subscriptionStore';
+import { ensurePremium } from '@/lib/premium';
 import { formatReportDate } from '@/lib/labReportAdapter';
+import { analysisUsageStore } from '@/store/analysisUsageStore';
 import { labReportStore } from '@/store/labReportStore';
 import { localeStore } from '@/store/localeStore';
+import { profileStore } from '@/store/profileStore';
+import { subscriptionStore } from '@/store/subscriptionStore';
 
 // The backend rejects anything larger (jpeg/png/webp/pdf, 5 MB).
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
@@ -84,6 +87,17 @@ function AiAnalysisScreen() {
     labReportStore.loadReports();
   }, []);
 
+  // Premium includes one analysis per rolling 30 days — buying extra ones isn't
+  // wired up yet, so once it's spent this just explains when the next is free.
+  function handleUploadPress() {
+    if (!ensurePremium()) return;
+    if (subscriptionStore.isAvailable && !analysisUsageStore.canUseFreeAnalysis) {
+      Alert.alert(t('aiAnalysis.limitReachedTitle'), t('aiAnalysis.limitReachedMessage', { date: formatReportDate(analysisUsageStore.nextAvailableAt.toISOString(), locale) }));
+      return;
+    }
+    setIsSourceSheetOpen(true);
+  }
+
   async function handleSelectSource(source) {
     setIsSourceSheetOpen(false);
     // Let the sheet finish closing before a native picker presents (iOS drops it otherwise).
@@ -96,6 +110,7 @@ function AiAnalysisScreen() {
         return;
       }
       const report = await labReportStore.uploadReport(file);
+      if (subscriptionStore.isAvailable) analysisUsageStore.recordUse();
       router.push({ pathname: '/lab-report/[id]', params: { id: report.id } });
     } catch (error) {
       Alert.alert(t('aiAnalysis.uploadErrorTitle'), error.message ?? t('aiAnalysis.uploadErrorMessage'));
@@ -137,31 +152,22 @@ function AiAnalysisScreen() {
       </View>;
   }
 
-  if (!subscriptionStore.hasAccess) {
-    return <ScreenScrollView isTabScreen gap={Spacing.three}>
-      <View style={styles.header}>
-        <ThemedText type="title" style={styles.title} color={theme.text}>
-          {t('aiAnalysis.title')}
-        </ThemedText>
-        <ThemedText type="default" color={theme.textSecondary}>
-          {t('aiAnalysis.subtitle')}
-        </ThemedText>
-      </View>
-      <LockedFeature message={t('paywall.lockedAnalysis')} />
-    </ScreenScrollView>;
-  }
-
   return <ScreenScrollView isTabScreen gap={Spacing.three}>
-      <View style={styles.header}>
-        <ThemedText type="title" style={styles.title} color={theme.text}>
-          {t('aiAnalysis.title')}
-        </ThemedText>
-        <ThemedText type="default" color={theme.textSecondary}>
-          {t('aiAnalysis.subtitle')}
-        </ThemedText>
+      <View style={styles.headerRow}>
+        <View style={styles.header}>
+          <ThemedText type="title" style={styles.title} color={theme.text}>
+            {t('aiAnalysis.title')}
+          </ThemedText>
+          <ThemedText type="default" color={theme.textSecondary}>
+            {t('aiAnalysis.subtitle')}
+          </ThemedText>
+        </View>
+        <PersonSwitcher variant="avatarBadge" size={40}>
+          <View style={styles.headerAvatarCircle}>
+            <PersonAvatar profile={profileStore.activeProfile} size={36} iconFallback />
+          </View>
+        </PersonSwitcher>
       </View>
-
-      <PersonSwitcher />
 
       <View style={styles.uploadCard}>
         <View style={styles.uploadIconWrapper}>
@@ -173,7 +179,7 @@ function AiAnalysisScreen() {
         <ThemedText type="small" color={theme.textSecondary} style={styles.centerText}>
           {isUploading ? t('aiAnalysis.analyzingHint') : t('aiAnalysis.uploadSubtitle')}
         </ThemedText>
-        <Pressable onPress={() => setIsSourceSheetOpen(true)} disabled={isUploading} style={({ pressed }) => [styles.uploadButton, (pressed || isUploading) && styles.pressed]}>
+        <Pressable onPress={handleUploadPress} disabled={isUploading} style={({ pressed }) => [styles.uploadButton, (pressed || isUploading) && styles.pressed]}>
           {isUploading ? <>
               <ActivityIndicator color="#ffffff" />
               <ThemedText type="smallBold" style={styles.uploadButtonText}>{t('aiAnalysis.analyzing')}</ThemedText>
@@ -255,8 +261,23 @@ const createStyles = theme => StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.three
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.three
+  },
   header: {
+    flex: 1,
     gap: Spacing.half
+  },
+  headerAvatarCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: theme.accent,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   title: {
     fontSize: 32,

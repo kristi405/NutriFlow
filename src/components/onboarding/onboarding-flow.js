@@ -36,7 +36,6 @@ export function OnboardingFlow({ onComplete, onCancel } = {}) {
     system: 'imperial'
   });
   const [activityLevel, setActivityLevel] = useState();
-  const [dietaryTags, setDietaryTags] = useState([]);
   const [allergies, setAllergies] = useState([]);
   const [showValidation, setShowValidation] = useState(false);
   const canProceed = step === 0 && Boolean(goal) || step === 1 && personalInfo.name.trim().length > 0 && Number(personalInfo.age) > 0 || step === 2 && Number(personalInfo.heightCm) > 0 && Number(personalInfo.weightKg) > 0 || step === 3 && Boolean(activityLevel) || step === 4;
@@ -63,7 +62,7 @@ export function OnboardingFlow({ onComplete, onCancel } = {}) {
         type: goal
       },
       preferences: {
-        dietaryTags,
+        dietaryTags: [],
         allergies,
         dislikedIngredientIds: [],
         favoriteCuisines: [],
@@ -134,7 +133,7 @@ export function OnboardingFlow({ onComplete, onCancel } = {}) {
           ...patch
         }))} showValidation={showValidation} />}
           {step === 3 && <ActivityStep value={activityLevel} onChange={setActivityLevel} showError={showValidation && !activityLevel} />}
-          {step === 4 && <PreferencesStep dietaryTags={dietaryTags} allergies={allergies} onChangeDietaryTags={setDietaryTags} onChangeAllergies={setAllergies} />}
+          {step === 4 && <PreferencesStep allergies={allergies} onChangeAllergies={setAllergies} />}
         </Animated.View>
 
         <View style={styles.footer}>

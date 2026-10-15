@@ -1,37 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import i18next from '@/i18n';
 import { apiRequest, setUnauthorizedHandler } from '@/lib/api';
 import { persistStore } from './persist';
-
-// Backend error messages are plain English strings (see AuthService.js), and the
-// same message can mean different things depending on which endpoint sent it —
-// e.g. "email is invalid" means "bad format" on register but "no such account" on
-// login (login intentionally doesn't reveal which part was wrong).
-function mapRegisterError(message) {
-  switch (message) {
-    case 'email is invalid':
-      return i18next.t('auth.errors.invalidEmail');
-    case 'password must be at least 6 characters':
-      return i18next.t('auth.errors.passwordTooShort');
-    case 'email is already registered':
-      return i18next.t('auth.errors.emailTaken');
-    default:
-      return message;
-  }
-}
-
-function mapLoginError(message) {
-  switch (message) {
-    case 'email is invalid':
-    case 'password is invalid':
-    case 'password is null':
-      return i18next.t('auth.errors.incorrectCredentials');
-    case 'user is blocked':
-      return i18next.t('auth.errors.accountBlocked');
-    default:
-      return message;
-  }
-}
 
 class AuthStore {
   currentUser = null;
@@ -53,38 +22,6 @@ class AuthStore {
 
   get isAuthenticated() {
     return this.currentUser !== null;
-  }
-
-  async register(email, password) {
-    let data;
-    try {
-      data = await apiRequest('/auth/register', { method: 'POST', body: { email: email.trim(), password } });
-    } catch (error) {
-      throw new Error(mapRegisterError(error.message));
-    }
-    runInAction(() => {
-      this.token = data.session.token;
-      this.currentUser = data.user;
-      this.hasLoggedOut = false;
-    });
-  }
-
-  async login(email, password) {
-    let data;
-    try {
-      data = await apiRequest('/auth/login', { method: 'POST', body: { email: email.trim(), password } });
-    } catch (error) {
-      throw new Error(mapLoginError(error.message));
-    }
-    runInAction(() => {
-      this.token = data.session.token;
-      this.currentUser = data.user;
-      this.hasLoggedOut = false;
-    });
-  }
-
-  async requestPasswordReset(email) {
-    await apiRequest('/auth/forgot-password', { method: 'POST', body: { email: email.trim() } });
   }
 
   // Pushes the local (camelCase) onboarding profile to the backend user record.

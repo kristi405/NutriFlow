@@ -7,6 +7,7 @@ import { ThemedView } from '@/components/themed-view';
 import { useTheme } from '@/hooks/use-theme';
 import '@/i18n';
 import { queryClient } from '@/lib/query-client';
+import { appStreakStore } from '@/store/appStreakStore';
 import { authStore } from '@/store/authStore';
 import { catalogStore } from '@/store/catalogStore';
 import { localeStore } from '@/store/localeStore';
@@ -14,6 +15,7 @@ import { peopleStore } from '@/store/peopleStore';
 import { syncFamilyMembers } from '@/store/peopleSync';
 import { profileStore } from '@/store/profileStore';
 import { subscriptionStore } from '@/store/subscriptionStore';
+import { termsStore } from '@/store/termsStore';
 import { themeStore } from '@/store/themeStore';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
@@ -21,6 +23,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AppState } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 SplashScreen.preventAutoHideAsync();
 const SKIP_AUTH_FOR_TESTING = false;
@@ -67,8 +70,23 @@ function TabLayout() {
   }, [authStore.isAuthenticated, peopleStore.hasHydrated, profileStore.hasOnboarded]);
   const userId = authStore.currentUser?.id;
   useEffect(() => {
+    if (!appStreakStore.hasHydrated) return;
+    appStreakStore.recordOpen();
+    const subscription = AppState.addEventListener('change', nextState => {
+      if (nextState === 'active') appStreakStore.recordOpen();
+    });
+    return () => subscription.remove();
+  }, [appStreakStore.hasHydrated]);
+  useEffect(() => {
     if (userId) subscriptionStore.init(userId);else subscriptionStore.logOut();
   }, [userId]);
+  useEffect(() => {
+    // There's no separate "register" screen anymore — Google/Apple sign-in both
+    // create and log in to an account, so this is the only place that can tell
+    // someone hasn't accepted the terms yet (including a returning account on a
+    // fresh install, since acceptance is stored locally, not on the server).
+    if (userId && termsStore.hasHydrated && !termsStore.acceptedAt && !termsStore.isPending) termsStore.requireAcceptance();
+  }, [userId, termsStore.hasHydrated]);
   const catalogSyncReady = authStore.isAuthenticated && localeStore.hasHydrated && catalogStore.hasHydrated;
   const contentLanguage = localeStore.language;
   useEffect(() => {

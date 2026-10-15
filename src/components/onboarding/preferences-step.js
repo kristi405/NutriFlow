@@ -1,3 +1,4 @@
+import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ThemedText } from '@/components/themed-text';
@@ -39,48 +40,25 @@ function Chip({
   onPress
 }) {
   const theme = useTheme();
-  return <Pressable onPress={onPress} style={[styles.chip, {
-    backgroundColor: selected ? theme.accent : theme.background,
+  return <Pressable onPress={onPress} style={[styles.optionTile, selected && styles.optionTileActive, {
+    backgroundColor: selected ? theme.accentSoft : theme.background,
     borderColor: selected ? theme.accent : theme.border
   }]}>
-      <ThemedText type="small" color={selected ? '#ffffff' : theme.text}>
+      <ThemedText type="smallBold" color={selected ? theme.accent : theme.text} numberOfLines={2} style={styles.optionLabel}>
         {label}
       </ThemedText>
+      {selected && <SymbolView name={{ ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }} size={16} tintColor={theme.accent} />}
     </Pressable>;
 }
 function toggle(list, item) {
   return list.includes(item) ? list.filter(entry => entry !== item) : [...list, item];
 }
 export function PreferencesStep({
-  dietaryTags,
   allergies,
-  onChangeDietaryTags,
   onChangeAllergies
 }) {
   const { t } = useTranslation();
   const theme = useTheme();
-  const DIETARY_OPTIONS = [{
-    tag: 'vegetarian',
-    label: t('onboarding.preferences.vegetarian')
-  }, {
-    tag: 'vegan',
-    label: t('onboarding.preferences.vegan')
-  }, {
-    tag: 'pescatarian',
-    label: t('onboarding.preferences.pescatarian')
-  }, {
-    tag: 'gluten-free',
-    label: t('onboarding.preferences.glutenFree')
-  }, {
-    tag: 'dairy-free',
-    label: t('onboarding.preferences.dairyFree')
-  }, {
-    tag: 'low-carb',
-    label: t('onboarding.preferences.lowCarb')
-  }, {
-    tag: 'high-protein',
-    label: t('onboarding.preferences.highProtein')
-  }];
   const ALLERGEN_OPTIONS = ALLERGEN_TAGS.map(({ tag, key }) => ({
     tag,
     label: t(`onboarding.preferences.${key}`)
@@ -95,13 +73,6 @@ export function PreferencesStep({
       <ThemedText type="caption" color={theme.textSecondary}>
         {t('onboarding.preferences.canSkip')}
       </ThemedText>
-
-      <View style={styles.section}>
-        <ThemedText type="smallBold" color={theme.accent}>{t('onboarding.preferences.dietary')}</ThemedText>
-        <View style={styles.chipRow}>
-          {DIETARY_OPTIONS.map(option => <Chip key={option.tag} label={option.label} selected={dietaryTags.includes(option.tag)} onPress={() => onChangeDietaryTags(toggle(dietaryTags, option.tag))} />)}
-        </View>
-      </View>
 
       <View style={styles.section}>
         <ThemedText type="smallBold" color={theme.accent}>{t('onboarding.preferences.allergies')}</ThemedText>
@@ -128,10 +99,24 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: Spacing.two
   },
-  chip: {
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-    borderRadius: 999,
-    borderWidth: 1
+  optionTile: {
+    width: '48.5%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    paddingVertical: Spacing.two + 2,
+    paddingHorizontal: Spacing.two + 2
+  },
+  optionTileActive: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3
+  },
+  optionLabel: {
+    flex: 1
   }
 });

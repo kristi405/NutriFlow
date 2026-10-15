@@ -11,8 +11,10 @@ import { useTheme } from '@/hooks/use-theme';
 import { peopleStore } from '@/store/peopleStore';
 import { profileStore } from '@/store/profileStore';
 
-/** Pill showing whose data the app is currently showing; opens a picker to switch or add a person. */
-function PersonSwitcherComponent({ style }) {
+/** Whose data the app is currently showing; opens a picker to switch or add a person.
+ *  `variant="pill"` (default) is a labeled chip; `variant="avatarBadge"` wraps `children`
+ *  (an avatar) so tapping it opens the switcher, with a small corner icon as a visual hint. */
+function PersonSwitcherComponent({ style, variant = 'pill', size = 48, children }) {
   const { t } = useTranslation();
   const theme = useTheme();
   const [isOpen, setIsOpen] = useState(false);
@@ -34,12 +36,29 @@ function PersonSwitcherComponent({ style }) {
     router.push('/add-person');
   }
 
+  const badgeSize = Math.round(size * 0.42);
+
   return <>
-      <Pressable onPress={() => setIsOpen(true)} style={[styles.pill, { backgroundColor: theme.background, borderColor: theme.border }, style]}>
-        <PersonAvatar profile={activeProfile} size={22} />
-        <ThemedText type="small" color={theme.text} numberOfLines={1} style={styles.pillLabel}>{activeProfile?.name}</ThemedText>
-        <SymbolView name={{ ios: 'chevron.down', android: 'expand_more', web: 'expand_more' }} size={12} tintColor={theme.textSecondary} />
-      </Pressable>
+      {variant === 'avatarBadge' ? <Pressable onPress={() => setIsOpen(true)} accessibilityLabel={t('people.switchTitle')} style={[{ width: size, height: size }, style]}>
+          {children}
+          <View style={[styles.avatarBadge, {
+        width: badgeSize,
+        height: badgeSize,
+        borderRadius: badgeSize / 2,
+        backgroundColor: theme.accent,
+        borderColor: theme.background
+      }]}>
+            <SymbolView name={{ ios: 'arrow.triangle.2.circlepath', android: 'sync', web: 'sync' }} size={Math.round(badgeSize * 0.55)} tintColor="#ffffff" />
+          </View>
+        </Pressable> : <Pressable onPress={() => setIsOpen(true)} style={({ pressed }) => [styles.pill, { backgroundColor: theme.accentSoft, borderColor: theme.accent, opacity: pressed ? 0.8 : 1 }, style]}>
+          <View style={[styles.pillAvatarRing, { borderColor: theme.accent }]}>
+            <PersonAvatar profile={activeProfile} size={24} />
+          </View>
+          <ThemedText type="smallBold" color={theme.text} numberOfLines={1} style={styles.pillLabel}>{activeProfile?.name}</ThemedText>
+          <View style={[styles.pillChevron, { backgroundColor: theme.accent }]}>
+            <SymbolView name={{ ios: 'chevron.down', android: 'expand_more', web: 'expand_more' }} size={10} tintColor="#ffffff" />
+          </View>
+        </Pressable>}
 
       <Modal visible={isOpen} transparent animationType="slide" onRequestClose={() => setIsOpen(false)}>
         <Pressable style={styles.backdrop} onPress={() => setIsOpen(false)}>
@@ -75,14 +94,39 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     gap: 8,
     maxWidth: 220,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderRadius: 999,
-    paddingLeft: 6,
-    paddingRight: 12,
-    paddingVertical: 5
+    paddingLeft: 5,
+    paddingRight: 10,
+    paddingVertical: 5,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2
+  },
+  pillAvatarRing: {
+    borderWidth: 1.5,
+    borderRadius: 14,
+    padding: 1
   },
   pillLabel: {
     flexShrink: 1
+  },
+  pillChevron: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  avatarBadge: {
+    position: 'absolute',
+    right: -4,
+    bottom: -4,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   backdrop: {
     flex: 1,

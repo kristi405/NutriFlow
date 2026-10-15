@@ -34,50 +34,10 @@
     "or": "oder"
   },
   "auth": {
-    "login": {
-      "title": "Willkommen zurück",
-      "subtitle": "Melde dich an, um dort weiterzumachen, wo du aufgehört hast.",
-      "emailPlaceholder": "E-Mail",
-      "passwordPlaceholder": "Passwort",
-      "forgotPassword": "Passwort vergessen?",
-      "submit": "Anmelden",
-      "noAccount": "Kein Konto?",
-      "register": "Registrieren",
-      "validationEmpty": "Gib deine E-Mail-Adresse und dein Passwort ein.",
-      "submitting": "Anmeldung…"
-    },
-    "register": {
-      "title": "Konto erstellen",
-      "subtitle": "Erstelle ein Konto, um deinen Fortschritt zu speichern.",
-      "emailPlaceholder": "E-Mail",
-      "passwordPlaceholder": "Passwort",
-      "confirmPasswordPlaceholder": "Passwort bestätigen",
-      "submit": "Konto erstellen",
-      "haveAccount": "Bereits ein Konto?",
-      "login": "Anmelden",
-      "passwordsDontMatch": "Die Passwörter stimmen nicht überein.",
-      "validationEmpty": "Fülle alle Felder aus.",
-      "submitting": "Konto wird erstellt…"
-    },
-    "forgotPassword": {
-      "title": "Passwort zurücksetzen",
-      "subtitle": "Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen deines Passworts.",
-      "emailPlaceholder": "E-Mail",
-      "submit": "Link senden",
-      "submitting": "Wird gesendet…",
-      "rememberedIt": "Erinnert?",
-      "login": "Anmelden",
-      "validationEmpty": "Gib deine E-Mail-Adresse ein.",
-      "doneTitle": "Überprüfe deine E-Mails",
-      "doneSubtitle": "Falls ein Konto mit dieser E-Mail-Adresse existiert, haben wir einen Link zum Zurücksetzen des Passworts gesendet.",
-      "backToLogin": "Zurück zur Anmeldung"
+    "entry": {
+      "titlePrefix": "Willkommen bei"
     },
     "errors": {
-      "invalidEmail": "Gib eine gültige E-Mail-Adresse ein.",
-      "passwordTooShort": "Das Passwort muss mindestens 6 Zeichen lang sein.",
-      "emailTaken": "Es existiert bereits ein Konto mit dieser E-Mail-Adresse.",
-      "incorrectCredentials": "Falsche E-Mail-Adresse oder falsches Passwort.",
-      "noAccountFound": "Kein Konto mit dieser E-Mail-Adresse gefunden.",
       "appleSignInFailed": "Die Anmeldung mit Apple ist fehlgeschlagen. Bitte versuche es erneut.",
       "accountBlocked": "Dieses Konto wurde gesperrt.",
       "googleSignInFailed": "Die Anmeldung mit Google ist fehlgeschlagen. Bitte versuche es erneut."
@@ -238,7 +198,8 @@
     "searchPlaceholder": "Zutaten suchen",
     "count": "{{count}} Zutaten gefunden",
     "noResultsTitle": "Keine Zutaten gefunden",
-    "noResultsMessage": "Ändere die Suche oder setze die Filter zurück."
+    "noResultsMessage": "Ändere die Suche oder setze die Filter zurück.",
+    "bannerSubtitle": "Nährwerte für jede Zutat"
   },
   "people": {
     "title": "Personen",
@@ -375,7 +336,14 @@
     "generatingDayTitle": "Heutiges Menü wird erstellt…",
     "generatingDayMessage": "Wir wählen Mahlzeiten passend zu deinem Kalorienziel",
     "dayGeneratedTitle": "Heutiges Menü ist fertig!",
-    "dayGeneratedMessage": "Dein Menü für heute wurde neu erstellt."
+    "dayGeneratedMessage": "Dein Menü für heute wurde neu erstellt.",
+    "chooseOtherDish": "Anderes Gericht wählen",
+    "showFewerDishes": "Weniger Gerichte anzeigen",
+    "chooseDish": "Gericht wählen",
+    "chooseIngredient": "Zutat wählen",
+    "searchDishPlaceholder": "Gerichte suchen",
+    "searchIngredientPlaceholder": "Zutaten suchen",
+    "howMuchEaten": "Wie viel hast du gegessen?"
   },
   "recipes": {
     "title": "Rezepte",
@@ -455,7 +423,8 @@
     "titleRequired": "Gib einen Namen für das Gericht ein",
     "ingredientsRequired": "Füge mindestens eine Zutat hinzu",
     "deleteRecipeTitle": "Dieses Rezept löschen?",
-    "deleteRecipeMessage": "Dieses Rezept wurde auf diesem Gerät erstellt und wird endgültig gelöscht, auch aus allen Essensplänen."
+    "deleteRecipeMessage": "Dieses Rezept wurde auf diesem Gerät erstellt und wird endgültig gelöscht, auch aus allen Essensplänen.",
+    "omega9": "Omega-9"
   },
   "nutrition": {
     "score": "Ernährungswert",
@@ -550,7 +519,9 @@
     "view": "Ansehen",
     "about": "Worum es geht",
     "indicatorTitle": "Wert",
-    "noDetails": "Für diesen Wert liegen keine zusätzlichen Informationen vor."
+    "noDetails": "Für diesen Wert liegen keine zusätzlichen Informationen vor.",
+    "limitReachedTitle": "Analyse-Limit erreicht",
+    "limitReachedMessage": "Sie haben alle in Ihrem Plan enthaltenen Analysen verbraucht. Die nächste ist am {{date}} verfügbar. Der Kauf zusätzlicher Analysen folgt bald."
   },
   "privacyPolicy": {
     "title": "Nutzungsbedingungen",
@@ -632,10 +603,10 @@
     "subtitle": "Schalten Sie das volle Potenzial Ihres Ernährungs-Trackings frei",
     "features": [
       "KI-Analyse Ihrer Laborwerte",
-      "Statistiken und Today's Progress",
       "Nährstoffübersicht in jedem Rezept",
       "Einkaufslisten",
-      "Automatische Menüerstellung"
+      "Automatische Menüerstellung",
+      "Erfolge und Fortschritts-Abzeichen"
     ],
     "monthly": "Monatlich",
     "yearly": "Jährlich",
@@ -657,9 +628,11 @@
     "lockedTitle": "Premium-Funktion",
     "lockedMessage": "Schalten Sie diese Funktion mit NutriFlow Premium frei.",
     "unlock": "Premium freischalten",
-    "lockedAnalysis": "Die KI-Analyse von Laborwerten ist mit Premium verfügbar.",
-    "lockedProgress": "Statistiken und Today's Progress sind mit Premium verfügbar.",
+    "lockedProgress": "Erfolge sind mit Premium verfügbar.",
     "lockedNutrients": "Die detaillierte Nährstoffübersicht ist mit Premium verfügbar.",
     "lockedShopping": "Einkaufslisten sind mit Premium verfügbar."
+  },
+  "allergens": {
+    "containsWarning": "Enthält: {{allergens}}"
   }
 }

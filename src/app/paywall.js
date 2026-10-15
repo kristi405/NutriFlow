@@ -1,12 +1,13 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
-import { Spacing } from '@/constants/theme';
+import { FoodBackgroundDecor } from '@/components/food-background-decor';
+import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { subscriptionStore } from '@/store/subscriptionStore';
 
@@ -91,24 +92,24 @@ function PaywallScreen() {
   }
 
   if (isPremium) {
-    return <ScreenScrollView gap={Spacing.four} horizontalPadding={20}>
+    return <ScreenChrome theme={theme} styles={styles}>
         <View style={styles.hero}>
           <View style={styles.crown}>
-            <SymbolView name={{ ios: 'crown.fill', android: 'workspace_premium', web: 'workspace_premium' }} size={30} tintColor="#ffffff" />
+            <SymbolView name={{ ios: 'crown.fill', android: 'workspace_premium', web: 'workspace_premium' }} size={26} tintColor="#ffffff" />
           </View>
           <ThemedText type="title" style={styles.title} color={theme.text}>{t('paywall.activeTitle')}</ThemedText>
-          <ThemedText type="default" color={theme.textSecondary} style={styles.center}>{t('paywall.activeMessage')}</ThemedText>
+          <ThemedText type="small" color={theme.textSecondary} style={styles.center}>{t('paywall.activeMessage')}</ThemedText>
         </View>
-      </ScreenScrollView>;
+      </ScreenChrome>;
   }
 
-  return <ScreenScrollView gap={Spacing.four} horizontalPadding={20}>
+  return <ScreenChrome theme={theme} styles={styles}>
       <View style={styles.hero}>
         <View style={styles.crown}>
-          <SymbolView name={{ ios: 'crown.fill', android: 'workspace_premium', web: 'workspace_premium' }} size={30} tintColor="#ffffff" />
+          <SymbolView name={{ ios: 'crown.fill', android: 'workspace_premium', web: 'workspace_premium' }} size={26} tintColor="#ffffff" />
         </View>
         <ThemedText type="title" style={styles.title} color={theme.text}>{t('paywall.title')}</ThemedText>
-        <ThemedText type="default" color={theme.textSecondary} style={styles.center}>{t('paywall.subtitle')}</ThemedText>
+        <ThemedText type="small" color={theme.textSecondary} style={styles.center}>{t('paywall.subtitle')}</ThemedText>
       </View>
 
       <View style={styles.features}>
@@ -134,27 +135,54 @@ function PaywallScreen() {
       <Pressable onPress={() => router.push('/privacy-policy')} hitSlop={8} style={styles.restore}>
         <ThemedText type="caption" color={theme.accent} style={styles.link}>{t('auth.terms.link')}</ThemedText>
       </Pressable>
-    </ScreenScrollView>;
+    </ScreenChrome>;
 }
 
 export default observer(PaywallScreen);
 
+// Same full-screen gradient + faint floating food photos as the sign-in screen.
+function ScreenChrome({ children, theme, styles }) {
+  return <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
+      <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+        <FoodBackgroundDecor opacity={0.12} />
+      </View>
+      <ScrollView style={styles.flex1} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>{children}</View>
+      </ScrollView>
+    </LinearGradient>;
+}
+
 const createStyles = theme => StyleSheet.create({
+  flex1: {
+    flex: 1
+  },
+  scrollContent: {
+    flexGrow: 1,
+    alignItems: 'center'
+  },
+  content: {
+    width: '100%',
+    maxWidth: MaxContentWidth,
+    paddingHorizontal: 20,
+    paddingTop: 0,
+    paddingBottom: Spacing.five,
+    gap: Spacing.four
+  },
   hero: {
     alignItems: 'center',
-    gap: Spacing.two
+    gap: Spacing.one
   },
   crown: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: theme.secondary,
     alignItems: 'center',
     justifyContent: 'center'
   },
   title: {
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 24,
+    lineHeight: 30,
     textAlign: 'center'
   },
   center: {

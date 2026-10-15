@@ -9,7 +9,8 @@ export const NUTRIENT_ROWS = [
   { key: 'cholesterol', labelKey: 'recipes.cholesterol', unit: 'mg' },
   { key: 'sodium', labelKey: 'recipes.sodium', unit: 'mg' },
   { key: 'omega3', labelKey: 'recipes.omega3', unit: 'g' },
-  { key: 'omega6', labelKey: 'recipes.omega6', unit: 'g' }
+  { key: 'omega6', labelKey: 'recipes.omega6', unit: 'g' },
+  { key: 'omega9', labelKey: 'recipes.omega9', unit: 'g' }
 ];
 
 export const VITAMIN_ROWS = [
@@ -45,4 +46,9 @@ export function formatNutrientAmount(value) {
   const amount = value ?? 0;
   if (amount === 0) return '0';
   return amount < 10 ? String(Math.round(amount * 10) / 10) : String(Math.round(amount));
+}
+
+/** Only the rows whose value is above zero — a nutrient at 0 isn't shown at all. */
+export function nonZeroRows(rows, values) {
+  return rows.filter(row => (values?.[row.key] ?? 0) > 0);
 }

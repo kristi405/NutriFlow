@@ -60,14 +60,19 @@ function EditPersonalGoalsScreen() {
     return [styles.input, focusedField === field && styles.inputFocused];
   }
 
+  // decimal-pad keyboards on many locales (e.g. Russian) type a comma, which Number() rejects.
+  function parseDecimal(value) {
+    return Number(String(value).replace(',', '.'));
+  }
+
   function handleSave() {
     profileStore.updateGoal({ type: goalType });
     profileStore.updateProfile({
       name: name.trim() || profile.name,
       age: Number(age) || profile.age,
       heightCm: Number(heightCm) || profile.heightCm,
-      weightKg: Number(weightKg) || profile.weightKg,
-      targetWeightKg: targetWeightKg === '' ? undefined : Number(targetWeightKg),
+      weightKg: parseDecimal(weightKg) || profile.weightKg,
+      targetWeightKg: targetWeightKg === '' ? undefined : parseDecimal(targetWeightKg),
       activityLevel
     });
     router.back();

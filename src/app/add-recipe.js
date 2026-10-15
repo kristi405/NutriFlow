@@ -117,23 +117,32 @@ function AddRecipeScreen() {
   return <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={[styles.flex1, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]}>
       <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
       <ScreenScrollView ref={scrollRef} gap={Spacing.four} horizontalPadding={20} contentContainerStyle={[styles.scrollContent, { paddingBottom: Spacing.six + keyboardHeight }]} keyboardShouldPersistTaps="handled">
-        <Pressable onPress={handlePickPhoto} style={styles.photoWrapper}>
-          <RecipeImage uri={imageUri} style={styles.photo} iconSize={36} />
+        <Pressable onPress={handlePickPhoto} style={[styles.photoWrapper, !imageUri && styles.photoEmpty]}>
+          {imageUri ? <RecipeImage uri={imageUri} style={styles.photo} iconSize={36} /> : <View style={styles.photoPlaceholder}>
+              <View style={styles.photoPlaceholderIcon}>
+                <SymbolView name={{ ios: 'camera.fill', android: 'photo_camera', web: 'photo_camera' }} size={22} tintColor={theme.accent} />
+              </View>
+              <ThemedText type="smallBold" color={theme.accent}>{t('recipes.addPhotoTitle')}</ThemedText>
+            </View>}
           <View style={styles.photoEditBadge}>
-            <SymbolView name={{ ios: 'camera.fill', android: 'photo_camera', web: 'photo_camera' }} size={15} tintColor="#ffffff" />
+            <SymbolView name={{ ios: imageUri ? 'pencil' : 'plus', android: imageUri ? 'edit' : 'add', web: imageUri ? 'edit' : 'add' }} size={15} tintColor="#ffffff" />
           </View>
         </Pressable>
 
-        <TextInput value={title} onChangeText={setTitle} placeholder={t('recipes.recipeTitlePlaceholder')} placeholderTextColor={theme.textSecondary} style={[styles.input, showTitleError && { borderColor: theme.error, borderWidth: 1.5 }]} />
-        {showTitleError && <ThemedText type="caption" color={theme.error}>{t('recipes.titleRequired')}</ThemedText>}
+        <View style={styles.field}>
+          <ThemedText type="small" color={theme.textSecondary}>{t('recipes.recipeTitle')}</ThemedText>
+          <TextInput value={title} onChangeText={setTitle} placeholder={t('recipes.recipeTitlePlaceholder')} placeholderTextColor={theme.textSecondary} style={[styles.titleInput, showTitleError && styles.inputError]} />
+          {showTitleError && <ThemedText type="caption" color={theme.error}>{t('recipes.titleRequired')}</ThemedText>}
+        </View>
 
         <View style={styles.field}>
           <ThemedText type="small" color={theme.textSecondary}>{t('recipes.categoriesLabel')}</ThemedText>
-          <View style={styles.chipRow}>
+          <View style={styles.optionGrid}>
             {categories.map(category => {
             const isActive = categoryId === category.id;
-            return <Pressable key={category.id} onPress={() => setCategoryId(category.id)} style={[styles.chip, isActive && styles.chipActive]}>
-                  <ThemedText type="small" color={isActive ? '#ffffff' : theme.text}>{category.name}</ThemedText>
+            return <Pressable key={category.id} onPress={() => setCategoryId(category.id)} style={[styles.optionTile, isActive && styles.optionTileActive]}>
+                  <ThemedText type="smallBold" color={isActive ? theme.accent : theme.text} numberOfLines={2} style={styles.optionLabel}>{category.name}</ThemedText>
+                  {isActive && <SymbolView name={{ ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }} size={16} tintColor={theme.accent} />}
                 </Pressable>;
           })}
           </View>
@@ -141,11 +150,11 @@ function AddRecipeScreen() {
 
         <View style={styles.field}>
           <ThemedText type="small" color={theme.textSecondary}>{t('recipes.difficultyLabel')}</ThemedText>
-          <View style={styles.chipRow}>
+          <View style={styles.segmented}>
             {DIFFICULTIES.map(level => {
             const isActive = difficulty === level;
-            return <Pressable key={level} onPress={() => setDifficulty(level)} style={[styles.chip, isActive && styles.chipActive]}>
-                  <ThemedText type="small" color={isActive ? '#ffffff' : theme.text}>{t(`recipes.difficulty.${level}`)}</ThemedText>
+            return <Pressable key={level} onPress={() => setDifficulty(level)} style={[styles.segment, isActive && styles.segmentActive]}>
+                  <ThemedText type="smallBold" color={isActive ? '#ffffff' : theme.text}>{t(`recipes.difficulty.${level}`)}</ThemedText>
                 </Pressable>;
           })}
           </View>
@@ -153,21 +162,29 @@ function AddRecipeScreen() {
 
         <View style={styles.field}>
           <View style={styles.sectionHeaderRow}>
-            <ThemedText type="smallBold" color={theme.text}>{t('recipes.ingredients')}</ThemedText>
+            <View style={styles.sectionTitleRow}>
+              <ThemedText type="smallBold" color={theme.text}>{t('recipes.ingredients')}</ThemedText>
+              {ingredientLines.length > 0 && <View style={styles.countBadge}>
+                  <ThemedText type="caption" color={theme.accent} style={styles.countText}>{ingredientLines.length}</ThemedText>
+                </View>}
+            </View>
             <Pressable onPress={() => setIsIngredientModalOpen(true)} style={styles.addChip}>
-              <SymbolView name={{ ios: 'plus.circle.fill', android: 'add_circle', web: 'add_circle' }} size={16} tintColor={theme.accent} />
-              <ThemedText type="small" color={theme.accent} style={styles.addChipText}>{t('common.add')}</ThemedText>
+              <SymbolView name={{ ios: 'plus', android: 'add', web: 'add' }} size={14} tintColor="#ffffff" />
+              <ThemedText type="small" color="#ffffff" style={styles.addChipText}>{t('common.add')}</ThemedText>
             </Pressable>
           </View>
-          {ingredientLines.length === 0 ? <View style={[styles.emptyIngredientsBox, showIngredientsError && { borderColor: theme.error }]}>
-              <ThemedText type="caption" color={showIngredientsError ? theme.error : theme.textSecondary} style={!showIngredientsError && styles.emptyIngredientsText}>{showIngredientsError ? t('recipes.ingredientsRequired') : t('recipes.noIngredientsYet')}</ThemedText>
-            </View> : <View style={styles.list}>
+          {ingredientLines.length === 0 ? <Pressable onPress={() => setIsIngredientModalOpen(true)} style={[styles.emptyIngredientsBox, showIngredientsError && styles.emptyIngredientsBoxError]}>
+              <SymbolView name={{ ios: 'leaf', android: 'eco', web: 'eco' }} size={20} tintColor={showIngredientsError ? theme.error : theme.textSecondary} />
+              <ThemedText type="caption" color={showIngredientsError ? theme.error : theme.textSecondary} style={styles.emptyIngredientsText}>{showIngredientsError ? t('recipes.ingredientsRequired') : t('recipes.noIngredientsYet')}</ThemedText>
+            </Pressable> : <View style={styles.list}>
               {ingredientLines.map((line, index) => <View key={`${line.ingredientId}-${index}`} {...rowProps(index)} style={styles.ingredientRow}>
-                  <ThemedText type="small" color={theme.text} style={styles.flex1} numberOfLines={1}>{line.name}</ThemedText>
-                  <TextInput value={line.quantity} onChangeText={value => handleQuantityChange(index, value)} keyboardType="decimal-pad" {...inputProps(index)} style={styles.quantityInput} />
-                  <ThemedText type="caption" color={theme.textSecondary}>{formatUnit(t, line.unit)}</ThemedText>
+                  <ThemedText type="smallBold" color={theme.text} style={styles.flex1} numberOfLines={1}>{line.name}</ThemedText>
+                  <View style={styles.quantityBox}>
+                    <TextInput value={line.quantity} onChangeText={value => handleQuantityChange(index, value)} keyboardType="decimal-pad" {...inputProps(index)} style={styles.quantityInput} />
+                    <ThemedText type="caption" color={theme.textSecondary}>{formatUnit(t, line.unit)}</ThemedText>
+                  </View>
                   <Pressable onPress={() => handleRemoveIngredient(index)} hitSlop={8}>
-                    <SymbolView name={{ ios: 'xmark.circle.fill', android: 'cancel', web: 'cancel' }} size={18} tintColor={theme.border} />
+                    <SymbolView name={{ ios: 'xmark.circle.fill', android: 'cancel', web: 'cancel' }} size={20} tintColor={theme.border} />
                   </Pressable>
                 </View>)}
             </View>}
@@ -175,24 +192,31 @@ function AddRecipeScreen() {
       </ScreenScrollView>
 
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + Spacing.two }]}>
-        <Pressable onPress={handleSave} style={[styles.saveButton, !canSave && styles.saveButtonDisabled]}>
-          <ThemedText type="default" color={canSave ? theme.accent : theme.textSecondary} style={styles.saveButtonText}>{t('common.save')}</ThemedText>
+        <Pressable onPress={handleSave} style={[styles.saveButton, canSave ? styles.saveButtonActive : styles.saveButtonDisabled]}>
+          <ThemedText type="default" color={canSave ? '#ffffff' : theme.textSecondary} style={styles.saveButtonText}>{t('common.save')}</ThemedText>
         </Pressable>
       </View>
 
       <Modal visible={isIngredientModalOpen} transparent animationType="slide" onRequestClose={() => setIsIngredientModalOpen(false)}>
         <Pressable style={[styles.modalBackdrop, { paddingBottom: keyboardHeight }]} onPress={() => setIsIngredientModalOpen(false)}>
           <Pressable style={styles.modalSheet} onPress={event => event.stopPropagation()}>
+            <View style={styles.modalGrabber} />
             <View style={styles.modalHeader}>
               <ThemedText type="smallBold" color={theme.text}>{t('recipes.addIngredientTitle')}</ThemedText>
-              <Pressable onPress={() => setIsIngredientModalOpen(false)} hitSlop={8}>
-                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={theme.accent} />
+              <Pressable onPress={() => setIsIngredientModalOpen(false)} hitSlop={8} style={styles.modalCloseButton}>
+                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={14} tintColor={theme.textSecondary} />
               </Pressable>
             </View>
-            <TextInput value={ingredientQuery} onChangeText={setIngredientQuery} placeholder={t('recipes.searchIngredientsPlaceholder')} placeholderTextColor={theme.textSecondary} style={styles.input} />
-            <ScrollView style={styles.ingredientScroll}>
+            <View style={styles.searchBox}>
+              <SymbolView name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} size={16} tintColor={theme.textSecondary} />
+              <TextInput value={ingredientQuery} onChangeText={setIngredientQuery} placeholder={t('recipes.searchIngredientsPlaceholder')} placeholderTextColor={theme.textSecondary} style={styles.searchInput} autoCorrect={false} />
+            </View>
+            <ScrollView style={styles.ingredientScroll} keyboardShouldPersistTaps="handled">
               {filteredIngredients.map(ingredient => <Pressable key={ingredient.id} onPress={() => handleAddIngredient(ingredient)} style={styles.ingredientOption}>
-                  <ThemedText type="small" color={theme.text}>{ingredient.name}</ThemedText>
+                  <ThemedText type="small" color={theme.text} style={styles.flex1} numberOfLines={1}>{ingredient.name}</ThemedText>
+                  <View style={styles.ingredientAddIcon}>
+                    <SymbolView name={{ ios: 'plus', android: 'add', web: 'add' }} size={12} tintColor={theme.accent} />
+                  </View>
                 </Pressable>)}
             </ScrollView>
           </Pressable>
@@ -217,13 +241,33 @@ const createStyles = theme => StyleSheet.create({
   },
   photoWrapper: {
     width: '100%',
-    height: 180,
-    borderRadius: 16,
+    height: 190,
+    borderRadius: 20,
     overflow: 'hidden'
+  },
+  photoEmpty: {
+    backgroundColor: theme.background,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: theme.accent
   },
   photo: {
     width: '100%',
     height: '100%'
+  },
+  photoPlaceholder: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.two
+  },
+  photoPlaceholderIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: theme.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   photoEditBadge: {
     position: 'absolute',
@@ -238,61 +282,124 @@ const createStyles = theme => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
-  input: {
+  titleInput: {
+    backgroundColor: theme.background,
     borderColor: theme.border,
-    borderWidth: 1,
-    borderRadius: 12,
+    borderWidth: 1.5,
+    borderRadius: 16,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-    fontSize: 16,
+    paddingVertical: Spacing.three,
+    fontSize: 17,
+    fontWeight: '600',
     color: theme.text
   },
-  chipRow: {
+  inputError: {
+    borderColor: theme.error
+  },
+  optionGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.two
   },
-  chip: {
+  optionTile: {
+    width: '48.5%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    backgroundColor: theme.background,
     borderColor: theme.border,
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-    backgroundColor: theme.background
+    borderWidth: 1.5,
+    borderRadius: 16,
+    paddingVertical: Spacing.two + 2,
+    paddingHorizontal: Spacing.two + 2
   },
-  chipActive: {
-    backgroundColor: theme.accent,
-    borderColor: theme.accent
+  optionTileActive: {
+    borderColor: theme.accent,
+    backgroundColor: theme.accentSoft,
+    shadowColor: theme.accent,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3
+  },
+  optionLabel: {
+    flex: 1
+  },
+  segmented: {
+    flexDirection: 'row',
+    backgroundColor: theme.background,
+    borderColor: theme.border,
+    borderWidth: 1.5,
+    borderRadius: 16,
+    padding: 4,
+    gap: 4
+  },
+  segment: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+    paddingVertical: Spacing.two
+  },
+  segmentActive: {
+    backgroundColor: theme.accent
   },
   sectionHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between'
   },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two
+  },
+  countBadge: {
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: theme.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6
+  },
+  countText: {
+    fontWeight: '700'
+  },
   addChip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: theme.background,
-    borderWidth: 1.5,
-    borderColor: theme.accent,
+    backgroundColor: theme.accent,
     borderRadius: 999,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.one
+    paddingVertical: Spacing.one + 2,
+    shadowColor: theme.accent,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 3
   },
   addChipText: {
     fontWeight: '700'
   },
-  emptyIngredientsText: {
-    opacity: 0.6
-  },
   emptyIngredientsBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.two,
     borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: 'transparent',
-    borderRadius: 12,
-    paddingVertical: Spacing.two,
+    borderColor: theme.border,
+    borderRadius: 16,
+    paddingVertical: Spacing.four,
     paddingHorizontal: Spacing.three
+  },
+  emptyIngredientsBoxError: {
+    borderColor: theme.error
+  },
+  emptyIngredientsText: {
+    flexShrink: 1
   },
   list: {
     gap: Spacing.two
@@ -307,19 +414,25 @@ const createStyles = theme => StyleSheet.create({
     backgroundColor: theme.background,
     borderColor: theme.border,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two
+    paddingVertical: Spacing.two + 2
+  },
+  quantityBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: theme.accentSoft,
+    borderRadius: 10,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: 4
   },
   quantityInput: {
-    width: 56,
-    borderColor: theme.border,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: Spacing.one,
-    paddingVertical: 4,
+    minWidth: 40,
     color: theme.text,
-    textAlign: 'center'
+    textAlign: 'center',
+    fontWeight: '600',
+    paddingVertical: 0
   },
   bottomBar: {
     paddingHorizontal: 20,
@@ -329,14 +442,21 @@ const createStyles = theme => StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
-    borderColor: theme.accent,
-    borderWidth: 1,
     borderRadius: 16,
-    paddingVertical: Spacing.two
+    paddingVertical: Spacing.two + 2
+  },
+  saveButtonActive: {
+    backgroundColor: theme.accent,
+    shadowColor: theme.accent,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4
   },
   saveButtonDisabled: {
-    borderColor: theme.border
+    backgroundColor: theme.background,
+    borderColor: theme.border,
+    borderWidth: 1
   },
   saveButtonText: {
     fontWeight: '700'
@@ -348,25 +468,69 @@ const createStyles = theme => StyleSheet.create({
   },
   modalSheet: {
     backgroundColor: theme.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: Spacing.four,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.two,
     paddingBottom: Spacing.six,
     gap: Spacing.three,
     maxHeight: '80%'
+  },
+  modalGrabber: {
+    alignSelf: 'center',
+    width: 40,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: theme.border
   },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between'
   },
+  modalCloseButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: theme.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    backgroundColor: theme.background,
+    borderColor: theme.border,
+    borderWidth: 1.5,
+    borderRadius: 14,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: theme.text,
+    paddingVertical: 0
+  },
   ingredientScroll: {
-    maxHeight: 320,
+    maxHeight: 340,
     flexShrink: 1
   },
   ingredientOption: {
-    paddingVertical: Spacing.two,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    paddingVertical: Spacing.three,
     borderBottomWidth: 1,
     borderBottomColor: theme.border
+  },
+  ingredientAddIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: theme.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center'
   }
 });

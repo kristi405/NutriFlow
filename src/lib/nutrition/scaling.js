@@ -33,7 +33,8 @@ function scaleNutrition(n, factor) {
     cholesterol: n.cholesterol * factor,
     sodium: n.sodium * factor,
     omega3: n.omega3 * factor,
-    omega6: n.omega6 * factor
+    omega6: n.omega6 * factor,
+    omega9: n.omega9 * factor
   };
 }
 function scaleVitamins(v, factor) {
@@ -77,7 +78,8 @@ const ZERO = {
   cholesterol: 0,
   sodium: 0,
   omega3: 0,
-  omega6: 0
+  omega6: 0,
+  omega9: 0
 };
 function addNutrition(a, b) {
   return {
@@ -91,7 +93,8 @@ function addNutrition(a, b) {
     cholesterol: a.cholesterol + b.cholesterol,
     sodium: a.sodium + b.sodium,
     omega3: a.omega3 + b.omega3,
-    omega6: a.omega6 + b.omega6
+    omega6: a.omega6 + b.omega6,
+    omega9: a.omega9 + b.omega9
   };
 }
 function addRecord(a, b) {

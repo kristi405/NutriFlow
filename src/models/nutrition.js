@@ -13,7 +13,8 @@ export const ZERO_NUTRITION = {
   cholesterol: 0,
   sodium: 0,
   omega3: 0,
-  omega6: 0
+  omega6: 0,
+  omega9: 0
 };
 export const ZERO_VITAMINS = {
   vitaminA: 0,

@@ -23,7 +23,8 @@ const NUTRITION_KEY_MAP = {
   cholesterol: 'cholesterol',
   sodium: 'sodium',
   omega_3: 'omega3',
-  omega_6: 'omega6'
+  omega_6: 'omega6',
+  omega_9: 'omega9'
 };
 
 const VITAMIN_KEY_MAP = {

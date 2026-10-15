@@ -35,7 +35,7 @@ export function useDailyNutrition(date) {
           profile: scaleForServings(perServing, entry.servings)
         });
       } else if (entry.manualCalories !== undefined) {
-        manualProfiles.push({
+        manualProfiles.push(entry.profile ?? {
           nutrition: { ...ZERO_NUTRITION, calories: entry.manualCalories },
           vitamins: {},
           minerals: {}

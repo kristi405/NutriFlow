@@ -22,15 +22,6 @@ import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
 import { Alert, Linking, Modal, Pressable, StyleSheet, Switch, TextInput, View } from 'react-native';
 
-const DIETARY_TAG_KEYS = {
-  vegetarian: 'vegetarian',
-  vegan: 'vegan',
-  pescatarian: 'pescatarian',
-  'gluten-free': 'glutenFree',
-  'dairy-free': 'dairyFree',
-  'low-carb': 'lowCarb',
-  'high-protein': 'highProtein'
-};
 const ALLERGEN_TAG_KEYS = {
   gluten: 'gluten',
   dairy: 'dairy',
@@ -127,14 +118,13 @@ function ProfileScreen() {
 
 
 
-  const dietaryTags = profile.preferences?.dietaryTags ?? [];
   const allergies = profile.preferences?.allergies ?? [];
 
   return <ScreenScrollView gap={Spacing.three}>
       <View style={styles.heroSection}>
         <View style={styles.avatarWrapper}>
           <Pressable onPress={handleEditPhoto} style={styles.avatar}>
-            {profile.photoUri ? <Image source={{ uri: profile.photoUri }} style={styles.avatarImage} contentFit="cover" /> : <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={44} tintColor={theme.accent} />}
+            {profile.photoUri ? <Image source={{ uri: profile.photoUri }} style={styles.avatarImage} contentFit="cover" onError={() => profileStore.updateProfile({ photoUri: null })} /> : <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={44} tintColor={theme.accent} />}
           </Pressable>
           <Pressable onPress={handleEditPhoto} hitSlop={8} style={styles.avatarEditBadge}>
             <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={15} tintColor="#ffffff" />
@@ -212,19 +202,6 @@ function ProfileScreen() {
           <Pressable onPress={() => router.push('/edit-diet-preferences')} hitSlop={8} style={styles.personalGoalsEditButton}>
             <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={15} tintColor={theme.accent} />
           </Pressable>
-        </View>
-        <View style={styles.preferenceGroup}>
-          <View style={styles.preferenceLabelRow}>
-            <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={13} tintColor={theme.secondary} />
-            <ThemedText type="caption" color={theme.secondary} style={styles.preferenceTitle}>{t('profile.dietary')}</ThemedText>
-          </View>
-          <View style={styles.chipRow}>
-            {dietaryTags.length === 0 ? <ThemedText type="small" color={theme.textSecondary}>{t('profile.noneSet')}</ThemedText> : dietaryTags.map(tag => <View key={tag} style={styles.chip}>
-                  <ThemedText type="caption" color="#ffffff">
-                    {t(`onboarding.preferences.${DIETARY_TAG_KEYS[tag] ?? tag}`, { defaultValue: tag })}
-                  </ThemedText>
-                </View>)}
-          </View>
         </View>
         <View style={styles.preferenceGroup}>
           <View style={styles.preferenceLabelRow}>

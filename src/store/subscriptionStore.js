@@ -3,6 +3,10 @@ import { ENTITLEMENT_ID, getApiKey, getPurchases, isPurchasesConfigured } from '
 
 class SubscriptionStore {
   isPremium = false;
+  // The active entitlement's product id (e.g. "monthly") — used to tell which
+  // plan tier is active, since RevenueCat's entitlement info doesn't carry the
+  // package type directly.
+  activeProductId = null;
   packages = [];
   isLoading = false;
   isPurchasing = false;
@@ -22,8 +26,26 @@ class SubscriptionStore {
     return !this.isAvailable || this.isPremium;
   }
 
+  // 'weekly' | 'monthly' | 'yearly' | null (no active plan). Matched against the
+  // loaded offering's packages first (authoritative — handles the "lifetime"
+  // product that's actually the weekly plan); falls back to guessing from the
+  // product id itself if offerings haven't loaded yet.
+  get planType() {
+    if (!this.activeProductId) return null;
+    const pkg = this.packages.find(candidate => candidate.product.identifier === this.activeProductId);
+    if (pkg?.packageType === 'ANNUAL') return 'yearly';
+    if (pkg?.packageType === 'MONTHLY') return 'monthly';
+    if (pkg?.packageType === 'WEEKLY' || pkg?.packageType === 'LIFETIME') return 'weekly';
+    const id = this.activeProductId.toLowerCase();
+    if (id.includes('year')) return 'yearly';
+    if (id.includes('month')) return 'monthly';
+    return 'weekly';
+  }
+
   applyCustomerInfo(info) {
-    this.isPremium = Boolean(info?.entitlements?.active?.[ENTITLEMENT_ID]);
+    const entitlement = info?.entitlements?.active?.[ENTITLEMENT_ID];
+    this.isPremium = Boolean(entitlement);
+    this.activeProductId = entitlement?.productIdentifier ?? null;
   }
 
   // Called once the user is signed in; ties purchases to the backend user id so
@@ -52,6 +74,7 @@ class SubscriptionStore {
 
   async logOut() {
     this.isPremium = false;
+    this.activeProductId = null;
     this.packages = [];
     if (!this.isAvailable || !this.isConfigured) return;
     try {

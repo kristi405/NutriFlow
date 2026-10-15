@@ -34,50 +34,10 @@
     "or": "или"
   },
   "auth": {
-    "login": {
-      "title": "С возвращением",
-      "subtitle": "Войдите, чтобы продолжить с того места, где остановились.",
-      "emailPlaceholder": "Email",
-      "passwordPlaceholder": "Пароль",
-      "forgotPassword": "Забыли пароль?",
-      "submit": "Войти",
-      "noAccount": "Нет аккаунта?",
-      "register": "Зарегистрироваться",
-      "validationEmpty": "Введите email и пароль.",
-      "submitting": "Вход…"
-    },
-    "register": {
-      "title": "Создать аккаунт",
-      "subtitle": "Создайте аккаунт, чтобы сохранять свой прогресс.",
-      "emailPlaceholder": "Email",
-      "passwordPlaceholder": "Пароль",
-      "confirmPasswordPlaceholder": "Подтвердите пароль",
-      "submit": "Создать аккаунт",
-      "haveAccount": "Уже есть аккаунт?",
-      "login": "Войти",
-      "passwordsDontMatch": "Пароли не совпадают.",
-      "validationEmpty": "Заполните все поля.",
-      "submitting": "Создание аккаунта…"
-    },
-    "forgotPassword": {
-      "title": "Сброс пароля",
-      "subtitle": "Введите email, и мы отправим ссылку для сброса пароля.",
-      "emailPlaceholder": "Email",
-      "submit": "Отправить ссылку",
-      "submitting": "Отправка…",
-      "rememberedIt": "Вспомнили пароль?",
-      "login": "Войти",
-      "validationEmpty": "Введите email.",
-      "doneTitle": "Проверьте почту",
-      "doneSubtitle": "Если аккаунт с таким email существует, мы отправили ссылку для сброса пароля.",
-      "backToLogin": "Назад ко входу"
+    "entry": {
+      "titlePrefix": "Добро пожаловать в"
     },
     "errors": {
-      "invalidEmail": "Введите корректный email.",
-      "passwordTooShort": "Пароль должен содержать не менее 6 символов.",
-      "emailTaken": "Аккаунт с таким email уже существует.",
-      "incorrectCredentials": "Неверный email или пароль.",
-      "noAccountFound": "Аккаунт с таким email не найден.",
       "appleSignInFailed": "Не удалось войти через Apple. Попробуйте снова.",
       "accountBlocked": "Этот аккаунт заблокирован.",
       "googleSignInFailed": "Не удалось войти через Google. Попробуйте снова."
@@ -238,7 +198,8 @@
     "searchPlaceholder": "Поиск ингредиентов",
     "count": "Найдено: {{count}}",
     "noResultsTitle": "Ингредиенты не найдены",
-    "noResultsMessage": "Измените поиск или сбросьте фильтры."
+    "noResultsMessage": "Измените поиск или сбросьте фильтры.",
+    "bannerSubtitle": "КБЖУ по каждому продукту"
   },
   "people": {
     "title": "Люди",
@@ -375,7 +336,14 @@
     "generatingDayTitle": "Генерируем меню на сегодня…",
     "generatingDayMessage": "Подбираем блюда под вашу норму калорий",
     "dayGeneratedTitle": "Меню на сегодня готово!",
-    "dayGeneratedMessage": "Меню на сегодня сгенерировано заново."
+    "dayGeneratedMessage": "Меню на сегодня сгенерировано заново.",
+    "chooseOtherDish": "Выбрать другое блюдо",
+    "showFewerDishes": "Показать меньше",
+    "chooseDish": "Выбрать блюдо",
+    "chooseIngredient": "Выбрать ингредиент",
+    "searchDishPlaceholder": "Поиск блюд",
+    "searchIngredientPlaceholder": "Поиск ингредиентов",
+    "howMuchEaten": "Сколько вы съели?"
   },
   "recipes": {
     "title": "Рецепты",
@@ -455,7 +423,8 @@
     "titleRequired": "Введите название блюда",
     "ingredientsRequired": "Добавьте хотя бы один ингредиент",
     "deleteRecipeTitle": "Удалить рецепт?",
-    "deleteRecipeMessage": "Рецепт создан на этом устройстве и будет удалён без возможности восстановления, в том числе из планов питания."
+    "deleteRecipeMessage": "Рецепт создан на этом устройстве и будет удалён без возможности восстановления, в том числе из планов питания.",
+    "omega9": "Омега-9"
   },
   "nutrition": {
     "score": "Оценка питания",
@@ -550,7 +519,9 @@
     "view": "Смотреть",
     "about": "Что это",
     "indicatorTitle": "Показатель",
-    "noDetails": "Для этого показателя нет дополнительной информации."
+    "noDetails": "Для этого показателя нет дополнительной информации.",
+    "limitReachedTitle": "Лимит разборов исчерпан",
+    "limitReachedMessage": "Вы использовали все разборы, доступные по вашему тарифу. Следующий будет доступен {{date}}. Покупка дополнительных разборов появится позже."
   },
   "privacyPolicy": {
     "title": "Условия использования",
@@ -632,10 +603,10 @@
     "subtitle": "Откройте все возможности учёта питания",
     "features": [
       "AI-разбор ваших анализов",
-      "Статистика и Today's Progress",
       "Нутриенты в каждом рецепте",
       "Список покупок",
-      "Автоматическая генерация меню"
+      "Автоматическая генерация меню",
+      "Достижения и награды за прогресс"
     ],
     "monthly": "На месяц",
     "yearly": "На год",
@@ -657,9 +628,11 @@
     "lockedTitle": "Функция Premium",
     "lockedMessage": "Откройте эту функцию с NutriFlow Premium.",
     "unlock": "Открыть Premium",
-    "lockedAnalysis": "AI-разбор анализов доступен в Premium.",
-    "lockedProgress": "Статистика и Today's Progress доступны в Premium.",
+    "lockedProgress": "Достижения доступны в Premium.",
     "lockedNutrients": "Подробные нутриенты доступны в Premium.",
     "lockedShopping": "Список покупок доступен в Premium."
+  },
+  "allergens": {
+    "containsWarning": "Содержит: {{allergens}}"
   }
 }

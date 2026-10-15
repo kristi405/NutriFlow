@@ -24,7 +24,8 @@ import { getIngredientById, getRecipeById } from '@/data/catalog';
 import { useDailyNutrition } from '@/hooks/useDailyNutrition';
 import { useNutritionScore } from '@/hooks/useNutritionScore';
 import { useStepCount } from '@/hooks/useStepCount';
-import { calculateDailyTargets, calculateRecipeNutrition, scaleForServings } from '@/lib/nutrition';
+import { calculateDailyTargets, planItemNutrition, scaleForServings } from '@/lib/nutrition';
+import { findAllergenConflicts } from '@/lib/allergens';
 import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
 import { planningCalories } from '@/lib/mealPlanning';
 import { todayKey } from '@/lib/date';
@@ -64,7 +65,7 @@ function HomeScreen() {
     if (!targets || !subscriptionStore.hasAccess) return;
     const today = todayKey();
     if (mealPlanStore.itemsForDate(today).length > 0) return;
-    const generated = generateDailyMealPlan(planningCalories(targets));
+    const generated = generateDailyMealPlan(planningCalories(targets), { allergies: profile?.preferences?.allergies });
     generated.forEach(item => mealPlanStore.addItem({ date: today, ...item }));
   }, [targets, subscriptionStore.hasAccess]);
   useEffect(() => {
@@ -78,11 +79,13 @@ function HomeScreen() {
     if (!item) return undefined;
     const recipe = getRecipeById(item.recipeId);
     if (!recipe) return undefined;
-    const calories = scaleForServings(calculateRecipeNutrition(recipe, getIngredientById), item.servings).nutrition.calories;
+    const calories = scaleForServings(planItemNutrition(recipe, item, getIngredientById), item.servings).nutrition.calories;
     return {
+      id: item.id,
       recipe,
       mealType: item.mealType,
-      calories
+      calories,
+      servings: item.servings
     };
   }, [planItems, loggedEntries]);
   const allMealsEaten = planItems.length > 0 && planItems.every(item => loggedEntries.some(entry => entry.mealType === item.mealType && entry.recipeId === item.recipeId));
@@ -96,9 +99,11 @@ function HomeScreen() {
       <TermsAcceptanceModal />
       <ScreenScrollView isTabScreen gap={Spacing.three}>
       <Pressable onPress={() => router.push('/profile')} style={styles.headerRow}>
-        <View style={styles.avatar}>
-          {profile.photoUri ? <Image source={{ uri: profile.photoUri }} style={styles.avatarImage} contentFit="cover" /> : <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={22} tintColor={theme.accent} />}
-        </View>
+        <PersonSwitcher variant="avatarBadge">
+          <View style={styles.avatar}>
+            {profile.photoUri ? <Image source={{ uri: profile.photoUri }} style={styles.avatarImage} contentFit="cover" onError={() => profileStore.updateProfile({ photoUri: null })} /> : <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={22} tintColor={theme.accent} />}
+          </View>
+        </PersonSwitcher>
         <View style={styles.headerTextColumn}>
           <View style={styles.greetingRow}>
             <ThemedText type="headline" style={styles.name} color={theme.text} numberOfLines={1}>
@@ -114,8 +119,6 @@ function HomeScreen() {
           <SymbolView name={{ ios: 'gearshape', android: 'settings', web: 'settings' }} size={30} tintColor={theme.textSecondary} />
         </View>
       </Pressable>
-
-      <PersonSwitcher />
 
       <DateStrip selectedDate={date} onSelectDate={setDate} style={styles.dateStrip} />
 
@@ -172,7 +175,7 @@ function HomeScreen() {
 
       {nextMeal ? <View style={styles.section}>
           <SectionHeader title={t('home.nextMeal')} />
-          <MealRow recipeId={nextMeal.recipe.id} mealType={nextMeal.mealType} title={nextMeal.recipe.title} imageUrl={nextMeal.recipe.imageUrl} calories={nextMeal.calories} />
+          <MealRow recipeId={nextMeal.recipe.id} planItemId={nextMeal.id} mealType={nextMeal.mealType} title={nextMeal.recipe.title} imageUrl={nextMeal.recipe.imageUrl} calories={nextMeal.calories} servings={nextMeal.servings} allergens={findAllergenConflicts(nextMeal.recipe, profile?.preferences?.allergies)} />
         </View> : <View style={styles.section}>
           <SectionHeader title={t('home.nextMeal')} />
           {allMealsEaten ? <View style={styles.planCompleteCard}>

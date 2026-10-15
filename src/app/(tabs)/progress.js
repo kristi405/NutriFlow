@@ -15,8 +15,10 @@ import { addDays, todayKey } from '@/lib/date';
 import { calculateBMI, calculateDailyTargets } from '@/lib/nutrition';
 import { displayWeight, weightUnitLabel } from '@/lib/units';
 import { useDailyNutrition } from '@/hooks/useDailyNutrition';
+import { PersonAvatar } from '@/components/people/person-avatar';
 import { PersonSwitcher } from '@/components/people/person-switcher';
 import { ACHIEVEMENT_GOALS, achievementsStore } from '@/store/achievementsStore';
+import { appStreakStore } from '@/store/appStreakStore';
 import { peopleStore } from '@/store/peopleStore';
 import { foodLogStore } from '@/store/foodLogStore';
 import { profileStore } from '@/store/profileStore';
@@ -48,6 +50,7 @@ const RANGE_OPTIONS = [{
 }];
 
 const STAT_CARD_GAP = Spacing.two;
+const HIGHLIGHT_ORANGE = '#FF7A1A';
 
 const ACHIEVEMENTS = [{
   icon: { ios: 'flame.fill', android: 'local_fire_department', web: 'local_fire_department' },
@@ -143,13 +146,13 @@ function WeightChart({ entries, theme }) {
     </Svg>;
 }
 
-function StatCard({ icon, label, value, unit, theme, styles }) {
-  return <View style={styles.statCard}>
+function StatCard({ icon, label, value, unit, theme, styles, highlight = false }) {
+  return <View style={[styles.statCard, highlight && styles.statCardHighlight]}>
       <View style={styles.statHeader}>
-        <SymbolView name={icon} size={14} tintColor={theme.accent} />
+        <SymbolView name={icon} size={14} tintColor={highlight ? HIGHLIGHT_ORANGE : theme.accent} />
         <ThemedText type="caption" color={theme.textSecondary}>{label}</ThemedText>
       </View>
-      <ThemedText type="smallBold" color={theme.text}>
+      <ThemedText type={highlight ? 'headline' : 'smallBold'} color={highlight ? HIGHLIGHT_ORANGE : theme.text}>
         {value}{unit ? ` ${unit}` : ''}
       </ThemedText>
     </View>;
@@ -192,37 +195,32 @@ function ProgressScreen() {
 
   if (!profile || !targets) return null;
 
-  if (!subscriptionStore.hasAccess) {
-    return <ScreenScrollView isTabScreen gap={Spacing.three}>
-      <View style={styles.header}>
-        <ThemedText type="title" style={styles.title} color={theme.text}>
-          {t('progress.title')}
-        </ThemedText>
-        <ThemedText type="default" color={theme.textSecondary}>
-          {t('progress.subtitle')}
-        </ThemedText>
-      </View>
-      <LockedFeature message={t('paywall.lockedProgress')} />
-    </ScreenScrollView>;
-  }
-
   return <ScreenScrollView isTabScreen gap={Spacing.three}>
-      <View style={styles.header}>
-        <ThemedText type="title" style={styles.title} color={theme.text}>
-          {t('progress.title')}
-        </ThemedText>
-        <ThemedText type="default" color={theme.textSecondary}>
-          {t('progress.subtitle')}
-        </ThemedText>
+      <View style={styles.headerRow}>
+        <View style={styles.header}>
+          <ThemedText type="title" style={styles.title} color={theme.text}>
+            {t('progress.title')}
+          </ThemedText>
+          <ThemedText type="small" color={theme.textSecondary}>
+            {t('progress.subtitle')}
+          </ThemedText>
+        </View>
+        <View style={styles.streakBadge}>
+          <SymbolView name={{ ios: 'flame.fill', android: 'local_fire_department', web: 'local_fire_department' }} size={20} tintColor="#FF7A1A" />
+          <ThemedText type="smallBold" color="#FF7A1A" style={styles.streakNumber}>{appStreakStore.streak}</ThemedText>
+        </View>
+        <PersonSwitcher variant="avatarBadge" size={40}>
+          <View style={styles.headerAvatarCircle}>
+            <PersonAvatar profile={profileStore.activeProfile} size={36} iconFallback />
+          </View>
+        </PersonSwitcher>
       </View>
-
-      <PersonSwitcher />
 
       <View style={styles.statsGrid}>
         <StatCard theme={theme} styles={styles} icon={{ ios: 'scalemass.fill', android: 'monitor_weight', web: 'monitor_weight' }} label={t('progress.currentWeight')} value={displayWeight(currentWeightKg, profile.preferences?.units)} unit={unitLabel} />
         <StatCard theme={theme} styles={styles} icon={{ ios: 'arrow.down.right', android: 'south_east', web: 'south_east' }} label={t('progress.weightLost')} value={weightLostKg !== undefined ? displayWeight(weightLostKg, profile.preferences?.units) : '—'} unit={weightLostKg !== undefined ? unitLabel : undefined} />
         <StatCard theme={theme} styles={styles} icon={{ ios: 'figure', android: 'accessibility_new', web: 'accessibility_new' }} label={t('progress.bmi')} value={Math.round(bmi * 10) / 10} />
-        <StatCard theme={theme} styles={styles} icon={{ ios: 'target', android: 'target', web: 'target' }} label={t('progress.targetWeight')} value={targetWeightKg !== undefined ? displayWeight(targetWeightKg, profile.preferences?.units) : '—'} unit={targetWeightKg !== undefined ? unitLabel : undefined} />
+        <StatCard theme={theme} styles={styles} icon={{ ios: 'target', android: 'target', web: 'target' }} label={t('progress.targetWeight')} value={targetWeightKg !== undefined ? displayWeight(targetWeightKg, profile.preferences?.units) : '—'} unit={targetWeightKg !== undefined ? unitLabel : undefined} highlight />
       </View>
 
       <View style={styles.card}>
@@ -264,13 +262,13 @@ function ProgressScreen() {
         <SymbolView name={showDetails ? { ios: 'chevron.up', android: 'expand_less', web: 'expand_less' } : { ios: 'chevron.down', android: 'expand_more', web: 'expand_more' }} size={14} tintColor={theme.accent} />
       </Pressable>
 
-      {showDetails && <DetailedNutritionCard total={total} targets={targets} />}
+      {showDetails && (subscriptionStore.hasAccess ? <DetailedNutritionCard total={total} targets={targets} /> : <LockedFeature message={t('paywall.lockedNutrients')} />)}
 
-      {peopleStore.currentPersonId === null && <View style={[styles.card, styles.lastCard]}>
+      <View style={[styles.card, styles.lastCard]}>
         <ThemedText type="smallBold" color={theme.text}>
           {t('progress.achievements')}
         </ThemedText>
-        <View style={styles.achievementsList}>
+        {!subscriptionStore.hasAccess ? <LockedFeature message={t('paywall.lockedProgress')} /> : <View style={styles.achievementsList}>
           {ACHIEVEMENTS.map(achievement => {
           const goal = ACHIEVEMENT_GOALS[achievement.key];
           const filled = achievementsStore.progressFor(achievement.key);
@@ -295,16 +293,48 @@ function ProgressScreen() {
               </View>
             </View>;
         })}
-        </View>
-      </View>}
+        </View>}
+      </View>
     </ScreenScrollView>;
 }
 
 export default observer(ProgressScreen);
 
 const createStyles = theme => StyleSheet.create({
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.three
+  },
   header: {
+    flex: 1,
     gap: Spacing.half
+  },
+  streakBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    height: 40,
+    paddingHorizontal: Spacing.three,
+    marginRight: -Spacing.two,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#FF7A1A',
+    backgroundColor: '#FFF1E4'
+  },
+  streakNumber: {
+    fontSize: 18,
+    lineHeight: 22,
+    fontWeight: '800'
+  },
+  headerAvatarCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: theme.accent,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   title: {
     fontSize: 32,
@@ -328,6 +358,11 @@ const createStyles = theme => StyleSheet.create({
     borderWidth: 1,
     borderRadius: 16,
     padding: Spacing.three
+  },
+  statCardHighlight: {
+    backgroundColor: '#FFF1E4',
+    borderColor: HIGHLIGHT_ORANGE,
+    borderWidth: 1.5
   },
   statHeader: {
     flexDirection: 'row',

@@ -8,8 +8,7 @@ import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
 import { getIngredientById } from '@/data/catalog';
 import { useTheme } from '@/hooks/use-theme';
-import { formatUnit } from '@/lib/ingredientUnits';
-import { formatNutrientAmount, MINERAL_ROWS, NUTRIENT_ROWS, VITAMIN_ROWS } from '@/lib/nutrientRows';
+import { formatNutrientAmount, MINERAL_ROWS, NUTRIENT_ROWS, nonZeroRows, VITAMIN_ROWS } from '@/lib/nutrientRows';
 
 const STATS = [
   { key: 'calories', labelKey: 'recipes.calories', unit: 'common.kcal' },
@@ -31,10 +30,6 @@ function IngredientDetailScreen() {
   }
 
   const { nutrition, vitamins, minerals } = ingredient.per100g;
-  // Weight/volume-measured ingredients (g, kg, ml, l) convert 1:1 with the
-  // nutrient table below and have nothing else to show; count-style units
-  // (piece, tbsp, ...) need their own gram weight spelled out.
-  const unitConversions = Object.entries(ingredient.gramsPerUnit);
   const per100Label = ingredient.defaultUnit === 'ml' || ingredient.defaultUnit === 'l' ? '100 ml' : '100 g';
 
   return <ScreenScrollView gap={Spacing.three} horizontalPadding={20} contentContainerStyle={styles.content}>
@@ -58,22 +53,10 @@ function IngredientDetailScreen() {
           </View>)}
       </View>
 
-      <View style={[styles.card, { backgroundColor: theme.background, borderColor: theme.border }]}>
-        <ThemedText type="headline" color={theme.text} style={styles.cardTitle}>{t('ingredients.measuredIn')}</ThemedText>
-        <View style={[styles.listRow, { borderBottomColor: theme.border }]}>
-          <ThemedText type="small" color={theme.text}>{t('ingredients.defaultUnit')}</ThemedText>
-          <ThemedText type="small" color={theme.textSecondary}>{formatUnit(t, ingredient.defaultUnit)}</ThemedText>
-        </View>
-        {unitConversions.map(([unit, grams], index) => <View key={unit} style={[styles.listRow, { borderBottomColor: theme.border }, index === unitConversions.length - 1 && styles.listRowLast]}>
-            <ThemedText type="small" color={theme.text}>1 {formatUnit(t, unit)}</ThemedText>
-            <ThemedText type="small" color={theme.textSecondary}>{grams} g</ThemedText>
-          </View>)}
-      </View>
-
       <View style={styles.nutrientsGroup}>
         <View style={[styles.card, { backgroundColor: theme.background, borderColor: theme.border }]}>
           <ThemedText type="headline" color={theme.text} style={styles.cardTitle}>{t('recipes.nutrients')}</ThemedText>
-          {NUTRIENT_ROWS.map((row, index) => <View key={row.key} style={[styles.listRow, { borderBottomColor: theme.border }, index === NUTRIENT_ROWS.length - 1 && styles.listRowLast]}>
+          {nonZeroRows(NUTRIENT_ROWS, nutrition).map((row, index, visibleRows) => <View key={row.key} style={[styles.listRow, { borderBottomColor: theme.border }, index === visibleRows.length - 1 && styles.listRowLast]}>
               <ThemedText type="small" color={theme.text}>{t(row.labelKey)}</ThemedText>
               <ThemedText type="small" color={theme.textSecondary}>{formatNutrientAmount(nutrition[row.key])} {row.unit}</ThemedText>
             </View>)}
@@ -81,7 +64,7 @@ function IngredientDetailScreen() {
 
         <View style={[styles.card, { backgroundColor: theme.background, borderColor: theme.border }]}>
           <ThemedText type="headline" color={theme.text} style={styles.cardTitle}>{t('recipes.vitamins')}</ThemedText>
-          {VITAMIN_ROWS.map((row, index) => <View key={row.key} style={[styles.listRow, { borderBottomColor: theme.border }, index === VITAMIN_ROWS.length - 1 && styles.listRowLast]}>
+          {nonZeroRows(VITAMIN_ROWS, vitamins).map((row, index, visibleRows) => <View key={row.key} style={[styles.listRow, { borderBottomColor: theme.border }, index === visibleRows.length - 1 && styles.listRowLast]}>
               <ThemedText type="small" color={theme.text}>{t(row.labelKey)}</ThemedText>
               <ThemedText type="small" color={theme.textSecondary}>{formatNutrientAmount(vitamins[row.key])} {row.unit}</ThemedText>
             </View>)}
@@ -89,7 +72,7 @@ function IngredientDetailScreen() {
 
         <View style={[styles.card, { backgroundColor: theme.background, borderColor: theme.border }]}>
           <ThemedText type="headline" color={theme.text} style={styles.cardTitle}>{t('recipes.minerals')}</ThemedText>
-          {MINERAL_ROWS.map((row, index) => <View key={row.key} style={[styles.listRow, { borderBottomColor: theme.border }, index === MINERAL_ROWS.length - 1 && styles.listRowLast]}>
+          {nonZeroRows(MINERAL_ROWS, minerals).map((row, index, visibleRows) => <View key={row.key} style={[styles.listRow, { borderBottomColor: theme.border }, index === visibleRows.length - 1 && styles.listRowLast]}>
               <ThemedText type="small" color={theme.text}>{t(row.labelKey)}</ThemedText>
               <ThemedText type="small" color={theme.textSecondary}>{formatNutrientAmount(minerals[row.key])} {row.unit}</ThemedText>
             </View>)}

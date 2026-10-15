@@ -29,6 +29,25 @@ export function scaleForServings(perServing, servings) {
 }
 
 /**
+ * A meal-plan item's nutrition, honoring whatever ingredients were removed or
+ * swapped on its recipe screen (mealPlanStore.updateIngredientEdits) instead
+ * of the recipe's plain ingredient list — mirrors the same exclude/substitute
+ * logic the recipe detail screen itself uses, so a meal's card matches what
+ * you'd see if you opened it.
+ */
+export function planItemNutrition(recipe, item, getIngredient) {
+  const excludedIds = item?.excludedIngredientIds;
+  const substitutions = item?.substitutions;
+  if (!excludedIds?.length && !substitutions) return calculateRecipeNutrition(recipe, getIngredient);
+  const excluded = new Set(excludedIds);
+  const activeIngredients = recipe.ingredients.filter(line => !excluded.has(line.ingredientId)).map(line => substitutions?.[line.ingredientId] ? {
+    ...line,
+    ingredientId: substitutions[line.ingredientId]
+  } : line);
+  return calculateRecipeNutrition({ ...recipe, ingredients: activeIngredients }, getIngredient);
+}
+
+/**
  * Recomputes per-serving nutrition with one ingredient swapped for a substitute
  * at the same quantity/unit (§8). Recalculates from ingredients rather than
  * patching the cached total, keeping the result deterministic.

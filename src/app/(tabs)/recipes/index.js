@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Animated, Easing, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
-import { RecentRecipeRow } from '@/components/ui/recent-recipe-row';
 import { RecipeCard } from '@/components/ui/recipe-card';
 import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
@@ -21,7 +20,6 @@ import { catalogStore } from '@/store/catalogStore';
 import { favoritesStore } from '@/store/favoritesStore';
 import { myRecipesStore } from '@/store/myRecipesStore';
 import { localeStore } from '@/store/localeStore';
-import { recentlyViewedStore } from '@/store/recentlyViewedStore';
 
 const FAVORITE_RED = '#E0245E';
 const MY_RECIPES_FILTER = 'my-recipes';
@@ -125,7 +123,6 @@ function RecipesScreen() {
       <ThemedText type="smallBold" color="#ffffff" style={styles.addRecipeLabel}>{t('recipes.addRecipe')}</ThemedText>
     </Pressable>;
 
-  const recentlyViewed = recentlyViewedStore.recipeIds.map(getRecipeById).filter(Boolean);
 
   function handleRefresh() {
     // The backend now reports deletions in the delta too (deletedIds), so a
@@ -140,7 +137,7 @@ function RecipesScreen() {
       <View style={styles.searchSection}>
         <View style={styles.searchRow}>
           <Pressable onPress={handleRefresh} disabled={catalogStore.isSyncing} hitSlop={8} accessibilityLabel={t('recipes.refresh')} style={[styles.refreshButton, catalogStore.isSyncing && styles.refreshButtonActive]}>
-            {catalogStore.isSyncing ? <ActivityIndicator size="small" color={theme.textSecondary} /> : <SymbolView name={{ ios: 'arrow.clockwise', android: 'refresh', web: 'refresh' }} size={18} tintColor={theme.textSecondary} />}
+            {catalogStore.isSyncing ? <ActivityIndicator size="small" color={theme.accent} /> : <SymbolView name={{ ios: 'arrow.clockwise', android: 'refresh', web: 'refresh' }} size={18} tintColor={theme.accent} />}
           </Pressable>
           <View style={styles.searchBar}>
             <SymbolView name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} size={16} tintColor={theme.textSecondary} />
@@ -190,24 +187,20 @@ function RecipesScreen() {
         </ScrollView>
       </View>
 
-      <View style={styles.paddedX}>
-        <Pressable onPress={() => router.push('/ingredients')} style={({ pressed }) => [styles.ingredientsBanner, { backgroundColor: theme.background, borderColor: theme.border, opacity: pressed ? 0.85 : 1 }]}>
+      <View style={[styles.paddedX, styles.ingredientsBannerWrapper]}>
+        <Pressable onPress={() => router.push('/ingredients')} style={({ pressed }) => [styles.ingredientsBanner, { backgroundColor: theme.background, borderColor: theme.accent, opacity: pressed ? 0.85 : 1 }]}>
           <View style={[styles.ingredientsBannerIcon, { backgroundColor: theme.accentSoft }]}>
-            <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={16} tintColor={theme.accent} />
+            <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={20} tintColor={theme.accent} />
           </View>
-          <ThemedText type="smallBold" color={theme.text} style={styles.ingredientsBannerText}>{t('ingredients.title')}</ThemedText>
-          <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={14} tintColor={theme.textSecondary} />
+          <View style={styles.ingredientsBannerTextGroup}>
+            <ThemedText type="smallBold" color={theme.text}>{t('ingredients.title')}</ThemedText>
+            <ThemedText type="caption" color={theme.textSecondary}>{t('ingredients.bannerSubtitle')}</ThemedText>
+          </View>
+          <View style={[styles.ingredientsBannerChevron, { backgroundColor: theme.accentSoft }]}>
+            <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={13} tintColor={theme.accent} />
+          </View>
         </Pressable>
       </View>
-
-      {recentlyViewed.length > 0 && <View style={[styles.section, styles.recentlyViewedSection]}>
-          <View style={styles.paddedX}>
-            <SectionHeader title={t('recipes.recentlyViewed')} />
-          </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.recentRow}>
-            {recentlyViewed.map(recipe => <RecentRecipeRow key={recipe.id} recipe={recipe} calories={calculateRecipeNutrition(recipe, getIngredientById).nutrition.calories} style={styles.recentCard} />)}
-          </ScrollView>
-        </View>}
 
       <Animated.View style={{ gap: Spacing.five, opacity: contentAnim, transform: [{ translateY: contentAnim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }}>
       {selectedFilter === MY_RECIPES_FILTER ? <View style={styles.section}>
@@ -254,35 +247,50 @@ const createStyles = theme => StyleSheet.create({
     marginHorizontal: CONTAINER_PADDING
   },
   refreshButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.backgroundElement
+    backgroundColor: theme.accentSoft
   },
   refreshButtonActive: {
     opacity: 0.6
   },
+  ingredientsBannerWrapper: {
+    marginVertical: -Spacing.two
+  },
   ingredientsBanner: {
-    alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.two,
+    gap: Spacing.three,
+    height: 60,
     borderWidth: 1,
-    borderRadius: 999,
-    paddingVertical: Spacing.one,
-    paddingHorizontal: Spacing.three
+    borderRadius: 18,
+    paddingHorizontal: Spacing.three,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2
   },
   ingredientsBannerIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  ingredientsBannerTextGroup: {
+    flex: 1,
+    gap: 2
+  },
+  ingredientsBannerChevron: {
     width: 26,
     height: 26,
     borderRadius: 13,
     alignItems: 'center',
     justifyContent: 'center'
-  },
-  ingredientsBannerText: {
-    marginRight: 2
   },
   searchBar: {
     flex: 1,
@@ -374,9 +382,6 @@ const createStyles = theme => StyleSheet.create({
   section: {
     gap: Spacing.three
   },
-  recentlyViewedSection: {
-    marginVertical: -Spacing.two
-  },
   rows: {
     gap: Spacing.two
   },
@@ -392,13 +397,6 @@ const createStyles = theme => StyleSheet.create({
   },
   cardFill: {
     width: '100%'
-  },
-  recentRow: {
-    gap: Spacing.two,
-    paddingLeft: CONTAINER_PADDING
-  },
-  recentCard: {
-    width: 200
   }
 });
 
