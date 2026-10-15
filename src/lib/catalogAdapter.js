@@ -12,6 +12,8 @@
  * tag id to its slug (see catalogStore.tagSlugs).
  */
 
+import { toFileUrl } from './api';
+
 const NUTRITION_KEY_MAP = {
   calories: 'calories',
   protein: 'protein',
@@ -77,7 +79,7 @@ export function adaptIngredient(raw, slugs) {
   return {
     id: raw.id,
     name: raw.name,
-    imageUrl: raw.image_url ?? undefined,
+    imageUrl: toFileUrl(raw.image_url),
     categoryId: FALLBACK_INGREDIENT_CATEGORY_ID,
     subcategoryId: undefined,
     // The unit this ingredient is normally measured in (g, piece, tbsp, ...).
@@ -135,7 +137,7 @@ export function adaptRecipe(raw, slugs) {
     id: raw.id,
     title: raw.name,
     description: raw.description,
-    imageUrl: raw.image_url ?? undefined,
+    imageUrl: toFileUrl(raw.image_url),
     servings: raw.servings || 1,
     categoryId,
     mealTypes,

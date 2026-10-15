@@ -6,6 +6,17 @@ import { Platform } from 'react-native';
 const DEFAULT_HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? `http://${DEFAULT_HOST}:3000/api/v1`;
 
+// The backend stores and returns only a bare filename for uploaded images/files
+// (e.g. ingredient.image_url, lab_report.file_url) — this is the base URL this
+// client prepends to build a displayable/openable URL. Configured separately
+// from API_URL since in production they can be different hosts/subdomains.
+export const FILES_URL = process.env.EXPO_PUBLIC_FILES_URL ?? `http://${DEFAULT_HOST}:3000/files`;
+
+export function toFileUrl(filename) {
+  if (!filename) return undefined;
+  return `${FILES_URL}/${filename}`;
+}
+
 export class ApiError extends Error {
   constructor(message, status) {
     super(message);

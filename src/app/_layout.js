@@ -6,6 +6,7 @@ import { OnboardingFlow } from '@/components/onboarding/onboarding-flow';
 import { ThemedView } from '@/components/themed-view';
 import { useTheme } from '@/hooks/use-theme';
 import '@/i18n';
+import { syncUiDictionary } from '@/i18n/uiDictionarySync';
 import { queryClient } from '@/lib/query-client';
 import { appStreakStore } from '@/store/appStreakStore';
 import { authStore } from '@/store/authStore';
@@ -63,6 +64,11 @@ function TabLayout() {
   useEffect(() => {
     if (localeStore.hasHydrated) localeStore.fetchLanguages();
   }, [localeStore.hasHydrated]);
+  useEffect(() => {
+    // Public endpoint, no auth needed — fires as soon as the persisted
+    // language is known, and again whenever it changes (select-language screen).
+    if (localeStore.hasHydrated) syncUiDictionary(localeStore.language);
+  }, [localeStore.hasHydrated, localeStore.language]);
   useEffect(() => {
     // Also re-runs once onboarding finishes: pending member changes can only
     // be uploaded when the owner's profile exists.

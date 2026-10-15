@@ -5,6 +5,8 @@
  * (paragraph/list structure kept, inline formatting dropped).
  */
 
+import { toFileUrl } from './api';
+
 const ENTITIES = { '&nbsp;': ' ', '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" };
 const EXCERPT_LENGTH = 140;
 
@@ -33,7 +35,7 @@ export function adaptArticle(raw) {
     title: raw.title,
     excerpt: excerptOf(body),
     body,
-    imageUrl: raw.image_url ?? null,
+    imageUrl: toFileUrl(raw.image_url) ?? null,
     publishedAt: raw.ctime ?? null,
     isFavorite: raw.isFavorite ?? false,
     // Not returned by the backend yet — until it is, every article counts as unread.

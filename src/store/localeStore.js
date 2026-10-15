@@ -5,7 +5,7 @@ import { persistStore } from './persist';
 
 // Shown until the server's list has been fetched at least once (first launch
 // offline) — the app ships UI translations for exactly these.
-const FALLBACK_LANGUAGES = [{ code: 'en', name: 'English' }, { code: 'ru', name: 'Русский' }, { code: 'pl', name: 'Polski' }, { code: 'de', name: 'Deutsch' }];
+const FALLBACK_LANGUAGES = [{ code: 'en', name: 'English' }, { code: 'ru', name: 'Русский' }, { code: 'pl', name: 'Polski' }, { code: 'de', name: 'Deutsch' }, { code: 'es', name: 'Español' }, { code: 'pt', name: 'Português' }];
 
 class LocaleStore {
   language = 'en';

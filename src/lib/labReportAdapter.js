@@ -3,6 +3,8 @@
  * All knowledge of the backend's field names lives here.
  */
 
+import { toFileUrl } from './api';
+
 const ABNORMAL_FLAGS = new Set(['low', 'high']);
 
 function toNumber(value) {
@@ -40,7 +42,7 @@ export function adaptLabReport(raw) {
     // DATE column, serialized as "YYYY-MM-DD" (see formatReportDate).
     takenAt: raw.taken_at || null,
     createdAt: raw.ctime || raw.created_at || null,
-    fileUrl: raw.file_url || null,
+    fileUrl: toFileUrl(raw.file_url) || null,
     results: (raw.results ?? []).map((result, index) => ({ ...adaptLabResult(result), index }))
   };
 }
