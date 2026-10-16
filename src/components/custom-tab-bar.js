@@ -55,7 +55,7 @@ function TabButton({ isFocused, onPress, icon, label, theme }) {
       <Animated.View style={[styles.tabContent, { transform: [{ scale }] }]}>
         {isFocused && <View style={[styles.activeBackground, { backgroundColor: theme.accentSoft, shadowColor: theme.accent }]} />}
         <SymbolView name={icon} size={22} tintColor={isFocused ? theme.accent : theme.textSecondary} />
-        <ThemedText type="caption" color={isFocused ? theme.accent : theme.textSecondary} style={styles.label}>
+        <ThemedText type="caption" color={isFocused ? theme.accent : theme.textSecondary} style={styles.label} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
           {label}
         </ThemedText>
       </Animated.View>
@@ -155,6 +155,8 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 9,
-    fontWeight: '600'
+    fontWeight: '600',
+    textAlign: 'center',
+    maxWidth: '100%'
   }
 });
