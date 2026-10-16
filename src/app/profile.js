@@ -7,6 +7,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { deletePhoto, pickProfilePhoto } from '@/lib/profilePhoto';
 import { PersonAvatar } from '@/components/people/person-avatar';
+import { apiRequest, apiUpload, toFileUrl } from '@/lib/api';
 import { authStore } from '@/store/authStore';
 import { foodLogStore } from '@/store/foodLogStore';
 import { mealPlanStore } from '@/store/mealPlanStore';
@@ -51,12 +52,24 @@ function ProfileScreen() {
 
   if (!profile) return null;
 
+  // The account owner's ("me") avatar is stored on the backend (my_user.photo_url)
+  // so it survives reinstalls/other devices; a family member isn't a separate
+  // account, so their avatar stays local-only, same as before.
+  const isEditingMe = !peopleStore.activeMember;
+
   async function handlePickPhoto(source) {
     try {
       const uri = await pickProfilePhoto(source);
       if (!uri) return;
-      deletePhoto(profile.photoUri);
-      profileStore.updateProfile({ photoUri: uri });
+      if (isEditingMe) {
+        const user = await apiUpload('/app/users/me/photo', { fileUri: uri, fileName: 'photo.jpg', mimeType: 'image/jpeg', token: authStore.token });
+        deletePhoto(uri);
+        if (profile.photoUri) deletePhoto(profile.photoUri);
+        profileStore.updateProfile({ photoUrl: user.photo_url, photoUri: null });
+      } else {
+        deletePhoto(profile.photoUri);
+        profileStore.updateProfile({ photoUri: uri });
+      }
     } catch {
       Alert.alert(t('common.errorTitle'), t('common.errorDefault'));
     }
@@ -64,10 +77,13 @@ function ProfileScreen() {
 
   function handleEditPhoto() {
     const actions = [{ text: t('recipes.takePhoto'), onPress: () => handlePickPhoto('camera') }, { text: t('recipes.chooseFromLibrary'), onPress: () => handlePickPhoto('library') }];
-    if (profile.photoUri) {
+    if (profile.photoUri || profile.photoUrl) {
       actions.push({ text: t('profile.removePhoto'), style: 'destructive', onPress: () => {
+        if (isEditingMe && profile.photoUrl) {
+          apiRequest('/app/users/me/photo', { method: 'DELETE', token: authStore.token }).catch(() => {});
+        }
         deletePhoto(profile.photoUri);
-        profileStore.updateProfile({ photoUri: null });
+        profileStore.updateProfile({ photoUri: null, photoUrl: null });
       } });
     }
     actions.push({ text: t('common.cancel'), style: 'cancel' });
@@ -119,12 +135,15 @@ function ProfileScreen() {
 
 
   const allergies = profile.preferences?.allergies ?? [];
+  // photoUrl (backend filename) wins when present; photoUri (local-only, either
+  // a family member's avatar or a pre-migration "me" avatar) is the fallback.
+  const avatarUri = profile.photoUrl ? toFileUrl(profile.photoUrl) : profile.photoUri;
 
   return <ScreenScrollView gap={Spacing.three}>
       <View style={styles.heroSection}>
         <View style={styles.avatarWrapper}>
           <Pressable onPress={handleEditPhoto} style={styles.avatar}>
-            {profile.photoUri ? <Image source={{ uri: profile.photoUri }} style={styles.avatarImage} contentFit="cover" onError={() => profileStore.updateProfile({ photoUri: null })} /> : <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={44} tintColor={theme.accent} />}
+            {avatarUri ? <Image source={{ uri: avatarUri }} style={styles.avatarImage} contentFit="cover" onError={() => { if (!profile.photoUrl) profileStore.updateProfile({ photoUri: null }); }} /> : <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={44} tintColor={theme.accent} />}
           </Pressable>
           <Pressable onPress={handleEditPhoto} hitSlop={8} style={styles.avatarEditBadge}>
             <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={15} tintColor="#ffffff" />

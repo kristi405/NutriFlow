@@ -79,6 +79,15 @@ export async function syncFamilyMembers() {
   } else {
     applyServerMembers(serverMembers);
   }
+
+  // The "me" avatar is uploaded straight to the server (see profile.js), so the
+  // server is always authoritative for it — just mirror it locally so it shows
+  // up after a reinstall or on another device logged into the same account.
+  if (profileStore.profile && (me?.photo_url ?? null) !== (profileStore.profile.photoUrl ?? null)) {
+    runInAction(() => {
+      profileStore.profile = { ...profileStore.profile, photoUrl: me?.photo_url ?? null };
+    });
+  }
 }
 
 reaction(() => JSON.stringify(serialize(peopleStore.members)), snapshot => {

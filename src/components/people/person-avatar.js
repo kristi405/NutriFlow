@@ -3,6 +3,7 @@ import { SymbolView } from 'expo-symbols';
 import { StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
+import { toFileUrl } from '@/lib/api';
 
 // `iconFallback` swaps the no-photo state from an initial letter to a generic
 // person icon — used where the avatar is a "switch account" affordance rather
@@ -11,9 +12,12 @@ export function PersonAvatar({ profile, size = 28, iconFallback = false }) {
   const theme = useTheme();
   const initial = profile?.name?.trim().charAt(0).toUpperCase() || '?';
   const dimension = { width: size, height: size, borderRadius: size / 2 };
+  // photoUrl ("me", stored on the backend) wins over photoUri (local-only —
+  // either a family member's avatar or a pre-migration "me" avatar).
+  const avatarUri = profile?.photoUrl ? toFileUrl(profile.photoUrl) : profile?.photoUri;
 
-  if (profile?.photoUri) {
-    return <Image source={{ uri: profile.photoUri }} style={dimension} contentFit="cover" />;
+  if (avatarUri) {
+    return <Image source={{ uri: avatarUri }} style={dimension} contentFit="cover" />;
   }
   if (iconFallback) {
     return <View style={[styles.fallback, dimension, { backgroundColor: theme.accentSoft }]}>
