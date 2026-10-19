@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Modal, PanResponder, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DateStrip } from '@/components/home/date-strip';
 import { PersonAvatar } from '@/components/people/person-avatar';
@@ -21,12 +21,13 @@ import { Spacing } from '@/constants/theme';
 import { getIngredientById, getIngredients, getRecipeById, getRecipes } from '@/data/catalog';
 import { useTheme } from '@/hooks/use-theme';
 import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
-import { todayKey, weekContaining } from '@/lib/date';
+import { addDays, todayKey, weekContaining } from '@/lib/date';
 import { defaultQuantityFor, formatQuantity, formatUnit, parseQuantity } from '@/lib/ingredientUnits';
 import { guessIngredientImage } from '@/lib/ingredientImage';
 import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
 import { planningCalories } from '@/lib/mealPlanning';
 import { findAllergenConflicts } from '@/lib/allergens';
+import { recipeImageUri } from '@/lib/recipeImage';
 import { calculateDailyTargets, calculateRecipeNutrition, planItemNutrition, scaleForServings, scaleIngredient } from '@/lib/nutrition';
 import { ensurePremium } from '@/lib/premium';
 import { foodLogStore } from '@/store/foodLogStore';
@@ -59,6 +60,8 @@ function categoryPoolForMealType(mealType) {
 }
 
 const CALORIE_MATCH_TOLERANCE = 100;
+// Minimum horizontal drag (px) to count as a deliberate week swipe, not a tap/wobble.
+const WEEK_SWIPE_THRESHOLD = 50;
 const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'];
 const MEAL_TYPE_ICONS = {
   breakfast: { ios: 'sunrise.fill', android: 'wb_twilight', web: 'wb_twilight' },
@@ -91,6 +94,15 @@ function MealPlanScreen() {
   const [snackAmount, setSnackAmount] = useState('');
   const [editingSnackId, setEditingSnackId] = useState(null);
   const [isShoppingRangeOpen, setIsShoppingRangeOpen] = useState(false);
+  // Swipe left/right on the calendar header to move a week at a time. Only
+  // claims the gesture once it's clearly horizontal, so it doesn't fight the
+  // page's vertical scrolling (the header sits above the ScreenScrollView anyway).
+  const weekPanResponder = useRef(PanResponder.create({
+    onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 12 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 2,
+    onPanResponderRelease: (_, gesture) => {
+      if (gesture.dx <= -WEEK_SWIPE_THRESHOLD) shiftWeek(1);else if (gesture.dx >= WEEK_SWIPE_THRESHOLD) shiftWeek(-1);
+    }
+  })).current;
   const profile = profileStore.activeProfile;
   const targets = useMemo(() => profile ? calculateDailyTargets(profile) : undefined, [profile]);
   const planItems = mealPlanStore.itemsForDate(date);
@@ -134,7 +146,16 @@ function MealPlanScreen() {
   if (!profile || !targets) return null;
 
   const today = todayKey();
-  const remainingWeekDays = weekContaining(today).filter(day => day >= today);
+  // The week being viewed (navigable via the arrows/swipe below), not always
+  // today's — but days already in the past are still never auto-generated.
+  const remainingWeekDays = weekContaining(date).filter(day => day >= today);
+
+  // Moves the calendar strip a week at a time, via the arrows or a swipe on
+  // the header (see weekPanResponder below). Shifting by exactly 7 days keeps
+  // the same weekday selected (e.g. Wednesday stays selected a week later).
+  function shiftWeek(weeks) {
+    setDate(current => addDays(current, weeks * 7));
+  }
 
   // Replaces today's whole menu, including any dishes the user swapped in by
   // hand — so ask first, unless there is nothing planned yet to lose.
@@ -335,7 +356,15 @@ function MealPlanScreen() {
           </PersonSwitcher>
         </View>
 
-        <DateStrip selectedDate={date} onSelectDate={setDate} />
+        <View style={styles.weekRow} {...weekPanResponder.panHandlers}>
+          <Pressable onPress={() => shiftWeek(-1)} hitSlop={8} style={styles.weekArrow}>
+            <SymbolView name={{ ios: 'chevron.left', android: 'chevron_left', web: 'chevron_left' }} size={18} tintColor={theme.textSecondary} />
+          </Pressable>
+          <DateStrip selectedDate={date} onSelectDate={setDate} style={styles.dateStripFlex} />
+          <Pressable onPress={() => shiftWeek(1)} hitSlop={8} style={styles.weekArrow}>
+            <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={18} tintColor={theme.textSecondary} />
+          </Pressable>
+        </View>
       </View>
 
       <ScreenScrollView isTabScreen gap={Spacing.three} contentContainerStyle={{
@@ -381,7 +410,7 @@ function MealPlanScreen() {
                 if (!recipe) return null;
                 const calories = scaleForServings(planItemNutrition(recipe, item, getIngredientById), item.servings).nutrition.calories;
                 const isEaten = loggedEntries.some(entry => entry.mealType === item.mealType && entry.recipeId === item.recipeId);
-                return <MealRow key={item.id} recipeId={item.recipeId} planItemId={item.id} mealType={item.mealType} title={recipe.title} imageUrl={recipe.imageUrl} calories={calories} servings={item.servings} isEaten={isEaten} onToggleEaten={() => toggleEaten(item)} allergens={findAllergenConflicts(recipe, profile?.preferences?.allergies)} />;
+                return <MealRow key={item.id} recipeId={item.recipeId} planItemId={item.id} mealType={item.mealType} title={recipe.title} imageUrl={recipeImageUri(recipe)} calories={calories} servings={item.servings} isEaten={isEaten} onToggleEaten={() => toggleEaten(item)} allergens={findAllergenConflicts(recipe, profile?.preferences?.allergies)} />;
               })}
                 </View>}
             </View>;
@@ -452,7 +481,7 @@ function MealPlanScreen() {
                 {(isShowingAllSwap ? allSwapRecipes : swapCandidates).map(recipe => {
               const calories = calculateRecipeNutrition(recipe, getIngredientById).nutrition.calories;
               return <Pressable key={recipe.id} onPress={() => handleSelectSwap(recipe)} style={styles.swapRow}>
-                      <RecipeImage uri={recipe.imageUrl} style={styles.swapImage} iconSize={18} />
+                      <RecipeImage uri={recipeImageUri(recipe)} style={styles.swapImage} iconSize={18} />
                       <View style={styles.swapTextWrapper}>
                         <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{recipe.title}</ThemedText>
                         <ThemedText type="small" color={theme.textSecondary}>{Math.round(calories)} {t('common.kcal')}</ThemedText>
@@ -497,7 +526,7 @@ function MealPlanScreen() {
                 <ScrollView style={styles.snackPickerScroll} keyboardShouldPersistTaps="handled">
                   <View style={styles.swapList}>
                     {snackPickerItems.map(item => <Pressable key={item.id} onPress={() => snackPickerMode === 'dish' ? handlePickSnackDish(item) : handlePickSnackIngredient(item)} style={styles.swapRow}>
-                        {snackPickerMode === 'dish' ? <RecipeImage uri={item.imageUrl} style={styles.swapImage} iconSize={18} /> : <RecipeImage uri={guessIngredientImage(item)} style={styles.swapImage} iconSize={18} />}
+                        {snackPickerMode === 'dish' ? <RecipeImage uri={recipeImageUri(item)} style={styles.swapImage} iconSize={18} /> : <RecipeImage uri={guessIngredientImage(item)} style={styles.swapImage} iconSize={18} />}
                         <ThemedText type="smallBold" color={theme.text} style={styles.flex1} numberOfLines={1}>{snackPickerMode === 'dish' ? item.title : item.name}</ThemedText>
                       </Pressable>)}
                   </View>
@@ -583,6 +612,17 @@ const createStyles = theme => StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: Spacing.two
+  },
+  weekRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one
+  },
+  weekArrow: {
+    padding: Spacing.one
+  },
+  dateStripFlex: {
+    flex: 1
   },
   header: {
     flex: 1,

@@ -32,10 +32,14 @@ function makeId() {
 class MealPlanStore {
   items = [];
   hasHydrated = false;
+  // Server sync state (see mealPlanSync.js) — same shape as peopleStore's
+  // needsPush/hasSyncedMembers for family members.
+  needsPush = false;
+  hasSyncedOnce = false;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
-    persistStore(this, 'nutriflow.meal-plan', ['items']);
+    persistStore(this, 'nutriflow.meal-plan', ['items', 'needsPush', 'hasSyncedOnce']);
   }
 
   addItem(input) {

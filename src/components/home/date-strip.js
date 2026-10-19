@@ -30,7 +30,10 @@ function DayButton({ isSelected, isToday, onPress, weekday, dayNumber, theme }) 
 
 export function DateStrip({ selectedDate, onSelectDate, style }) {
   const theme = useTheme();
-  const days = weekContaining(todayKey());
+  // The week shown is whichever one contains selectedDate — on Home that's
+  // always today's week (selectedDate never leaves it there), but meal-plan.js
+  // lets selectedDate move a week at a time, so the strip follows it.
+  const days = weekContaining(selectedDate);
   return <View style={[styles.row, style]}>
       {days.map(dateKey => {
       const dayNumber = Number(dateKey.split('-')[2]);

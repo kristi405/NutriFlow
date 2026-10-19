@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { getIngredientById, getRecipeById } from '@/data/catalog';
 import { calculateRecipeNutrition, scaleForServings, sumProfiles } from '@/lib/nutrition';
+import { recipeImageUri } from '@/lib/recipeImage';
 import { ZERO_MINERALS, ZERO_NUTRITION, ZERO_VITAMINS } from '@/models/nutrition';
 import { foodLogStore } from '@/store/foodLogStore';
 const EMPTY_PROFILE = {
@@ -30,7 +31,7 @@ export function useDailyNutrition(date) {
           recipeId: entry.recipeId,
           mealType: entry.mealType,
           recipeTitle: recipe.title,
-          recipeImageUrl: recipe.imageUrl,
+          recipeImageUrl: recipeImageUri(recipe),
           servings: entry.servings,
           profile: scaleForServings(perServing, entry.servings)
         });

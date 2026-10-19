@@ -11,6 +11,7 @@ import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { defaultQuantityFor, formatQuantity, formatUnit, parseQuantity } from '@/lib/ingredientUnits';
 import { guessIngredientCategory } from '@/lib/ingredientImage';
 import { calculateRecipeNutrition, canMeasureIn, scaleForServings } from '@/lib/nutrition';
+import { recipeImageUri } from '@/lib/recipeImage';
 import { formatNutrientAmount, MINERAL_ROWS, NUTRIENT_ROWS, nonZeroRows, VITAMIN_ROWS } from '@/lib/nutrientRows';
 import { mealPlanStore } from '@/store/mealPlanStore';
 import { myRecipesStore } from '@/store/myRecipesStore';
@@ -207,7 +208,7 @@ function RecipeDetailScreen() {
 
   function handleShare() {
     Share.share({
-      message: `${recipe.title}\n${recipe.imageUrl}`
+      message: `${recipe.title}\n${recipeImageUri(recipe)}`
     }).catch(() => {});
   }
 
@@ -305,7 +306,7 @@ function RecipeDetailScreen() {
       <View style={[styles.fixedImageWrapper, {
       height: imageHeight
     }]}>
-        <RecipeImage uri={isOwnRecipe && isEditingRecipe ? editedImageUri : recipe.imageUrl} style={styles.image} iconSize={48} />
+        <RecipeImage uri={isOwnRecipe && isEditingRecipe ? editedImageUri || recipeImageUri(recipe) : recipeImageUri(recipe)} style={styles.image} iconSize={48} />
       </View>
 
       {isOwnRecipe && isEditingRecipe && <Pressable onPress={handlePickPhoto} hitSlop={8} style={[styles.imageEditBadge, {

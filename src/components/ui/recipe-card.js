@@ -4,6 +4,7 @@ import { ThemedText } from '@/components/themed-text';
 import { RecipeImage } from '@/components/ui/recipe-image';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { recipeImageUri } from '@/lib/recipeImage';
 import { favoritesStore } from '@/store/favoritesStore';
 import { Link } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -30,7 +31,7 @@ function RecipeCardComponent({
   }} asChild>
       <Pressable style={StyleSheet.flatten([styles.card, style])}>
         {({ pressed }) => <View style={[styles.cardInner, pressed && styles.pressed]}>
-            <RecipeImage uri={recipe.imageUrl} style={styles.image} />
+            <RecipeImage uri={recipeImageUri(recipe)} style={styles.image} />
             {recipe.difficulty && <View style={styles.difficultyBadge}>
                 <ThemedText type="caption" color="#ffffff">
                   {t(`recipes.difficulty.${recipe.difficulty}`, { defaultValue: recipe.difficulty })}

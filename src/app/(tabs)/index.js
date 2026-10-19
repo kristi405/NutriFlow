@@ -30,6 +30,7 @@ import { findAllergenConflicts } from '@/lib/allergens';
 import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
 import { planningCalories } from '@/lib/mealPlanning';
 import { todayKey } from '@/lib/date';
+import { recipeImageUri } from '@/lib/recipeImage';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { articleStore } from '@/store/articleStore';
@@ -180,7 +181,7 @@ function HomeScreen() {
 
       {nextMeal ? <View style={styles.section}>
           <SectionHeader title={t('home.nextMeal')} />
-          <MealRow recipeId={nextMeal.recipe.id} planItemId={nextMeal.id} mealType={nextMeal.mealType} title={nextMeal.recipe.title} imageUrl={nextMeal.recipe.imageUrl} calories={nextMeal.calories} servings={nextMeal.servings} allergens={findAllergenConflicts(nextMeal.recipe, profile?.preferences?.allergies)} />
+          <MealRow recipeId={nextMeal.recipe.id} planItemId={nextMeal.id} mealType={nextMeal.mealType} title={nextMeal.recipe.title} imageUrl={recipeImageUri(nextMeal.recipe)} calories={nextMeal.calories} servings={nextMeal.servings} allergens={findAllergenConflicts(nextMeal.recipe, profile?.preferences?.allergies)} />
         </View> : <View style={styles.section}>
           <SectionHeader title={t('home.nextMeal')} />
           {allMealsEaten ? <View style={styles.planCompleteCard}>

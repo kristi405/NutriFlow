@@ -12,6 +12,10 @@ import { appStreakStore } from '@/store/appStreakStore';
 import { authStore } from '@/store/authStore';
 import { catalogStore } from '@/store/catalogStore';
 import { localeStore } from '@/store/localeStore';
+import { mealPlanStore } from '@/store/mealPlanStore';
+import { syncMealPlan } from '@/store/mealPlanSync';
+import { myRecipesStore } from '@/store/myRecipesStore';
+import { syncMyRecipes } from '@/store/myRecipesSync';
 import { peopleStore } from '@/store/peopleStore';
 import { syncFamilyMembers } from '@/store/peopleSync';
 import { profileStore } from '@/store/profileStore';
@@ -74,6 +78,12 @@ function TabLayout() {
     // be uploaded when the owner's profile exists.
     if (authStore.isAuthenticated && peopleStore.hasHydrated) syncFamilyMembers();
   }, [authStore.isAuthenticated, peopleStore.hasHydrated, profileStore.hasOnboarded]);
+  useEffect(() => {
+    if (authStore.isAuthenticated && myRecipesStore.hasHydrated) syncMyRecipes();
+  }, [authStore.isAuthenticated, myRecipesStore.hasHydrated]);
+  useEffect(() => {
+    if (authStore.isAuthenticated && mealPlanStore.hasHydrated) syncMealPlan();
+  }, [authStore.isAuthenticated, mealPlanStore.hasHydrated]);
   const userId = authStore.currentUser?.id;
   useEffect(() => {
     if (!appStreakStore.hasHydrated) return;

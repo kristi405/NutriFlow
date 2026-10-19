@@ -8,10 +8,14 @@ function normalizeSteps(steps) {
 class MyRecipesStore {
   recipes = [];
   hasHydrated = false;
+  // Server sync state (see myRecipesSync.js) — same shape as peopleStore's
+  // needsPush/hasSyncedMembers for family members.
+  needsPush = false;
+  hasSyncedOnce = false;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
-    persistStore(this, 'nutriflow.myRecipes', ['recipes']);
+    persistStore(this, 'nutriflow.myRecipes', ['recipes', 'needsPush', 'hasSyncedOnce']);
   }
 
   addRecipe({ title, categoryId, imageUrl, servings, prepTimeMinutes, cookTimeMinutes, difficulty, ingredients, steps }) {
