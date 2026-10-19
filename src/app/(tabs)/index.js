@@ -21,6 +21,7 @@ import { PremiumCard } from '@/components/ui/premium-card';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { SectionHeader } from '@/components/ui/section-header';
 import { getIngredientById, getRecipeById } from '@/data/catalog';
+import { toFileUrl } from '@/lib/api';
 import { useDailyNutrition } from '@/hooks/useDailyNutrition';
 import { useNutritionScore } from '@/hooks/useNutritionScore';
 import { useStepCount } from '@/hooks/useStepCount';
@@ -95,13 +96,17 @@ function HomeScreen() {
   const isMe = peopleStore.currentPersonId === null;
   const burnedCalories = isMe ? Math.round(steps * profile.weightKg * 0.0005) : 0;
   const remainingCalories = Math.max(0, targets.calories - consumedCalories);
+  // photoUrl (backend filename) wins when present — same priority as the Profile screen.
+  const avatarUri = profile.photoUrl ? toFileUrl(profile.photoUrl) : profile.photoUri;
   return <>
       <TermsAcceptanceModal />
       <ScreenScrollView isTabScreen gap={Spacing.three}>
       <Pressable onPress={() => router.push('/profile')} style={styles.headerRow}>
         <PersonSwitcher variant="avatarBadge">
           <View style={styles.avatar}>
-            {profile.photoUri ? <Image source={{ uri: profile.photoUri }} style={styles.avatarImage} contentFit="cover" onError={() => profileStore.updateProfile({ photoUri: null })} /> : <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={22} tintColor={theme.accent} />}
+            {avatarUri ? <Image source={{ uri: avatarUri }} style={styles.avatarImage} contentFit="cover" onError={() => {
+              if (!profile.photoUrl) profileStore.updateProfile({ photoUri: null });
+            }} /> : <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={22} tintColor={theme.accent} />}
           </View>
         </PersonSwitcher>
         <View style={styles.headerTextColumn}>
