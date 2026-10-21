@@ -1,0 +1,80 @@
+ сменить версию JAVA
+ sudo update-alternatives --config java
+    export ANDROID_HOME=$HOME/Android/Sdk
+    export PATH=$PATH:$ANDROID_HOME/emulator
+    export PATH=$PATH:$ANDROID_HOME/platform-tools
+ java -version
+ export PATH="/home/azhuk/.nvm/versions/node/v20.17.0/bin:$PATH"
+ adb start-server
+ adb kill-server
+
+"hooks": {
+"postPublish": [
+{
+    "file": "sentry-expo/upload-sourcemaps",
+    "config": {
+    "organization": "myoffer",
+    "project": "myoffer_app",
+    "url": "https://app.glitchtip.com/"
+    }
+}
+]
+},
+
+Обновить expo  https://blog.expo.dev/expo-sdk-49-c6d398cdf740
+npm install expo@^49.0.0
+npx expo install --fix
+npx expo-doctor@latest
+
+npx expo prebuild
+
+Обновить билд без новой сборки (картики название)
+npx expo prebuild --clean
+
+билд
+eas login
+eas build:configure
+eas build --platform android --profile production
+eas build --platform ios --profile production
+
+eas build --platform android --profile preview
+
+обновить билд у пользователей
+npx eas update --branch production --message "Updating the app"
+https://u.expo.dev/bf189e94-81ad-4deb-9d3b-3de10662db11?runtime-version=1.0.15&channel-name=production&platform=android
+
+sha-1 token
+https://expo.dev/accounts/kristina_gyk/projects/youoffer/credentials/android/com.offer.youoffer
+npx eas credentials
+keytool -keystore ./android/app/debug.keystore -list -v
+
+проверить порт
+netstat -nlp | grep :8081
+
+sentry token
+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
+
+expo-location для android минимум 16.5.0, а для ios - 16.3.0
+
+For prod build ios
+export const FILE_URL = `https://myoffer.life/api/v1/file/`;
+export const API_URL = 'https://myoffer.life/';
+ 
+for android
+export const FILE_URL = `${process.env.EXPO_PUBLIC_API_URL}api/v1/file/`;
+export const API_URL = process.env.EXPO_PUBLIC_API_URL;
+export const ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_ANDROID_CLIENT_ID
+export const IOS_CLIENT_ID = process.env.EXPO_PUBLIC_IOS_CLIENT_ID
+
+// dev
+export const FILE_URL = `https://dev.myoffer.life/api/v1/file/`;
+export const API_URL = 'https://dev.myoffer.life/';
+ 
+// for ios build
+in Xcode
+add push notification
+add location request descriptions
+add check remote notification
+
+
+
