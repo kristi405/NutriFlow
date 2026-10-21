@@ -265,7 +265,12 @@
     "premiumCta": "Assinar o plano Premium",
     "signOut": "Sair",
     "signOutConfirmTitle": "Sair da conta?",
-    "signOutConfirmMessage": "Você precisará entrar novamente para acessar sua conta."
+    "signOutConfirmMessage": "Você precisará entrar novamente para acessar sua conta.",
+    "deleteAllData": "Sair e excluir todos os dados",
+    "deleteAllDataConfirmTitle": "Excluir todos os dados?",
+    "deleteAllDataConfirmMessage": "Isso excluirá permanentemente sua conta e tudo o que há nela — perfil, planos de refeições, receitas, laudos de exames e fotos. Essa ação não pode ser desfeita.",
+    "deleteAllDataConfirm": "Excluir tudo",
+    "deleteAllDataFailed": "Não foi possível excluir a conta. Verifique sua conexão e tente novamente."
   },
   "progress": {
     "title": "Progresso",

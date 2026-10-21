@@ -279,7 +279,12 @@
     "premiumCta": "Join Premium Plan",
     "signOut": "Sign Out",
     "signOutConfirmTitle": "Sign out?",
-    "signOutConfirmMessage": "You will need to log in again to access your account."
+    "signOutConfirmMessage": "You will need to log in again to access your account.",
+    "deleteAllData": "Sign Out and Delete All Data",
+    "deleteAllDataConfirmTitle": "Delete all data?",
+    "deleteAllDataConfirmMessage": "This permanently deletes your account and everything in it — profile, meal plans, recipes, lab reports and photos. This cannot be undone.",
+    "deleteAllDataConfirm": "Delete Everything",
+    "deleteAllDataFailed": "Couldn't delete your account. Please check your connection and try again."
   },
   "progress": {
     "title": "Progress",

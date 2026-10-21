@@ -265,7 +265,12 @@
     "premiumCta": "Unirse al plan Premium",
     "signOut": "Cerrar sesión",
     "signOutConfirmTitle": "¿Cerrar sesión?",
-    "signOutConfirmMessage": "Deberás iniciar sesión de nuevo para acceder a tu cuenta."
+    "signOutConfirmMessage": "Deberás iniciar sesión de nuevo para acceder a tu cuenta.",
+    "deleteAllData": "Cerrar sesión y eliminar todos los datos",
+    "deleteAllDataConfirmTitle": "¿Eliminar todos los datos?",
+    "deleteAllDataConfirmMessage": "Esto eliminará permanentemente tu cuenta y todo lo que contiene: perfil, planes de comidas, recetas, informes de laboratorio y fotos. Esta acción no se puede deshacer.",
+    "deleteAllDataConfirm": "Eliminar todo",
+    "deleteAllDataFailed": "No se pudo eliminar la cuenta. Comprueba tu conexión e inténtalo de nuevo."
   },
   "progress": {
     "title": "Progreso",

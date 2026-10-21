@@ -279,7 +279,12 @@
     "premiumCta": "Premium abschließen",
     "signOut": "Abmelden",
     "signOutConfirmTitle": "Abmelden?",
-    "signOutConfirmMessage": "Du musst dich erneut anmelden, um auf dein Konto zuzugreifen."
+    "signOutConfirmMessage": "Du musst dich erneut anmelden, um auf dein Konto zuzugreifen.",
+    "deleteAllData": "Abmelden und alle Daten löschen",
+    "deleteAllDataConfirmTitle": "Alle Daten löschen?",
+    "deleteAllDataConfirmMessage": "Dadurch werden dein Konto und alles darin dauerhaft gelöscht — Profil, Essenspläne, Rezepte, Laborberichte und Fotos. Dies kann nicht rückgängig gemacht werden.",
+    "deleteAllDataConfirm": "Alles löschen",
+    "deleteAllDataFailed": "Konto konnte nicht gelöscht werden. Bitte überprüfe deine Verbindung und versuche es erneut."
   },
   "progress": {
     "title": "Fortschritt",

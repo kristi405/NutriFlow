@@ -279,7 +279,12 @@
     "premiumCta": "Оформить Premium",
     "signOut": "Выйти из аккаунта",
     "signOutConfirmTitle": "Выйти?",
-    "signOutConfirmMessage": "Для доступа к аккаунту потребуется войти снова."
+    "signOutConfirmMessage": "Для доступа к аккаунту потребуется войти снова.",
+    "deleteAllData": "Выйти и удалить все данные",
+    "deleteAllDataConfirmTitle": "Удалить все данные?",
+    "deleteAllDataConfirmMessage": "Это навсегда удалит ваш аккаунт и всё, что в нём — профиль, планы питания, рецепты, отчёты анализов и фото. Это действие нельзя отменить.",
+    "deleteAllDataConfirm": "Удалить всё",
+    "deleteAllDataFailed": "Не удалось удалить аккаунт. Проверьте подключение и попробуйте снова."
   },
   "progress": {
     "title": "Прогресс",

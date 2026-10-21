@@ -279,7 +279,12 @@
     "premiumCta": "Dołącz do Premium",
     "signOut": "Wyloguj się",
     "signOutConfirmTitle": "Wylogować się?",
-    "signOutConfirmMessage": "Aby uzyskać dostęp do konta, musisz zalogować się ponownie."
+    "signOutConfirmMessage": "Aby uzyskać dostęp do konta, musisz zalogować się ponownie.",
+    "deleteAllData": "Wyloguj się i usuń wszystkie dane",
+    "deleteAllDataConfirmTitle": "Usunąć wszystkie dane?",
+    "deleteAllDataConfirmMessage": "To nieodwracalnie usunie twoje konto i wszystko w nim — profil, plany posiłków, przepisy, raporty badań i zdjęcia. Tej operacji nie można odwrócić.",
+    "deleteAllDataConfirm": "Usuń wszystko",
+    "deleteAllDataFailed": "Nie udało się usunąć konta. Sprawdź połączenie i spróbuj ponownie."
   },
   "progress": {
     "title": "Postęp",

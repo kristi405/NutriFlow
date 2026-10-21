@@ -62,6 +62,17 @@ function TabLayout() {
     }
   }, [hasHydrated, hasOnboarded, authStore.isAuthenticated]);
   useEffect(() => {
+    // Covers a reinstall: AsyncStorage (and hasOnboarded with it) is gone, but
+    // the backend may already have this account's anketa from before — a
+    // no-op for a genuinely new account, which has none yet.
+    if (authStore.isAuthenticated && hasHydrated && !hasOnboarded) {
+      profileStore.hydrateFromServer(authStore.currentUser);
+      // Restoring silently isn't "just finished onboarding" — skip the
+      // calorie-calculating splash the effect below would otherwise trigger.
+      if (profileStore.hasOnboarded) prevHasOnboardedRef.current = true;
+    }
+  }, [authStore.isAuthenticated, hasHydrated, hasOnboarded]);
+  useEffect(() => {
     if (localeStore.hasHydrated) localeStore.fetchLanguages();
   }, [localeStore.hasHydrated]);
   useEffect(() => {
@@ -87,10 +98,16 @@ function TabLayout() {
     if (userId) subscriptionStore.init(userId);else subscriptionStore.logOut();
   }, [userId]);
   useEffect(() => {
+    // Covers a reinstall: AsyncStorage (and acceptedAt with it) is gone, but
+    // the backend may already have this account's acceptance from before —
+    // a no-op for a genuinely new account, which has none yet. Declared
+    // before the requireAcceptance effect below so it runs first.
+    if (userId && termsStore.hasHydrated) termsStore.hydrateFromServer(authStore.currentUser);
+  }, [userId, termsStore.hasHydrated]);
+  useEffect(() => {
     // There's no separate "register" screen anymore — Google/Apple sign-in both
     // create and log in to an account, so this is the only place that can tell
-    // someone hasn't accepted the terms yet (including a returning account on a
-    // fresh install, since acceptance is stored locally, not on the server).
+    // someone hasn't accepted the terms yet.
     if (userId && termsStore.hasHydrated && !termsStore.acceptedAt && !termsStore.isPending) termsStore.requireAcceptance();
   }, [userId, termsStore.hasHydrated]);
   const catalogSyncReady = authStore.isAuthenticated && localeStore.hasHydrated && catalogStore.hasHydrated;

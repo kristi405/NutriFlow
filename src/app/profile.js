@@ -16,6 +16,7 @@ import { removeFamilyMember } from '@/store/peopleActions';
 import { profileStore } from '@/store/profileStore';
 import { notificationsStore } from '@/store/notificationsStore';
 import { themeStore } from '@/store/themeStore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
@@ -124,6 +125,27 @@ function ProfileScreen() {
       text: t('profile.signOut'),
       style: 'destructive',
       onPress: () => authStore.logout()
+    }]);
+  }
+
+  function handleDeleteAccount() {
+    Alert.alert(t('profile.deleteAllDataConfirmTitle'), t('profile.deleteAllDataConfirmMessage'), [{ text: t('common.cancel'), style: 'cancel' }, {
+      text: t('profile.deleteAllDataConfirm'),
+      style: 'destructive',
+      onPress: async () => {
+        try {
+          await apiRequest('/app/users/me', { method: 'DELETE', token: authStore.token });
+        } catch {
+          Alert.alert(t('common.errorTitle'), t('profile.deleteAllDataFailed'));
+          return;
+        }
+        // The account (and every server-side trace of it) is already gone at
+        // this point — clear local storage too so nothing from it lingers,
+        // then sign out locally (its own server-side session revoke is a
+        // harmless no-op now, the session row no longer exists).
+        await authStore.logout();
+        await AsyncStorage.clear().catch(() => {});
+      }
     }]);
   }
 
@@ -261,6 +283,11 @@ function ProfileScreen() {
 
       <Pressable onPress={handleSignOut} style={styles.signOutButton}>
         <ThemedText type="smallBold" color={theme.error}>{t('profile.signOut')}</ThemedText>
+      </Pressable>
+
+      <Pressable onPress={handleDeleteAccount} style={[styles.signOutButton, styles.deleteAllDataButton, { backgroundColor: theme.error }]}>
+        <SymbolView name={{ ios: 'exclamationmark.triangle.fill', android: 'warning', web: 'warning' }} size={16} tintColor="#ffffff" />
+        <ThemedText type="smallBold" color="#ffffff">{t('profile.deleteAllData')}</ThemedText>
       </Pressable>
 
       <Modal visible={isHelpModalOpen} transparent animationType="slide" onRequestClose={() => setIsHelpModalOpen(false)}>
@@ -493,6 +520,11 @@ const createStyles = theme => StyleSheet.create({
     borderRadius: 16,
     paddingVertical: Spacing.three,
     marginBottom: Spacing.four
+  },
+  deleteAllDataButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: Spacing.one
   },
   modalBackdrop: {
     flex: 1,

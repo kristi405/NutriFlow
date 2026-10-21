@@ -8,7 +8,17 @@ import { TermsContent } from '@/components/terms-content';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { apiRequest } from '@/lib/api';
+import { authStore } from '@/store/authStore';
 import { termsStore } from '@/store/termsStore';
+
+function handleAccept() {
+  termsStore.accept();
+  // Best-effort, same as authStore.syncProfile — the user has already moved
+  // on locally either way; a failed push here just means hydrateFromServer
+  // won't find it after a reinstall, and this screen runs again then.
+  apiRequest('/app/users/me', { method: 'PUT', token: authStore.token, body: { preferences: { termsAcceptedAt: termsStore.acceptedAt } } }).catch(() => {});
+}
 
 function TermsAcceptanceModal() {
   const { t } = useTranslation();
@@ -34,7 +44,7 @@ function TermsAcceptanceModal() {
               {t('auth.terms.agreePrefix')}{t('auth.terms.link')}{t('auth.terms.agreeSuffix')}
             </ThemedText>
           </Pressable>
-          <Pressable onPress={() => termsStore.accept()} disabled={!checked} style={({ pressed }) => [styles.button, { backgroundColor: theme.accent, opacity: checked ? (pressed ? 0.85 : 1) : 0.4 }]}>
+          <Pressable onPress={handleAccept} disabled={!checked} style={({ pressed }) => [styles.button, { backgroundColor: theme.accent, opacity: checked ? (pressed ? 0.85 : 1) : 0.4 }]}>
             <ThemedText type="smallBold" color="#ffffff" style={styles.buttonText}>{t('auth.terms.accept')}</ThemedText>
           </Pressable>
         </View>
