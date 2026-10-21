@@ -21,7 +21,7 @@ import { Spacing } from '@/constants/theme';
 import { getIngredientById, getIngredients, getRecipeById, getRecipes } from '@/data/catalog';
 import { useTheme } from '@/hooks/use-theme';
 import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
-import { addDays, todayKey, weekContaining } from '@/lib/date';
+import { addDays, monthOf, todayKey, weekContaining, yearOf } from '@/lib/date';
 import { defaultQuantityFor, formatQuantity, formatUnit, parseQuantity } from '@/lib/ingredientUnits';
 import { guessIngredientImage } from '@/lib/ingredientImage';
 import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
@@ -148,7 +148,13 @@ function MealPlanScreen() {
   const today = todayKey();
   // The week being viewed (navigable via the arrows/swipe below), not always
   // today's — but days already in the past are still never auto-generated.
-  const remainingWeekDays = weekContaining(date).filter(day => day >= today);
+  const weekDays = weekContaining(date);
+  const remainingWeekDays = weekDays.filter(day => day >= today);
+  // A week spanning two months (e.g. the last days of one and the first of the
+  // next) is labeled by its Thursday — the same convention ISO week numbering
+  // uses, so the shown month/year stays stable as you scrub near a month edge.
+  const monthAnchor = weekDays[3];
+  const monthLabel = `${t(`common.months.${monthOf(monthAnchor)}`)} ${yearOf(monthAnchor)}`;
 
   // Moves the calendar strip a week at a time, via the arrows or a swipe on
   // the header (see weekPanResponder below). Shifting by exactly 7 days keeps
@@ -342,9 +348,6 @@ function MealPlanScreen() {
             <ThemedText type="title" style={styles.title} color={theme.text}>
               {t('mealPlan.title')}
             </ThemedText>
-            <ThemedText type="small" color={theme.textSecondary}>
-              {t('mealPlan.subtitle')}
-            </ThemedText>
           </View>
           <Pressable onPress={() => ensurePremium() && handleRegenerateToday()} hitSlop={8} style={styles.refreshButton}>
             <SymbolView name={{ ios: 'arrow.clockwise', android: 'refresh', web: 'refresh' }} size={18} tintColor={theme.accent} />
@@ -355,6 +358,10 @@ function MealPlanScreen() {
             </View>
           </PersonSwitcher>
         </View>
+
+        <ThemedText type="smallBold" color={theme.textSecondary} style={styles.monthLabel}>
+          {monthLabel}
+        </ThemedText>
 
         <View style={styles.weekRow} {...weekPanResponder.panHandlers}>
           <Pressable onPress={() => shiftWeek(-1)} hitSlop={8} style={styles.weekArrow}>
@@ -612,6 +619,12 @@ const createStyles = theme => StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: Spacing.two
+  },
+  monthLabel: {
+    textAlign: 'left',
+    textTransform: 'capitalize',
+    marginTop: Spacing.one,
+    marginBottom: -Spacing.two
   },
   weekRow: {
     flexDirection: 'row',

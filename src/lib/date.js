@@ -18,6 +18,14 @@ export function weekdayLabel(dateKey) {
   return WEEKDAY_LABELS[new Date(year, month - 1, day).getDay()];
 }
 
+// 0-11, matching the `common.months` translation array.
+export function monthOf(dateKey) {
+  return Number(dateKey.split('-')[1]) - 1;
+}
+export function yearOf(dateKey) {
+  return Number(dateKey.split('-')[0]);
+}
+
 /** Monday-start week containing dateKey, as 7 DateKeys. */
 export function weekContaining(dateKey) {
   const [year, month, day] = dateKey.split('-').map(Number);

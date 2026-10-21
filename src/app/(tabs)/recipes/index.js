@@ -4,7 +4,7 @@ import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-spe
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Animated, Easing, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Easing, Image as RNImage, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
 import { RecipeCard } from '@/components/ui/recipe-card';
@@ -26,9 +26,9 @@ const MY_RECIPES_FILTER = 'my-recipes';
 
 // Matching photos for the non-category filter chips (all/my recipes/favorites),
 // so they get the same round-photo treatment as the real categories below.
-const ALL_CATEGORIES_IMAGE = 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=800';
-const MY_RECIPES_IMAGE = 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800';
-const FAVORITES_IMAGE = 'https://images.unsplash.com/photo-1493770348161-369560ae357d?w=800';
+const ALL_CATEGORIES_IMAGE = RNImage.resolveAssetSource(require('../../../../assets/images/all-recipes-category.png')).uri;
+const MY_RECIPES_IMAGE = RNImage.resolveAssetSource(require('../../../../assets/images/my-recipes-category.png')).uri;
+const FAVORITES_IMAGE = RNImage.resolveAssetSource(require('../../../../assets/images/favorites-category.png')).uri;
 
 const CONTAINER_PADDING = 20;
 const CARD_GAP = Spacing.two;
@@ -358,9 +358,9 @@ const createStyles = theme => StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: 'transparent'
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+    padding: 3
   },
   categoryImageWrapperActive: {
     borderColor: theme.accent

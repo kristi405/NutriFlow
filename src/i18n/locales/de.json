@@ -31,7 +31,21 @@
     "searchTags": "Tags suchen",
     "noTagsFound": "Keine Tags gefunden",
     "delete": "Löschen",
-    "or": "oder"
+    "or": "oder",
+    "months": [
+      "Januar",
+      "Februar",
+      "März",
+      "April",
+      "Mai",
+      "Juni",
+      "Juli",
+      "August",
+      "September",
+      "Oktober",
+      "November",
+      "Dezember"
+    ]
   },
   "auth": {
     "entry": {
