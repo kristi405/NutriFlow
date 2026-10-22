@@ -31,7 +31,21 @@
     "searchTags": "Buscar etiquetas",
     "noTagsFound": "No se encontraron etiquetas",
     "delete": "Eliminar",
-    "or": "o"
+    "or": "o",
+    "months": [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre"
+    ]
   },
   "auth": {
     "entry": {
@@ -477,7 +491,7 @@
   },
   "aiAnalysis": {
     "title": "Análisis con IA",
-    "subtitle": "Sube resultados de laboratorio y obtén consejos nutricionales personalizados",
+    "subtitle": "Sube resultados de laboratorio y obtén un análisis nutricional personalizado",
     "uploadTitle": "Sube tus resultados de laboratorio",
     "uploadSubtitle": "Foto (JPG, PNG, WebP) o PDF de hasta 5 MB",
     "uploadButton": "Elegir archivo",
@@ -486,7 +500,7 @@
     "step1Subtitle": "Añade una foto o PDF de tu análisis de sangre o informe de laboratorio",
     "step2Title": "Analiza",
     "step2Subtitle": "La IA revisa tus resultados según la ciencia de la nutrición",
-    "step3Title": "Recibe consejos",
+    "step3Title": "Obtén análisis",
     "step3Subtitle": "Recibe un plan de nutrición personalizado según tus niveles",
     "recentAnalyses": "Análisis recientes",
     "emptyTitle": "Aún no hay análisis",
@@ -516,7 +530,7 @@
     "noChartMessage": "Este indicador no tiene valores numéricos para graficar.",
     "loadFailedTitle": "No se pudo cargar",
     "loadFailedMessage": "Comprueba tu conexión e inténtalo de nuevo.",
-    "disclaimer": "Solo con fines informativos, no es un diagnóstico médico. Comenta tus resultados con un médico.",
+    "disclaimer": "Solo con fines informativos: no es un diagnóstico médico ni sustituye a un médico. Comenta siempre tus resultados con un profesional de la salud.",
     "ifLow": "Si está bajo",
     "ifHigh": "Si está alto",
     "foodSources": "Fuentes alimentarias",
