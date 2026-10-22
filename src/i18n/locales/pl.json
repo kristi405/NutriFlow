@@ -68,7 +68,13 @@
       "agreeSuffix": " i wyrażam wyraźną zgodę na przetwarzanie moich danych osobowych i danych o zdrowiu.",
       "close": "Zamknij",
       "accept": "Akceptuję i kontynuuję"
-    }
+    },
+    "continueAsGuest": "Kontynuuj bez konta",
+    "signIn": "Zaloguj się",
+    "guestLockedTitle": "Zaloguj się, aby kontynuować",
+    "guestLockedNutrients": "Utwórz bezpłatne konto, aby zobaczyć wartości odżywcze tego przepisu.",
+    "guestBannerTitle": "Przeglądasz jako gość",
+    "guestBannerMessage": "Zaloguj się, aby uzyskać dostęp do wartości odżywczych, własnych przepisów, planów posiłków i więcej."
   },
   "onboarding": {
     "skip": "Pomiń",

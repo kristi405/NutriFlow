@@ -8,11 +8,15 @@ class AuthStore {
   // Set once the user explicitly signs out — lets _layout.js's SKIP_AUTH_FOR_TESTING
   // bypass be overridden so logout actually lands on the login screen during dev.
   hasLoggedOut = false;
+  // Chose "Continue without an account" on the sign-in screen (see AuthEntryScreen).
+  // No backend user at all — distinct from isAuthenticated, which _layout.js uses
+  // to gate the real app vs. the cut-down, recipes-only guest shell.
+  isGuest = false;
   hasHydrated = false;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
-    persistStore(this, 'nutriflow.auth', ['token', 'currentUser']);
+    persistStore(this, 'nutriflow.auth', ['token', 'currentUser', 'isGuest']);
     // Sessions never expire server-side, but a token can still be killed
     // early (revoked from another device, account blocked) — any 401 from an
     // authed request means the persisted session is dead, so drop it locally
@@ -68,6 +72,7 @@ class AuthStore {
       this.token = data.session.token;
       this.currentUser = data.user;
       this.hasLoggedOut = false;
+      this.isGuest = false;
     });
   }
 
@@ -86,7 +91,21 @@ class AuthStore {
       this.token = data.session.token;
       this.currentUser = data.user;
       this.hasLoggedOut = false;
+      this.isGuest = false;
     });
+  }
+
+  // "Continue without an account" on the sign-in screen — no backend call, just
+  // a local flag that routes _layout.js to the cut-down guest shell instead of
+  // AuthFlow/the full app.
+  continueAsGuest() {
+    this.isGuest = true;
+  }
+
+  // Lets a guest back out to the real sign-in screen (e.g. tapping "Sign in"
+  // inside the guest shell) without going through the full logout/session-revoke path.
+  exitGuestMode() {
+    this.isGuest = false;
   }
 
   async logout() {
@@ -94,6 +113,7 @@ class AuthStore {
     this.currentUser = null;
     this.token = null;
     this.hasLoggedOut = true;
+    this.isGuest = false;
 
     if (!token) return;
     // Best-effort: revoke the session server-side so the token can't be reused.

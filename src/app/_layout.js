@@ -35,6 +35,12 @@ function TabLayout() {
   const [showCalculating, setShowCalculating] = useState(false);
   const hasHydrated = profileStore.hasHydrated && authStore.hasHydrated && peopleStore.hasHydrated;
   const isAuthenticated = authStore.isAuthenticated || (SKIP_AUTH_FOR_TESTING && !authStore.hasLoggedOut);
+  // "Continue without an account" on the sign-in screen — skips onboarding
+  // and goes straight into the same Stack/tab navigator real users get (see
+  // renderContent below), with app-tabs.js and recipes/[id] cutting it down
+  // to just the Recipes tab, no own recipes, no ingredients catalog, and
+  // nutrients locked behind sign-in.
+  const isGuest = authStore.isGuest && !isAuthenticated;
   const hasOnboarded = profileStore.hasOnboarded;
   const prevHasOnboardedRef = useRef(hasOnboarded);
   useEffect(() => {
@@ -110,17 +116,21 @@ function TabLayout() {
     // someone hasn't accepted the terms yet.
     if (userId && termsStore.hasHydrated && !termsStore.acceptedAt && !termsStore.isPending) termsStore.requireAcceptance();
   }, [userId, termsStore.hasHydrated]);
-  const catalogSyncReady = authStore.isAuthenticated && localeStore.hasHydrated && catalogStore.hasHydrated;
+  // A guest sync hits /app/sync with no token — optionalAuth there still
+  // returns the catalog, just without nutrition/ingredients (see
+  // NUTRIFLOW_BACKEND's CatalogSyncService).
+  const catalogSyncReady = (authStore.isAuthenticated || isGuest) && localeStore.hasHydrated && catalogStore.hasHydrated;
   const contentLanguage = localeStore.language;
   useEffect(() => {
-    // Fires when the session becomes usable (fresh login or restored on app
-    // launch) and again whenever the app language changes, since catalog text
-    // is served pre-translated. Waits for the persisted language/catalog to
-    // load so it doesn't sync with a stale default first.
+    // Fires when the session becomes usable (fresh login, restored on app
+    // launch, or "continue as guest") and again whenever the app language
+    // changes, since catalog text is served pre-translated. Waits for the
+    // persisted language/catalog to load so it doesn't sync with a stale
+    // default first.
     if (catalogSyncReady) {
-      catalogStore.sync(authStore.token, contentLanguage);
+      catalogStore.sync(isGuest ? null : authStore.token, contentLanguage);
     }
-  }, [catalogSyncReady, contentLanguage]);
+  }, [catalogSyncReady, contentLanguage, isGuest]);
   useEffect(() => {
     if (!prevHasOnboardedRef.current && hasOnboarded) {
       setShowCalculating(true);
@@ -132,8 +142,16 @@ function TabLayout() {
   }, [hasOnboarded]);
   function renderContent() {
     if (!hasHydrated) return <ThemedView key="loading" style={{ flex: 1 }} />;
-    if (!isAuthenticated) return <AuthFlow key="auth" />;
-    if (!hasOnboarded) return <OnboardingFlow key="onboarding" />;
+    if (!isAuthenticated && !isGuest) return <AuthFlow key="auth" />;
+    // Guests skip onboarding (no profile to collect) and land straight in the
+    // same Stack/tab navigator real users get — app-tabs.js renders only the
+    // Recipes tab for them, and recipes/[id] locks nutrients behind sign-in
+    // (see that screen's authStore.isGuest check). A separate guest-only
+    // Stack here (declaring just guest-recipes + recipes/[id]) was tried
+    // first but conflicted with expo-router's route resolution, which kept
+    // resolving to (tabs) regardless of which Stack.Screen list was active —
+    // reusing the one real Stack avoids that entirely.
+    if (!hasOnboarded && !isGuest) return <OnboardingFlow key="onboarding" />;
     if (showCalculating) return <CalculatingScreen key="calculating" />;
     return <Stack key="tabs" screenOptions={{ headerShown: false, headerLeft: () => <HeaderBackButton /> }}>
         <Stack.Screen name="(tabs)" />

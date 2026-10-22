@@ -61,6 +61,7 @@ function RecipesScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const isGuest = authStore.isGuest;
   const [query, setQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(null);
@@ -160,14 +161,14 @@ function RecipesScreen() {
               {t('recipes.allCategories')}
             </ThemedText>
           </PulseItem>
-          <PulseItem active={selectedFilter === MY_RECIPES_FILTER} onPress={() => setSelectedFilter(current => current === MY_RECIPES_FILTER ? null : MY_RECIPES_FILTER)} style={styles.categoryCircleItem}>
+          {!isGuest && <PulseItem active={selectedFilter === MY_RECIPES_FILTER} onPress={() => setSelectedFilter(current => current === MY_RECIPES_FILTER ? null : MY_RECIPES_FILTER)} style={styles.categoryCircleItem}>
             <View style={[styles.categoryImageWrapper, selectedFilter === MY_RECIPES_FILTER && styles.myRecipesImageWrapperActive]}>
               <RecipeImage uri={MY_RECIPES_IMAGE} style={styles.categoryImage} iconSize={16} />
             </View>
             <ThemedText type="caption" color={theme.secondary} numberOfLines={2} style={styles.categoryLabel}>
               {t('recipes.myRecipes')}
             </ThemedText>
-          </PulseItem>
+          </PulseItem>}
           <PulseItem active={selectedFilter === 'favorites'} onPress={() => setSelectedFilter(current => current === 'favorites' ? null : 'favorites')} style={styles.categoryCircleItem}>
             <View style={[styles.categoryImageWrapper, selectedFilter === 'favorites' && styles.favoritesImageWrapperActive]}>
               <RecipeImage uri={FAVORITES_IMAGE} style={styles.categoryImage} iconSize={16} />
@@ -187,20 +188,33 @@ function RecipesScreen() {
         </ScrollView>
       </View>
 
-      <View style={[styles.paddedX, styles.ingredientsBannerWrapper]}>
-        <Pressable onPress={() => router.push('/ingredients')} style={({ pressed }) => [styles.ingredientsBanner, { backgroundColor: theme.background, borderColor: theme.accent, opacity: pressed ? 0.85 : 1 }]}>
-          <View style={[styles.ingredientsBannerIcon, { backgroundColor: theme.accentSoft }]}>
-            <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={20} tintColor={theme.accent} />
-          </View>
-          <View style={styles.ingredientsBannerTextGroup}>
-            <ThemedText type="smallBold" color={theme.text}>{t('ingredients.title')}</ThemedText>
-            <ThemedText type="caption" color={theme.textSecondary}>{t('ingredients.bannerSubtitle')}</ThemedText>
-          </View>
-          <View style={[styles.ingredientsBannerChevron, { backgroundColor: theme.accentSoft }]}>
-            <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={13} tintColor={theme.accent} />
-          </View>
-        </Pressable>
-      </View>
+      {isGuest ? <View style={[styles.paddedX, styles.ingredientsBannerWrapper]}>
+          <Pressable onPress={authStore.exitGuestMode} style={({ pressed }) => [styles.ingredientsBanner, { backgroundColor: theme.accentSoft, borderColor: theme.accent, opacity: pressed ? 0.85 : 1 }]}>
+            <View style={[styles.ingredientsBannerIcon, { backgroundColor: theme.background }]}>
+              <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={20} tintColor={theme.accent} />
+            </View>
+            <View style={styles.ingredientsBannerTextGroup}>
+              <ThemedText type="smallBold" color={theme.text}>{t('auth.guestBannerTitle')}</ThemedText>
+              <ThemedText type="caption" color={theme.textSecondary}>{t('auth.guestBannerMessage')}</ThemedText>
+            </View>
+            <View style={[styles.ingredientsBannerChevron, { backgroundColor: theme.background }]}>
+              <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={13} tintColor={theme.accent} />
+            </View>
+          </Pressable>
+        </View> : <View style={[styles.paddedX, styles.ingredientsBannerWrapper]}>
+          <Pressable onPress={() => router.push('/ingredients')} style={({ pressed }) => [styles.ingredientsBanner, { backgroundColor: theme.background, borderColor: theme.accent, opacity: pressed ? 0.85 : 1 }]}>
+            <View style={[styles.ingredientsBannerIcon, { backgroundColor: theme.accentSoft }]}>
+              <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={20} tintColor={theme.accent} />
+            </View>
+            <View style={styles.ingredientsBannerTextGroup}>
+              <ThemedText type="smallBold" color={theme.text}>{t('ingredients.title')}</ThemedText>
+              <ThemedText type="caption" color={theme.textSecondary}>{t('ingredients.bannerSubtitle')}</ThemedText>
+            </View>
+            <View style={[styles.ingredientsBannerChevron, { backgroundColor: theme.accentSoft }]}>
+              <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={13} tintColor={theme.accent} />
+            </View>
+          </Pressable>
+        </View>}
 
       <Animated.View style={{ gap: Spacing.five, opacity: contentAnim, transform: [{ translateY: contentAnim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }}>
       {selectedFilter === MY_RECIPES_FILTER ? <View style={styles.section}>
@@ -221,12 +235,12 @@ function RecipesScreen() {
           <EmptyState icon={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} title={t('recipes.noResults')} message={t('recipes.noResultsMessage')} />
         </View> : collections.map(({ category, rows }, collectionIndex) => <View key={category.id} style={styles.section}>
           <View style={styles.paddedX}>
-            <SectionHeader title={category.name} right={collectionIndex === 0 ? addRecipeButton : undefined} />
+            <SectionHeader title={category.name} right={!isGuest && collectionIndex === 0 ? addRecipeButton : undefined} />
           </View>
           <View style={[styles.rows, styles.paddedX]}>
             {rows.map((pair, index) => <View key={index} style={styles.row}>
                 {pair.map(recipe => <View key={recipe.id} style={styles.cardSlot}>
-                    <RecipeCard recipe={recipe} calories={calculateRecipeNutrition(recipe, getIngredientById).nutrition.calories} style={styles.cardFill} />
+                    <RecipeCard recipe={recipe} calories={isGuest ? undefined : calculateRecipeNutrition(recipe, getIngredientById).nutrition.calories} style={styles.cardFill} />
                   </View>)}
                 {pair.length === 1 && <View style={styles.cardSlot} />}
               </View>)}

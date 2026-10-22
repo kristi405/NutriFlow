@@ -68,7 +68,13 @@
       "agreeSuffix": " e dou meu consentimento explícito para o tratamento dos meus dados pessoais e de saúde.",
       "close": "Fechar",
       "accept": "Aceitar e continuar"
-    }
+    },
+    "continueAsGuest": "Continuar sem uma conta",
+    "signIn": "Entrar",
+    "guestLockedTitle": "Entre para continuar",
+    "guestLockedNutrients": "Crie uma conta gratuita para ver as informações nutricionais desta receita.",
+    "guestBannerTitle": "Você está navegando como visitante",
+    "guestBannerMessage": "Entre para acessar informações nutricionais, suas próprias receitas, planos de refeição e mais."
   },
   "onboarding": {
     "skip": "Pular",

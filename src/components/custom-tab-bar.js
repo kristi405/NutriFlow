@@ -1,11 +1,13 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SymbolView } from 'expo-symbols';
+import { observer } from 'mobx-react-lite';
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
+import { authStore } from '@/store/authStore';
 
 // Same icon set as before — kept alongside the tab bar so it stays a single
 // source of truth for which icon goes with which route.
@@ -21,6 +23,14 @@ const TAB_ICONS = {
 // profile is reachable via router.push('/profile') (from the Home header) but
 // isn't a button in the bar itself — same as it was hidden on NativeTabs.
 const HIDDEN_ROUTES = new Set(['profile']);
+
+// A guest ("Continue without an account", see authStore.isGuest) only gets
+// Recipes and Articles — Home/Meal Plan/AI/Progress all assume a real,
+// onboarded profile (goals, targets, synced data) a guest never has. All six
+// tabs stay registered in app-tabs.js regardless (see its comment on why
+// conditionally declaring fewer <Tabs.Screen> doesn't actually work);
+// filtering them out of the bar here is what actually hides them.
+const GUEST_VISIBLE_ROUTES = new Set(['recipes', 'articles']);
 
 // The bar floats over screen content (like the native tab bar it replaced),
 // so scrollable screens need to know how much bottom clearance to leave —
@@ -62,10 +72,17 @@ function TabButton({ isFocused, onPress, icon, label, theme }) {
     </Pressable>;
 }
 
-export function CustomTabBar({ state, descriptors, navigation }) {
+function CustomTabBarComponent({ state, descriptors, navigation }) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const visibleRoutes = state.routes.filter(route => !HIDDEN_ROUTES.has(route.name));
+  const isGuest = authStore.isGuest;
+  // Nested screens (recipes/index.js) register as "recipes/index", not
+  // "recipes" — strip the suffix before matching either route set, same as
+  // the icon lookup below already has to.
+  const visibleRoutes = state.routes.filter(route => {
+    const baseName = route.name.replace(/\/index$/, '');
+    return !HIDDEN_ROUTES.has(baseName) && (!isGuest || GUEST_VISIBLE_ROUTES.has(baseName));
+  });
 
   return <View pointerEvents="box-none" style={[styles.wrapper, { paddingBottom: tabBarBottomGap(insets.bottom) }]}>
       <View pointerEvents="none" style={styles.fade}>
@@ -92,6 +109,8 @@ export function CustomTabBar({ state, descriptors, navigation }) {
       </View>
     </View>;
 }
+
+export const CustomTabBar = observer(CustomTabBarComponent);
 
 const styles = StyleSheet.create({
   wrapper: {

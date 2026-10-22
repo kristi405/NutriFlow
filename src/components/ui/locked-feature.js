@@ -7,7 +7,11 @@ import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-export function LockedFeature({ title, message }) {
+// `onAction`/`actionLabel`/`actionIcon` default to the premium-paywall CTA —
+// pass them to reuse this same card for a different lock (e.g. "Sign in" for
+// a guest, see recipes/[id].js's nutrients tab) without touching callers that
+// still want the paywall behavior.
+export function LockedFeature({ title, message, actionLabel, actionIcon, onAction }) {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -18,9 +22,9 @@ export function LockedFeature({ title, message }) {
       </View>
       <ThemedText type="headline" color={theme.text} style={styles.center}>{title ?? t('paywall.lockedTitle')}</ThemedText>
       <ThemedText type="small" color={theme.textSecondary} style={styles.center}>{message ?? t('paywall.lockedMessage')}</ThemedText>
-      <Pressable onPress={() => router.push('/paywall')} style={({ pressed }) => [styles.button, pressed && { opacity: 0.85 }]}>
-        <SymbolView name={{ ios: 'crown.fill', android: 'workspace_premium', web: 'workspace_premium' }} size={16} tintColor="#ffffff" />
-        <ThemedText type="smallBold" color="#ffffff">{t('paywall.unlock')}</ThemedText>
+      <Pressable onPress={onAction ?? (() => router.push('/paywall'))} style={({ pressed }) => [styles.button, pressed && { opacity: 0.85 }]}>
+        <SymbolView name={actionIcon ?? { ios: 'crown.fill', android: 'workspace_premium', web: 'workspace_premium' }} size={16} tintColor="#ffffff" />
+        <ThemedText type="smallBold" color="#ffffff">{actionLabel ?? t('paywall.unlock')}</ThemedText>
       </Pressable>
     </View>;
 }

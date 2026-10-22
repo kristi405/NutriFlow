@@ -68,7 +68,13 @@
       "agreeSuffix": " and give my explicit consent to the processing of my personal and health data.",
       "close": "Close",
       "accept": "Accept and continue"
-    }
+    },
+    "continueAsGuest": "Continue without an account",
+    "signIn": "Sign In",
+    "guestLockedTitle": "Sign in to continue",
+    "guestLockedNutrients": "Create a free account to see the nutrition facts for this recipe.",
+    "guestBannerTitle": "Browsing as a guest",
+    "guestBannerMessage": "Sign in for nutrition facts, your own recipes, meal plans and more."
   },
   "onboarding": {
     "skip": "Skip",

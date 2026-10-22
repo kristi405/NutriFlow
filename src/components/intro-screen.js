@@ -9,8 +9,14 @@ const FADE_DURATION = 600;
 
 export function IntroScreen({ onFinish }) {
   const opacity = useRef(new Animated.Value(1)).current;
+  // Grow-in then pulse on this one value (not two values combined with
+  // Animated.multiply) — some devices (seen with system "reduce motion" on)
+  // throw a native "Illegal node ID" exception on a multiply node combining
+  // two independently native-driven values, which corrupts the native
+  // animated driver for the rest of the session and leaves later screens'
+  // own native-driven fade/scale-ins stuck invisible (looks like a blank
+  // white screen, not just a broken intro).
   const iconScale = useRef(new Animated.Value(0.4)).current;
-  const iconPulse = useRef(new Animated.Value(1)).current;
   const titleOpacity = useRef(new Animated.Value(0)).current;
   const titleTranslateY = useRef(new Animated.Value(12)).current;
   const [nativeSplashHidden, setNativeSplashHidden] = useState(false);
@@ -39,12 +45,12 @@ export function IntroScreen({ onFinish }) {
         })
       ])
     ]).start(() => {
-      Animated.loop(Animated.sequence([Animated.timing(iconPulse, {
+      Animated.loop(Animated.sequence([Animated.timing(iconScale, {
         toValue: 1.08,
         duration: 700,
         easing: Easing.inOut(Easing.ease),
         useNativeDriver: true
-      }), Animated.timing(iconPulse, {
+      }), Animated.timing(iconScale, {
         toValue: 1,
         duration: 700,
         easing: Easing.inOut(Easing.ease),
@@ -69,7 +75,7 @@ export function IntroScreen({ onFinish }) {
   }}>
       <Animated.View style={[styles.content, { opacity }]}>
         <Animated.View style={[styles.iconBadge, {
-        transform: [{ scale: Animated.multiply(iconScale, iconPulse) }]
+        transform: [{ scale: iconScale }]
       }]}>
           <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={64} tintColor="#ffffff" />
         </Animated.View>

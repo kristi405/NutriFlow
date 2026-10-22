@@ -68,7 +68,13 @@
       "agreeSuffix": " und erteile meine ausdrückliche Einwilligung in die Verarbeitung meiner personenbezogenen Daten und Gesundheitsdaten.",
       "close": "Schließen",
       "accept": "Akzeptieren und fortfahren"
-    }
+    },
+    "continueAsGuest": "Ohne Konto fortfahren",
+    "signIn": "Anmelden",
+    "guestLockedTitle": "Melde dich an, um fortzufahren",
+    "guestLockedNutrients": "Erstelle ein kostenloses Konto, um die Nährwerte dieses Rezepts zu sehen.",
+    "guestBannerTitle": "Du bist im Gastmodus",
+    "guestBannerMessage": "Melde dich an für Nährwerte, eigene Rezepte, Essenspläne und mehr."
   },
   "onboarding": {
     "skip": "Überspringen",

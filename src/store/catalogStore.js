@@ -42,6 +42,11 @@ class CatalogStore {
   // so it only returns rows changed after this point. null means "never
   // synced", which makes the next sync a full fetch of the whole catalog.
   lastSyncedAt = null;
+  // Whether that last sync ran without a token (guest — see /app/sync's
+  // optionalAuth). Guest responses have no ingredients/nutrition at all, so
+  // signing in afterwards must force a full re-fetch rather than an
+  // incremental one, or the catalog would stay stuck without them forever.
+  lastSyncWasGuest = false;
   hasHydrated = false;
   // True while a sync request is in flight — drives the refresh button's spinner.
   isSyncing = false;
@@ -54,7 +59,7 @@ class CatalogStore {
     makeAutoObservable(this, {}, { autoBind: true });
     // v2: stored rows changed shape (localized fields instead of name_ru/name_en).
     AsyncStorage.removeItem('nutriflow.catalog').catch(() => {});
-    persistStore(this, 'nutriflow.catalog.v2', ['recipes', 'ingredients', 'tags', 'tagSlugs', 'lang', 'lastSyncedAt']);
+    persistStore(this, 'nutriflow.catalog.v2', ['recipes', 'ingredients', 'tags', 'tagSlugs', 'lang', 'lastSyncedAt', 'lastSyncWasGuest']);
   }
 
   isRecipeNew(id) {
@@ -66,14 +71,22 @@ class CatalogStore {
   // `manual`: pass true from the refresh button so rapid repeat taps are
   // silently capped (see MIN_MANUAL_SYNC_INTERVAL_MS) — login/language-change
   // syncs are deliberate, rare events and are never throttled.
+  // `token` can be omitted for a guest sync (see /app/sync's optionalAuth) —
+  // _layout.js only calls this once it knows whether the session is a real
+  // login or an explicit "continue as guest", so there's nothing to guard
+  // against here.
   async sync(token, lang, { manual = false } = {}) {
-    if (!token) return;
     if (manual) {
       const now = Date.now();
       if (now - lastManualSyncAt < MIN_MANUAL_SYNC_INTERVAL_MS) return;
       lastManualSyncAt = now;
     }
-    const isFullSync = !this.lastSyncedAt || this.lang !== lang;
+    const isGuestNow = !token;
+    // A guest response has no ingredients/nutrition — merging it as a delta
+    // onto an already-authenticated catalog (or vice versa, after signing in)
+    // would silently leave stale/missing data, so either transition forces a
+    // full fetch instead of an incremental one.
+    const isFullSync = !this.lastSyncedAt || this.lang !== lang || isGuestNow !== this.lastSyncWasGuest;
     const params = new URLSearchParams({ lang });
     if (!isFullSync) params.set('since', this.lastSyncedAt);
     const syncId = ++latestSyncId;
@@ -116,6 +129,7 @@ class CatalogStore {
       this.newRecipeIds = isFullSync ? [] : data.recipes.map(recipe => recipe.id);
       this.lang = lang;
       this.lastSyncedAt = data.syncedAt;
+      this.lastSyncWasGuest = isGuestNow;
     });
   }
 }

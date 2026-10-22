@@ -1,11 +1,12 @@
 import { SymbolView } from 'expo-symbols';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { authStore } from '@/store/authStore';
 import { AppleSignInButton } from './apple-sign-in-button';
 import { GoogleSignInButton } from './google-sign-in-button';
 import { TermsLink } from './terms-consent';
@@ -40,6 +41,10 @@ export function AuthEntryScreen() {
             <AppleSignInButton onError={setAppleError} />
             {appleError && <ThemedText type="small" color={theme.error}>{appleError}</ThemedText>}
           </View>}
+
+        <Pressable onPress={authStore.continueAsGuest} hitSlop={8} style={styles.guestButton}>
+          <ThemedText type="small" color={theme.textSecondary} style={styles.guestButtonLabel}>{t('auth.continueAsGuest')}</ThemedText>
+        </Pressable>
       </Animated.View>
 
       <TermsLink />
@@ -89,5 +94,12 @@ const createStyles = theme => StyleSheet.create({
   appleSection: {
     marginTop: Spacing.three,
     gap: Spacing.one
+  },
+  guestButton: {
+    marginTop: Spacing.four,
+    alignItems: 'center'
+  },
+  guestButtonLabel: {
+    textDecorationLine: 'underline'
   }
 });

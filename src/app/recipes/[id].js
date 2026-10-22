@@ -13,6 +13,7 @@ import { guessIngredientCategory } from '@/lib/ingredientImage';
 import { calculateRecipeNutrition, canMeasureIn, scaleForServings } from '@/lib/nutrition';
 import { recipeImageUri } from '@/lib/recipeImage';
 import { formatNutrientAmount, MINERAL_ROWS, NUTRIENT_ROWS, nonZeroRows, VITAMIN_ROWS } from '@/lib/nutrientRows';
+import { authStore } from '@/store/authStore';
 import { mealPlanStore } from '@/store/mealPlanStore';
 import { myRecipesStore } from '@/store/myRecipesStore';
 import { deleteUserRecipe } from '@/store/recipeActions';
@@ -364,7 +365,7 @@ function RecipeDetailScreen() {
             {recipe.difficulty && <MetaItem styles={styles} icon={{ ios: 'chart.bar.fill', android: 'bar_chart', web: 'bar_chart' }} label={t(`recipes.difficulty.${recipe.difficulty}`, { defaultValue: recipe.difficulty })} color={recipe.difficulty === 'easy' ? theme.primary : theme.textSecondary} />}
           </View>
 
-          {nutrition && <View style={styles.statsCard}>
+          {nutrition && !authStore.isGuest && <View style={styles.statsCard}>
               {STATS.map(stat => <View key={stat.key} style={styles.statItem}>
                   <ThemedText type="smallBold" color={stat.color}>
                     {Math.round(nutrition[stat.key])}
@@ -471,9 +472,11 @@ function RecipeDetailScreen() {
               </View>
             </View>}
 
-          {activeTab === 'nutrients' && nutrition && !subscriptionStore.hasAccess && <LockedFeature message={t('paywall.lockedNutrients')} />}
+          {activeTab === 'nutrients' && nutrition && authStore.isGuest && <LockedFeature title={t('auth.guestLockedTitle')} message={t('auth.guestLockedNutrients')} actionLabel={t('auth.signIn')} actionIcon={{ ios: 'person.fill', android: 'person', web: 'person' }} onAction={authStore.exitGuestMode} />}
 
-          {activeTab === 'nutrients' && nutrition && subscriptionStore.hasAccess && <View style={styles.nutrientsGroup}>
+          {activeTab === 'nutrients' && nutrition && !authStore.isGuest && !subscriptionStore.hasAccess && <LockedFeature message={t('paywall.lockedNutrients')} />}
+
+          {activeTab === 'nutrients' && nutrition && !authStore.isGuest && subscriptionStore.hasAccess && <View style={styles.nutrientsGroup}>
               <View style={styles.card}>
                 <ThemedText type="headline" color={theme.text} style={styles.cardTitle}>
                   {t('recipes.nutrients')}
