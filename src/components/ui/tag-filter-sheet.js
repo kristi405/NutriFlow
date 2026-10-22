@@ -1,7 +1,7 @@
 import { SymbolView } from 'expo-symbols';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -34,8 +34,9 @@ export function TagFilterSheet({ visible, tags, selectedIds, onChange, onClose }
   }
 
   return <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
-      <Pressable style={[styles.backdrop, { paddingBottom: keyboardHeight }]} onPress={handleClose}>
-        <Pressable style={[styles.sheet, { backgroundColor: theme.background }]} onPress={event => event.stopPropagation()}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex1}>
+      <Pressable style={[styles.backdrop, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]} onPress={handleClose}>
+        <Pressable style={[styles.sheet, { backgroundColor: theme.background }, keyboardHeight > 0 && styles.sheetKeyboardOpen]} onPress={event => event.stopPropagation()}>
           <View style={styles.header}>
             <ThemedText type="smallBold" color={theme.text}>{t('common.selectTags')}</ThemedText>
             <Pressable onPress={handleClose} hitSlop={8} style={[styles.closeButton, { backgroundColor: theme.accentSoft }]}>
@@ -64,10 +65,14 @@ export function TagFilterSheet({ visible, tags, selectedIds, onChange, onClose }
           </View>
         </Pressable>
       </Pressable>
+      </KeyboardAvoidingView>
     </Modal>;
 }
 
 const styles = StyleSheet.create({
+  flex1: {
+    flex: 1
+  },
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
@@ -80,6 +85,12 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.five,
     gap: Spacing.three,
     height: '75%'
+  },
+  // With the keyboard up, KeyboardAvoidingView already shifts the sheet to sit
+  // right above it — the sheet's own resting-state bottom padding would then
+  // show up as a gap of empty space above the keyboard.
+  sheetKeyboardOpen: {
+    paddingBottom: Spacing.two
   },
   header: {
     flexDirection: 'row',

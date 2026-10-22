@@ -301,7 +301,13 @@ function RecipeDetailScreen() {
     }
   });
 
-  return <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={[styles.flex1, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]}>
+  // iOS gets its keyboard-clearing room from the ScrollView's own
+  // automaticallyAdjustKeyboardInsets below — a native, frame-synced inset
+  // that tracks the keyboard's real animation curve. Running KeyboardAvoidingView's
+  // "padding" behavior at the same time double-counted the shift and made the
+  // whole screen (including the collapsing header) visibly jump; Android still
+  // has no native equivalent, so it keeps the manual paddingBottom.
+  return <KeyboardAvoidingView behavior={undefined} style={[styles.flex1, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]}>
       <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
       <View style={[styles.fixedImageWrapper, {
       height: imageHeight
@@ -383,8 +389,12 @@ function RecipeDetailScreen() {
         </View>
       </Animated.View>
 
-      <Animated.ScrollView ref={detailScrollRef} keyboardShouldPersistTaps="handled" style={styles.flex1} showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16} contentContainerStyle={{
-      paddingBottom: insets.bottom + Spacing.four + keyboardHeight
+      <Animated.ScrollView ref={detailScrollRef} keyboardShouldPersistTaps="handled" style={styles.flex1} showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16} automaticallyAdjustKeyboardInsets contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{
+      // This padding is only for clearing safe-area/tab-bar space when there's
+      // no keyboard. With the keyboard up, automaticallyAdjustKeyboardInsets
+      // already adds its own native inset — stacking this on top of that left
+      // a visible gap of empty space above the keyboard.
+      paddingBottom: Platform.OS === 'android' ? insets.bottom + Spacing.four + keyboardHeight : keyboardHeight > 0 ? 0 : insets.bottom + Spacing.four
     }}>
         <View style={{
         height: imageHeight
@@ -544,8 +554,9 @@ function RecipeDetailScreen() {
       </Modal>
 
       <Modal visible={isIngredientPickerOpen} transparent animationType="slide" onRequestClose={() => setIsIngredientPickerOpen(false)}>
-        <Pressable style={[styles.modalBackdrop, { paddingBottom: keyboardHeight }]} onPress={() => setIsIngredientPickerOpen(false)}>
-          <Pressable style={styles.modalSheet} onPress={event => event.stopPropagation()}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex1}>
+        <Pressable style={[styles.modalBackdrop, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]} onPress={() => setIsIngredientPickerOpen(false)}>
+          <Pressable style={[styles.modalSheet, keyboardHeight > 0 && styles.modalSheetKeyboardOpen]} onPress={event => event.stopPropagation()}>
             <View style={styles.modalHeader}>
               <ThemedText type="smallBold" color={theme.text}>{t('recipes.addIngredientTitle')}</ThemedText>
               <Pressable onPress={() => setIsIngredientPickerOpen(false)} hitSlop={8} style={styles.modalCloseButton}>
@@ -560,6 +571,7 @@ function RecipeDetailScreen() {
             </ScrollView>
           </Pressable>
         </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
       </LinearGradient>
     </KeyboardAvoidingView>;
@@ -776,6 +788,12 @@ const createStyles = theme => StyleSheet.create({
     paddingBottom: Spacing.six,
     gap: Spacing.three,
     maxHeight: '90%'
+  },
+  // With the keyboard up, KeyboardAvoidingView already shifts the sheet to sit
+  // right above it — the sheet's own resting-state bottom padding would then
+  // show up as a gap of empty space between the list and the keyboard.
+  modalSheetKeyboardOpen: {
+    paddingBottom: Spacing.two
   },
   modalHeader: {
     flexDirection: 'row',

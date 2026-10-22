@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { Alert, Modal, PanResponder, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Modal, PanResponder, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DateStrip } from '@/components/home/date-strip';
 import { PersonAvatar } from '@/components/people/person-avatar';
@@ -475,7 +475,7 @@ function MealPlanScreen() {
         <Pressable style={styles.modalBackdrop} onPress={() => setSwapMealType(null)}>
           <Pressable style={styles.modalSheet} onPress={event => event.stopPropagation()}>
             <View style={styles.modalHeader}>
-              <View>
+              <View style={styles.modalHeaderText}>
                 <ThemedText type="smallBold" color={theme.text}>{t('mealPlan.swapTitle')}</ThemedText>
                 <ThemedText type="caption" color={theme.textSecondary}>{t('mealPlan.swapSubtitle')}</ThemedText>
               </View>
@@ -508,10 +508,19 @@ function MealPlanScreen() {
       </Modal>
 
       <Modal visible={isAddSnackModalOpen} transparent animationType="slide" onRequestClose={closeSnackModal}>
-        <Pressable style={[styles.modalBackdrop, { paddingBottom: keyboardHeight }]} onPress={closeSnackModal}>
-          <Pressable style={[styles.modalSheet, snackPickerMode !== null && { paddingBottom: Spacing.three }]} onPress={event => event.stopPropagation()}>
+        {/* Modals present in their own native root, so the keyboard-avoidance
+            fix applied to the main screens (automaticallyAdjustKeyboardInsets
+            on a ScrollView) doesn't reach in here — this sheet has no scroll
+            view of its own, just a fixed card, so KeyboardAvoidingView's
+            native, frame-synced "padding" is the right tool. It replaces the
+            old `paddingBottom: keyboardHeight` state-driven snap, which moved
+            the whole sheet (search field and close button included) a beat
+            after the real keyboard animation, instead of with it. */}
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex1}>
+          <Pressable style={[styles.modalBackdrop, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]} onPress={closeSnackModal}>
+          <Pressable style={[styles.modalSheet, snackPickerMode !== null && { paddingBottom: Spacing.three }, keyboardHeight > 0 && styles.modalSheetKeyboardOpen]} onPress={event => event.stopPropagation()}>
             <View style={styles.modalHeader}>
-              <View>
+              <View style={styles.modalHeaderText}>
                 <ThemedText type="smallBold" color={theme.text}>{t(editingSnackId ? 'mealPlan.editSnackTitle' : 'mealPlan.addSnackTitle')}</ThemedText>
                 <ThemedText type="caption" color={theme.textSecondary}>{t('mealPlan.addSnackSubtitle')}</ThemedText>
               </View>
@@ -557,7 +566,7 @@ function MealPlanScreen() {
               </Pressable>
             </View>}
           </Pressable>
-        {pendingSnackIngredient && <Pressable style={[StyleSheet.absoluteFill, styles.amountBackdrop]} onPress={() => setPendingSnackIngredient(null)}>
+          {pendingSnackIngredient && <Pressable style={[StyleSheet.absoluteFill, styles.amountBackdrop]} onPress={() => setPendingSnackIngredient(null)}>
           <Pressable style={[styles.amountCard, { backgroundColor: theme.background }]} onPress={event => event.stopPropagation()}>
             <ThemedText type="smallBold" color={theme.text}>{t('mealPlan.howMuchEaten')}</ThemedText>
             <ThemedText type="small" color={theme.textSecondary}>{pendingSnackIngredient.name}</ThemedText>
@@ -575,7 +584,8 @@ function MealPlanScreen() {
             </View>
           </Pressable>
         </Pressable>}
-        </Pressable>
+          </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
     </View>;
 }
@@ -835,7 +845,8 @@ const createStyles = theme => StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
-    fontSize: 16
+    fontSize: 16,
+    lineHeight: 20
   },
   customSnackRow: {
     flexDirection: 'row',
@@ -873,11 +884,23 @@ const createStyles = theme => StyleSheet.create({
     gap: Spacing.three,
     maxHeight: '90%'
   },
+  // With the keyboard up, KeyboardAvoidingView already shifts the sheet to sit
+  // right above it — the sheet's own resting-state bottom padding would then
+  // show up as a gap of empty space above the keyboard.
+  modalSheetKeyboardOpen: {
+    paddingBottom: Spacing.two
+  },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: Spacing.two
+  },
+  // Without this, the title/subtitle block has no shrink limit, so a longer
+  // translation (German, Polish, ...) overflows the row and pushes the
+  // fixed-size close button out of place instead of wrapping its own text.
+  modalHeaderText: {
+    flex: 1
   },
   swapList: {
     gap: Spacing.two

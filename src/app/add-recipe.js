@@ -114,9 +114,20 @@ function AddRecipeScreen() {
     router.replace({ pathname: '/recipes/[id]', params: { id } });
   }
 
-  return <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={[styles.flex1, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]}>
+  // iOS gets its keyboard-clearing room from ScreenScrollView's own
+  // automaticallyAdjustKeyboardInsets below — a native, frame-synced inset
+  // that tracks the keyboard's real animation curve, instead of this view's
+  // own "padding" behavior stacking an extra, non-synced shift on top.
+  // Android still has no native equivalent, so it keeps the manual paddingBottom.
+  return <KeyboardAvoidingView behavior={undefined} style={[styles.flex1, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]}>
       <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
-      <ScreenScrollView ref={scrollRef} gap={Spacing.four} horizontalPadding={20} contentContainerStyle={[styles.scrollContent, { paddingBottom: Spacing.six + keyboardHeight }]} keyboardShouldPersistTaps="handled">
+      <ScreenScrollView ref={scrollRef} gap={Spacing.four} horizontalPadding={20} automaticallyAdjustKeyboardInsets contentInsetAdjustmentBehavior="automatic" contentContainerStyle={[styles.scrollContent, {
+      // This padding is only for clearing safe-area/home-indicator space when
+      // there's no keyboard. With the keyboard up, automaticallyAdjustKeyboardInsets
+      // already adds its own native inset — stacking this on top of that left a
+      // visible gap of empty space above the keyboard.
+      paddingBottom: Platform.OS === 'android' ? Spacing.six + keyboardHeight : keyboardHeight > 0 ? 0 : Spacing.six
+    }]} keyboardShouldPersistTaps="handled">
         <Pressable onPress={handlePickPhoto} style={[styles.photoWrapper, !imageUri && styles.photoEmpty]}>
           {imageUri ? <RecipeImage uri={imageUri} style={styles.photo} iconSize={36} /> : <View style={styles.photoPlaceholder}>
               <View style={styles.photoPlaceholderIcon}>
@@ -198,8 +209,9 @@ function AddRecipeScreen() {
       </View>
 
       <Modal visible={isIngredientModalOpen} transparent animationType="slide" onRequestClose={() => setIsIngredientModalOpen(false)}>
-        <Pressable style={[styles.modalBackdrop, { paddingBottom: keyboardHeight }]} onPress={() => setIsIngredientModalOpen(false)}>
-          <Pressable style={styles.modalSheet} onPress={event => event.stopPropagation()}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex1}>
+        <Pressable style={[styles.modalBackdrop, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]} onPress={() => setIsIngredientModalOpen(false)}>
+          <Pressable style={[styles.modalSheet, keyboardHeight > 0 && styles.modalSheetKeyboardOpen]} onPress={event => event.stopPropagation()}>
             <View style={styles.modalGrabber} />
             <View style={styles.modalHeader}>
               <ThemedText type="smallBold" color={theme.text}>{t('recipes.addIngredientTitle')}</ThemedText>
@@ -221,6 +233,7 @@ function AddRecipeScreen() {
             </ScrollView>
           </Pressable>
         </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
       </LinearGradient>
     </KeyboardAvoidingView>;
@@ -476,6 +489,12 @@ const createStyles = theme => StyleSheet.create({
     gap: Spacing.three,
     maxHeight: '80%'
   },
+  // With the keyboard up, KeyboardAvoidingView already shifts the sheet to sit
+  // right above it — the sheet's own resting-state bottom padding would then
+  // show up as a gap of empty space between the list and the keyboard.
+  modalSheetKeyboardOpen: {
+    paddingBottom: Spacing.two
+  },
   modalGrabber: {
     alignSelf: 'center',
     width: 40,
@@ -510,8 +529,9 @@ const createStyles = theme => StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
+    lineHeight: 20,
     color: theme.text,
-    paddingVertical: 0
+    paddingVertical: 2
   },
   ingredientScroll: {
     maxHeight: 340,

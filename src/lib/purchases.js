@@ -6,7 +6,7 @@ const IOS_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY ?? '';
 const ANDROID_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY ?? '';
 
 // Must match the entitlement identifier configured in the RevenueCat dashboard.
-export const ENTITLEMENT_ID = 'nutriflow_pro';
+export const ENTITLEMENT_ID = 'Premium';
 
 function currentApiKey() {
   return Platform.OS === 'android' ? ANDROID_API_KEY : IOS_API_KEY;

@@ -22,7 +22,7 @@ import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { Alert, Linking, Modal, Pressable, StyleSheet, Switch, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Linking, Modal, Platform, Pressable, StyleSheet, Switch, TextInput, View } from 'react-native';
 
 const ALLERGEN_TAG_KEYS = {
   gluten: 'gluten',
@@ -36,7 +36,7 @@ const ALLERGEN_TAG_KEYS = {
   sesame: 'sesame'
 };
 
-const SUPPORT_EMAIL = '5507151kr@gmail.com';
+const SUPPORT_EMAIL = 'nutrifloowapp@gmail.com';
 
 // No real destinations wired up yet — tapping shows a "coming soon" alert until real links are provided.
 const CONTACT_LINKS = [{ key: 'website', labelKey: 'profile.contactWebsite', icon: { ios: 'globe', android: 'public', web: 'public' } }, { key: 'linkedin', labelKey: 'profile.contactLinkedIn', icon: { ios: 'briefcase.fill', android: 'work', web: 'work' } }, { key: 'instagram', labelKey: 'profile.contactInstagram', icon: { ios: 'camera.fill', android: 'photo_camera', web: 'photo_camera' } }, { key: 'tiktok', labelKey: 'profile.contactTikTok', icon: { ios: 'music.note', android: 'music_note', web: 'music_note' } }];
@@ -291,8 +291,9 @@ function ProfileScreen() {
       </Pressable>
 
       <Modal visible={isHelpModalOpen} transparent animationType="slide" onRequestClose={() => setIsHelpModalOpen(false)}>
-        <Pressable style={[styles.modalBackdrop, { paddingBottom: keyboardHeight }]} onPress={() => setIsHelpModalOpen(false)}>
-          <Pressable style={styles.modalSheet} onPress={event => event.stopPropagation()}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex1}>
+        <Pressable style={[styles.modalBackdrop, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]} onPress={() => setIsHelpModalOpen(false)}>
+          <Pressable style={[styles.modalSheet, keyboardHeight > 0 && styles.modalSheetKeyboardOpen]} onPress={event => event.stopPropagation()}>
             <View style={styles.modalHeader}>
               <View>
                 <ThemedText type="smallBold" color={theme.text}>{t('profile.helpModalTitle')}</ThemedText>
@@ -319,6 +320,7 @@ function ProfileScreen() {
             </Pressable>
           </Pressable>
         </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
     </ScreenScrollView>;
 }
@@ -338,6 +340,9 @@ function SettingsRow({ styles, theme, icon, label, onPress, right, last }) {
 export default observer(ProfileScreen);
 
 const createStyles = theme => StyleSheet.create({
+  flex1: {
+    flex: 1
+  },
   peopleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -538,6 +543,12 @@ const createStyles = theme => StyleSheet.create({
     padding: Spacing.four,
     paddingBottom: Spacing.six,
     gap: Spacing.three
+  },
+  // With the keyboard up, KeyboardAvoidingView already shifts the sheet to sit
+  // right above it — the sheet's own resting-state bottom padding would then
+  // show up as a gap of empty space above the keyboard.
+  modalSheetKeyboardOpen: {
+    paddingBottom: Spacing.two
   },
   modalHeader: {
     flexDirection: 'row',
