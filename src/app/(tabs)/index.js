@@ -17,6 +17,7 @@ import TermsAcceptanceModal from '@/components/terms-acceptance-modal';
 import { ThemedText } from '@/components/themed-text';
 import { CalorieRing } from '@/components/ui/calorie-ring';
 import { EmptyState } from '@/components/ui/empty-state';
+import { GuestLockOverlay } from '@/components/ui/guest-lock-overlay';
 import { PremiumCard } from '@/components/ui/premium-card';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { SectionHeader } from '@/components/ui/section-header';
@@ -27,6 +28,7 @@ import { useNutritionScore } from '@/hooks/useNutritionScore';
 import { useStepCount } from '@/hooks/useStepCount';
 import { calculateDailyTargets, planItemNutrition, scaleForServings } from '@/lib/nutrition';
 import { findAllergenConflicts } from '@/lib/allergens';
+import { GUEST_MOCK_PROFILE } from '@/lib/guestMockProfile';
 import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
 import { planningCalories } from '@/lib/mealPlanning';
 import { todayKey } from '@/lib/date';
@@ -34,6 +36,7 @@ import { recipeImageUri } from '@/lib/recipeImage';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { articleStore } from '@/store/articleStore';
+import { authStore } from '@/store/authStore';
 import { localeStore } from '@/store/localeStore';
 import { subscriptionStore } from '@/store/subscriptionStore';
 import { foodLogStore } from '@/store/foodLogStore';
@@ -53,7 +56,7 @@ function HomeScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const profile = profileStore.activeProfile;
+  const profile = authStore.isGuest ? GUEST_MOCK_PROFILE : profileStore.activeProfile;
   const [date, setDate] = useState(todayKey());
   const { total } = useDailyNutrition(date);
   const scoreResult = useNutritionScore(date);
@@ -99,7 +102,7 @@ function HomeScreen() {
   const remainingCalories = Math.max(0, targets.calories - consumedCalories);
   // photoUrl (backend filename) wins when present — same priority as the Profile screen.
   const avatarUri = profile.photoUrl ? toFileUrl(profile.photoUrl) : profile.photoUri;
-  return <>
+  return <GuestLockOverlay message={t('auth.guestLockedHome')}>
       <TermsAcceptanceModal />
       <ScreenScrollView isTabScreen gap={Spacing.three}>
       <Pressable onPress={() => router.push('/profile')} style={styles.headerRow}>
@@ -204,7 +207,7 @@ function HomeScreen() {
       <SectionHeader title={t('articles.title')} seeAllHref="/articles" />
       <ArticleCard article={articleStore.todayArticle} onPress={() => router.push({ pathname: '/article/[id]', params: { id: articleStore.todayArticle.id } })} />
     </ScreenScrollView>
-    </>;
+    </GuestLockOverlay>;
 }
 export default observer(HomeScreen);
 const createStyles = theme => StyleSheet.create({

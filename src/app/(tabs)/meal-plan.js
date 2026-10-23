@@ -13,6 +13,7 @@ import { MealRow } from '@/components/home/meal-row';
 import { ShoppingRangeModal } from '@/components/meal-plan/shopping-range-modal';
 import { WeeklyMenuModal } from '@/components/meal-plan/weekly-menu-modal';
 import { ThemedText } from '@/components/themed-text';
+import { GuestLockOverlay } from '@/components/ui/guest-lock-overlay';
 import { MacroBar } from '@/components/ui/macro-bar';
 import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
@@ -27,9 +28,11 @@ import { guessIngredientImage } from '@/lib/ingredientImage';
 import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
 import { planningCalories } from '@/lib/mealPlanning';
 import { findAllergenConflicts } from '@/lib/allergens';
+import { GUEST_MOCK_PROFILE } from '@/lib/guestMockProfile';
 import { recipeImageUri } from '@/lib/recipeImage';
 import { calculateDailyTargets, calculateRecipeNutrition, planItemNutrition, scaleForServings, scaleIngredient } from '@/lib/nutrition';
 import { ensurePremium } from '@/lib/premium';
+import { authStore } from '@/store/authStore';
 import { foodLogStore } from '@/store/foodLogStore';
 import { mealPlanStore } from '@/store/mealPlanStore';
 import { myRecipesStore } from '@/store/myRecipesStore';
@@ -103,7 +106,7 @@ function MealPlanScreen() {
       if (gesture.dx <= -WEEK_SWIPE_THRESHOLD) shiftWeek(1);else if (gesture.dx >= WEEK_SWIPE_THRESHOLD) shiftWeek(-1);
     }
   })).current;
-  const profile = profileStore.activeProfile;
+  const profile = authStore.isGuest ? GUEST_MOCK_PROFILE : profileStore.activeProfile;
   const targets = useMemo(() => profile ? calculateDailyTargets(profile) : undefined, [profile]);
   const planItems = mealPlanStore.itemsForDate(date);
   const loggedEntries = foodLogStore.entriesForDate(date);
@@ -339,7 +342,8 @@ function MealPlanScreen() {
     commitSnack(editingEntry?.label ?? t('mealPlan.customSnackLabel'), calories);
   }
 
-  return <View style={styles.flex1}>
+  return <GuestLockOverlay message={t('auth.guestLockedMealPlan')}>
+    <View style={styles.flex1}>
       <View style={[styles.fixedTop, {
       paddingTop: insets.top + Spacing.two
     }]}>
@@ -587,7 +591,8 @@ function MealPlanScreen() {
           </Pressable>
         </KeyboardAvoidingView>
       </Modal>
-    </View>;
+    </View>
+  </GuestLockOverlay>;
 }
 
 export default observer(MealPlanScreen);

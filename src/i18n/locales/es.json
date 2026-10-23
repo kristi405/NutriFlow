@@ -74,7 +74,13 @@
     "guestLockedTitle": "Inicia sesión para continuar",
     "guestLockedNutrients": "Crea una cuenta gratuita para ver la información nutricional de esta receta.",
     "guestBannerTitle": "Estás navegando como invitado",
-    "guestBannerMessage": "Inicia sesión para acceder a la información nutricional, tus propias recetas, planes de comidas y más."
+    "guestBannerMessage": "Inicia sesión para acceder a la información nutricional, tus propias recetas, planes de comidas y más.",
+    "guestLockedIngredients": "Crea una cuenta gratuita para ver los ingredientes de esta receta.",
+    "guestLockedHome": "Crea una cuenta gratuita para seguir tus comidas, calorías y progreso diario.",
+    "guestLockedMealPlan": "Crea una cuenta gratuita para crear y seguir un plan de comidas.",
+    "guestLockedAnalysis": "Crea una cuenta gratuita para subir y analizar tus resultados de laboratorio.",
+    "guestLockedProgress": "Crea una cuenta gratuita para seguir tu peso y progreso a lo largo del tiempo.",
+    "guestLockedIngredientsCatalog": "Crea una cuenta gratuita para explorar la base de ingredientes con calorías y macros de cada producto."
   },
   "onboarding": {
     "skip": "Omitir",

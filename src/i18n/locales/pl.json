@@ -74,7 +74,13 @@
     "guestLockedTitle": "Zaloguj się, aby kontynuować",
     "guestLockedNutrients": "Utwórz bezpłatne konto, aby zobaczyć wartości odżywcze tego przepisu.",
     "guestBannerTitle": "Przeglądasz jako gość",
-    "guestBannerMessage": "Zaloguj się, aby uzyskać dostęp do wartości odżywczych, własnych przepisów, planów posiłków i więcej."
+    "guestBannerMessage": "Zaloguj się, aby uzyskać dostęp do wartości odżywczych, własnych przepisów, planów posiłków i więcej.",
+    "guestLockedIngredients": "Utwórz bezpłatne konto, aby zobaczyć składniki tego przepisu.",
+    "guestLockedHome": "Utwórz bezpłatne konto, aby śledzić posiłki, kalorie i dzienny postęp.",
+    "guestLockedMealPlan": "Utwórz bezpłatne konto, aby tworzyć i prowadzić plan posiłków.",
+    "guestLockedAnalysis": "Utwórz bezpłatne konto, aby przesyłać i analizować wyniki badań.",
+    "guestLockedProgress": "Utwórz bezpłatne konto, aby śledzić wagę i postępy w czasie.",
+    "guestLockedIngredientsCatalog": "Utwórz bezpłatne konto, aby otworzyć bazę składników z kaloriami i makroskładnikami dla każdego produktu."
   },
   "onboarding": {
     "skip": "Pomiń",

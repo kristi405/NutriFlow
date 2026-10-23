@@ -74,7 +74,13 @@
     "guestLockedTitle": "Melde dich an, um fortzufahren",
     "guestLockedNutrients": "Erstelle ein kostenloses Konto, um die Nährwerte dieses Rezepts zu sehen.",
     "guestBannerTitle": "Du bist im Gastmodus",
-    "guestBannerMessage": "Melde dich an für Nährwerte, eigene Rezepte, Essenspläne und mehr."
+    "guestBannerMessage": "Melde dich an für Nährwerte, eigene Rezepte, Essenspläne und mehr.",
+    "guestLockedIngredients": "Erstelle ein kostenloses Konto, um die Zutaten dieses Rezepts zu sehen.",
+    "guestLockedHome": "Erstelle ein kostenloses Konto, um Mahlzeiten, Kalorien und deinen täglichen Fortschritt zu verfolgen.",
+    "guestLockedMealPlan": "Erstelle ein kostenloses Konto, um einen Essensplan zu erstellen und zu befolgen.",
+    "guestLockedAnalysis": "Erstelle ein kostenloses Konto, um deine Laborergebnisse hochzuladen und zu analysieren.",
+    "guestLockedProgress": "Erstelle ein kostenloses Konto, um dein Gewicht und deinen Fortschritt im Zeitverlauf zu verfolgen.",
+    "guestLockedIngredientsCatalog": "Erstelle ein kostenloses Konto, um die Zutatendatenbank mit Kalorien und Makros für jedes Produkt zu öffnen."
   },
   "onboarding": {
     "skip": "Überspringen",

@@ -11,6 +11,7 @@ import { ThemedText } from '@/components/themed-text';
 import { PersonAvatar } from '@/components/people/person-avatar';
 import { PersonSwitcher } from '@/components/people/person-switcher';
 import { EmptyState } from '@/components/ui/empty-state';
+import { GuestLockOverlay } from '@/components/ui/guest-lock-overlay';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -152,7 +153,8 @@ function AiAnalysisScreen() {
       </View>;
   }
 
-  return <ScreenScrollView isTabScreen gap={Spacing.three}>
+  return <GuestLockOverlay message={t('auth.guestLockedAnalysis')}>
+    <ScreenScrollView isTabScreen gap={Spacing.three}>
       <View style={styles.headerRow}>
         <View style={styles.header}>
           <ThemedText type="title" style={styles.title} color={theme.text}>
@@ -233,7 +235,8 @@ function AiAnalysisScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-    </ScreenScrollView>;
+    </ScreenScrollView>
+  </GuestLockOverlay>;
 }
 
 export default observer(AiAnalysisScreen);

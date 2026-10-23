@@ -390,7 +390,7 @@ function RecipeDetailScreen() {
         </View>
       </Animated.View>
 
-      <Animated.ScrollView ref={detailScrollRef} keyboardShouldPersistTaps="handled" style={styles.flex1} showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16} automaticallyAdjustKeyboardInsets contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{
+      <Animated.ScrollView ref={detailScrollRef} keyboardShouldPersistTaps="handled" style={styles.flex1} showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16} automaticallyAdjustKeyboardInsets contentInsetAdjustmentBehavior="never" contentContainerStyle={{
       // This padding is only for clearing safe-area/tab-bar space when there's
       // no keyboard. With the keyboard up, automaticallyAdjustKeyboardInsets
       // already adds its own native inset — stacking this on top of that left
@@ -409,7 +409,7 @@ function RecipeDetailScreen() {
           {activeTab === 'ingredients' && <View style={styles.section}>
               <View style={styles.sectionHeaderRow}>
                 <ThemedText type="headline" color={theme.text}>{t('recipes.ingredients')}</ThemedText>
-                {canEditCatalogIngredients && <Pressable onPress={() => setIsEditingIngredients(current => !current)} hitSlop={8} style={[styles.editButton, isEditingIngredients && styles.editButtonActive]}>
+                {!authStore.isGuest && canEditCatalogIngredients && <Pressable onPress={() => setIsEditingIngredients(current => !current)} hitSlop={8} style={[styles.editButton, isEditingIngredients && styles.editButtonActive]}>
                     <SymbolView name={isEditingIngredients ? { ios: 'checkmark', android: 'check', web: 'check' } : { ios: 'square.and.pencil', android: 'edit_square', web: 'edit_square' }} size={15} tintColor={isEditingIngredients ? '#ffffff' : theme.accent} />
                     <ThemedText type="small" color={isEditingIngredients ? '#ffffff' : theme.accent}>
                       {isEditingIngredients ? t('common.done') : t('common.edit')}
@@ -417,7 +417,7 @@ function RecipeDetailScreen() {
                   </Pressable>}
               </View>
 
-              {isOwnRecipe && isEditingRecipe ? <View style={styles.list}>
+              {authStore.isGuest ? <LockedFeature title={t('auth.guestLockedTitle')} message={t('auth.guestLockedIngredients')} actionLabel={t('auth.signIn')} actionIcon={{ ios: 'person.fill', android: 'person', web: 'person' }} onAction={authStore.exitGuestMode} /> : isOwnRecipe && isEditingRecipe ? <View style={styles.list}>
                   {editedIngredients.map((line, index) => <View key={`${line.ingredientId}-${index}`} {...rowProps(index)} style={styles.editIngredientRow}>
                       <ThemedText type="small" color={theme.text} style={styles.flex1} numberOfLines={1}>{line.name}</ThemedText>
                       <TextInput value={line.quantity} onChangeText={value => handleEditedQuantityChange(index, value)} keyboardType="decimal-pad" {...inputProps(index)} style={styles.quantityInput} />
@@ -628,7 +628,7 @@ const createStyles = theme => StyleSheet.create({
     gap: Spacing.three
   },
   tabContent: {
-    paddingTop: Spacing.three
+    paddingTop: Spacing.two
   },
   headerBlock: {
     position: 'absolute',
@@ -638,8 +638,7 @@ const createStyles = theme => StyleSheet.create({
     zIndex: 5,
     backgroundColor: theme.accentSoft,
     borderBottomWidth: 1,
-    borderBottomColor: theme.border,
-    paddingBottom: Spacing.three
+    borderBottomColor: theme.border
   },
   headerSpacer: {
     backgroundColor: theme.accentSoft
@@ -682,7 +681,7 @@ const createStyles = theme => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingBottom: Spacing.two,
+    paddingBottom: Spacing.three,
     borderBottomWidth: 2,
     borderBottomColor: 'transparent'
   },

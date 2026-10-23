@@ -7,11 +7,13 @@ import Svg, { Circle, Line, Polyline, Text as SvgText } from 'react-native-svg';
 import { ThemedText } from '@/components/themed-text';
 import { DetailedNutritionCard } from '@/components/progress/detailed-nutrition-card';
 import { MacroBar } from '@/components/ui/macro-bar';
+import { GuestLockOverlay } from '@/components/ui/guest-lock-overlay';
 import { LockedFeature } from '@/components/ui/locked-feature';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { addDays, todayKey } from '@/lib/date';
+import { GUEST_MOCK_PROFILE } from '@/lib/guestMockProfile';
 import { calculateBMI, calculateDailyTargets } from '@/lib/nutrition';
 import { displayWeight, weightUnitLabel } from '@/lib/units';
 import { useDailyNutrition } from '@/hooks/useDailyNutrition';
@@ -19,6 +21,7 @@ import { PersonAvatar } from '@/components/people/person-avatar';
 import { PersonSwitcher } from '@/components/people/person-switcher';
 import { ACHIEVEMENT_GOALS, achievementsStore } from '@/store/achievementsStore';
 import { appStreakStore } from '@/store/appStreakStore';
+import { authStore } from '@/store/authStore';
 import { peopleStore } from '@/store/peopleStore';
 import { foodLogStore } from '@/store/foodLogStore';
 import { profileStore } from '@/store/profileStore';
@@ -162,7 +165,7 @@ function ProgressScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const profile = profileStore.activeProfile;
+  const profile = authStore.isGuest ? GUEST_MOCK_PROFILE : profileStore.activeProfile;
   const { total } = useDailyNutrition(todayKey());
   const waterMl = waterStore.totalForDate(todayKey());
   const targets = useMemo(() => profile ? calculateDailyTargets(profile) : undefined, [profile]);
@@ -195,7 +198,8 @@ function ProgressScreen() {
 
   if (!profile || !targets) return null;
 
-  return <ScreenScrollView isTabScreen gap={Spacing.three}>
+  return <GuestLockOverlay message={t('auth.guestLockedProgress')}>
+    <ScreenScrollView isTabScreen gap={Spacing.three}>
       <View style={styles.headerRow}>
         <View style={styles.header}>
           <ThemedText type="title" style={styles.title} color={theme.text}>
@@ -295,7 +299,8 @@ function ProgressScreen() {
         })}
         </View>}
       </View>
-    </ScreenScrollView>;
+    </ScreenScrollView>
+  </GuestLockOverlay>;
 }
 
 export default observer(ProgressScreen);

@@ -74,7 +74,13 @@
     "guestLockedTitle": "Sign in to continue",
     "guestLockedNutrients": "Create a free account to see the nutrition facts for this recipe.",
     "guestBannerTitle": "Browsing as a guest",
-    "guestBannerMessage": "Sign in for nutrition facts, your own recipes, meal plans and more."
+    "guestBannerMessage": "Sign in for nutrition facts, your own recipes, meal plans and more.",
+    "guestLockedIngredients": "Create a free account to see the ingredients for this recipe.",
+    "guestLockedHome": "Create a free account to track your meals, calories and daily progress.",
+    "guestLockedMealPlan": "Create a free account to build and follow a meal plan.",
+    "guestLockedAnalysis": "Create a free account to upload and analyze your lab results.",
+    "guestLockedProgress": "Create a free account to track your weight and progress over time.",
+    "guestLockedIngredientsCatalog": "Create a free account to browse the ingredients database with calories and macros for every product."
   },
   "onboarding": {
     "skip": "Skip",

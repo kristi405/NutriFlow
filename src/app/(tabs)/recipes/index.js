@@ -4,9 +4,10 @@ import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-spe
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Animated, Easing, Image as RNImage, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Easing, Image as RNImage, Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
+import { LockedFeature } from '@/components/ui/locked-feature';
 import { RecipeCard } from '@/components/ui/recipe-card';
 import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
@@ -65,6 +66,7 @@ function RecipesScreen() {
   const [query, setQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(null);
+  const [isGuestLockVisible, setIsGuestLockVisible] = useState(false);
   const contentAnim = useRef(new Animated.Value(1)).current;
   useEffect(() => {
     contentAnim.setValue(0);
@@ -188,21 +190,8 @@ function RecipesScreen() {
         </ScrollView>
       </View>
 
-      {isGuest ? <View style={[styles.paddedX, styles.ingredientsBannerWrapper]}>
-          <Pressable onPress={authStore.exitGuestMode} style={({ pressed }) => [styles.ingredientsBanner, { backgroundColor: theme.accentSoft, borderColor: theme.accent, opacity: pressed ? 0.85 : 1 }]}>
-            <View style={[styles.ingredientsBannerIcon, { backgroundColor: theme.background }]}>
-              <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={20} tintColor={theme.accent} />
-            </View>
-            <View style={styles.ingredientsBannerTextGroup}>
-              <ThemedText type="smallBold" color={theme.text}>{t('auth.guestBannerTitle')}</ThemedText>
-              <ThemedText type="caption" color={theme.textSecondary}>{t('auth.guestBannerMessage')}</ThemedText>
-            </View>
-            <View style={[styles.ingredientsBannerChevron, { backgroundColor: theme.background }]}>
-              <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={13} tintColor={theme.accent} />
-            </View>
-          </Pressable>
-        </View> : <View style={[styles.paddedX, styles.ingredientsBannerWrapper]}>
-          <Pressable onPress={() => router.push('/ingredients')} style={({ pressed }) => [styles.ingredientsBanner, { backgroundColor: theme.background, borderColor: theme.accent, opacity: pressed ? 0.85 : 1 }]}>
+      <View style={[styles.paddedX, styles.ingredientsBannerWrapper]}>
+          <Pressable onPress={() => isGuest ? setIsGuestLockVisible(true) : router.push('/ingredients')} style={({ pressed }) => [styles.ingredientsBanner, { backgroundColor: theme.background, borderColor: theme.accent, opacity: pressed ? 0.85 : 1 }]}>
             <View style={[styles.ingredientsBannerIcon, { backgroundColor: theme.accentSoft }]}>
               <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={20} tintColor={theme.accent} />
             </View>
@@ -214,7 +203,7 @@ function RecipesScreen() {
               <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={13} tintColor={theme.accent} />
             </View>
           </Pressable>
-        </View>}
+        </View>
 
       <Animated.View style={{ gap: Spacing.five, opacity: contentAnim, transform: [{ translateY: contentAnim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }}>
       {selectedFilter === MY_RECIPES_FILTER ? <View style={styles.section}>
@@ -247,6 +236,17 @@ function RecipesScreen() {
           </View>
         </View>)}
       </Animated.View>
+
+      <Modal visible={isGuestLockVisible} transparent animationType="fade" onRequestClose={() => setIsGuestLockVisible(false)}>
+        <Pressable style={styles.guestLockBackdrop} onPress={() => setIsGuestLockVisible(false)}>
+          <Pressable style={styles.guestLockCardWrapper} onPress={event => event.stopPropagation()}>
+            <LockedFeature title={t('auth.guestLockedTitle')} message={t('auth.guestLockedIngredientsCatalog')} actionLabel={t('auth.signIn')} actionIcon={{ ios: 'person.fill', android: 'person', web: 'person' }} onAction={() => {
+            setIsGuestLockVisible(false);
+            authStore.exitGuestMode();
+          }} />
+          </Pressable>
+        </Pressable>
+      </Modal>
     </ScreenScrollView>;
 }
 
@@ -410,6 +410,16 @@ const createStyles = theme => StyleSheet.create({
     minWidth: 0
   },
   cardFill: {
+    width: '100%'
+  },
+  guestLockBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.four
+  },
+  guestLockCardWrapper: {
     width: '100%'
   }
 });
