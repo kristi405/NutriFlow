@@ -19,7 +19,14 @@ function SelectLanguageScreen() {
 
   function handleSelect(code) {
     localeStore.setLanguage(code);
-    router.back();
+    // setLanguage triggers a synchronous re-render burst across every mounted
+    // screen's t() calls (i18next.changeLanguage + the MobX language change).
+    // Popping the screen in that same tick raced the native screen-removal
+    // transaction against that burst and could leave react-native-screens'
+    // fragment tracking out of sync ("ScreenStackFragment added into a
+    // non-stack container"). Deferring to the next tick lets the re-render
+    // settle first.
+    setTimeout(() => router.back(), 0);
   }
 
   return <ScreenScrollView gap={Spacing.two} horizontalPadding={20}>

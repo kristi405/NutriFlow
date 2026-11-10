@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "NutriFlow",
-    "slug": "NutriFlow",
+    "slug": "nutriflow",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -15,7 +15,9 @@
       "infoPlist": {
         "UIDesignRequiresCompatibility": true,
         "NSPhotoLibraryUsageDescription": "NutriFlow uses your photo library so you can set a profile photo, attach lab result images for AI analysis, and add photos to your recipes.",
-        "NSCameraUsageDescription": "NutriFlow uses your camera so you can take a photo for your recipe."
+        "NSCameraUsageDescription": "NutriFlow uses your camera so you can take a photo for your recipe.",
+        "NSSpeechRecognitionUsageDescription": "Allow NutriFlow to use speech recognition for voice search.",
+        "NSMicrophoneUsageDescription": "Allow NutriFlow to use the microphone for voice search."
       }
     },
     "android": {
@@ -26,7 +28,13 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.nutriFlow"
+      "package": "com.nutriFlow",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "blockedPermissions": [
+        "com.google.android.gms.permission.AD_ID"
+      ]
     },
     "web": {
       "output": "static",
@@ -66,6 +74,13 @@
     ],
     "experiments": {
       "reactCompiler": false
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "450c786e-2b28-415f-a36a-f5806e757935"
+      }
+    },
+    "owner": "kristina_gyk"
   }
 }
