@@ -164,12 +164,11 @@
       "peanuts": "peanuts",
       "soy": "soy",
       "sesame": "sesame"
-    }
+    },
+    "chooseLanguageTitle": "Choose your language",
+    "chooseLanguageSubtitle": "Recipes, articles and the whole app will be shown in this language. You can change it later in Settings."
   },
   "home": {
-    "greetingMorning": "Good morning",
-    "greetingAfternoon": "Good afternoon",
-    "greetingEvening": "Good evening",
     "trackSubtitle": "Track your nutrition today",
     "dailyCalories": "Daily Calories",
     "consumed": "Consumed",
@@ -198,7 +197,8 @@
     "carbs": "Carbs",
     "fat": "Fat",
     "fiber": "Fiber",
-    "steps": "Steps"
+    "steps": "Steps",
+    "greeting": "Hi"
   },
   "article": {
     "notFoundTitle": "Article not found",
@@ -296,7 +296,9 @@
     "deleteAllDataConfirmTitle": "Delete all data?",
     "deleteAllDataConfirmMessage": "This permanently deletes your account and everything in it — profile, meal plans, recipes, lab reports and photos. This cannot be undone.",
     "deleteAllDataConfirm": "Delete Everything",
-    "deleteAllDataFailed": "Couldn't delete your account. Please check your connection and try again."
+    "deleteAllDataFailed": "Couldn't delete your account. Please check your connection and try again.",
+    "managePlanTitle": "Manage subscription",
+    "managePlanSubtitle": "Current plan: {{plan}}"
   },
   "progress": {
     "title": "Progress",
@@ -552,16 +554,19 @@
     "indicatorTitle": "Indicator",
     "noDetails": "No additional information is available for this indicator.",
     "limitReachedTitle": "Analysis limit reached",
-    "limitReachedMessage": "You've used all the analyses included with your plan for now. The next one will be available on {{date}}. Buying extra analyses will be available soon."
+    "limitReachedMessage": "You've used all the analyses included with your plan for now. The next one will be available on {{date}}. Buying extra analyses will be available soon.",
+    "aiConsentTitle": "Send to AI for analysis?",
+    "aiConsentMessage": "This file will be sent to Google Gemini AI to analyze your lab results. Only proceed if you agree to share this data.",
+    "aiConsentAllow": "Allow"
   },
   "privacyPolicy": {
     "title": "Terms & Conditions",
-    "lastUpdated": "Last updated: September 2026",
-    "intro": "Please read these Terms & Conditions and Privacy Notice (the \"Terms\") carefully. They form a legal agreement between you and NutriFlow (\"we\", \"us\", \"the app\") and explain the rules for using the app and how we collect and process your personal data, including data concerning your health.",
+    "lastUpdated": "Last updated: November 2026",
+    "intro": "Please read these Terms & Conditions and Privacy Notice (the \"Terms\") carefully. They form a legal agreement between you and NutriFlow (\"we\", \"us\", \"the app\") and explain the rules for using the app and how we collect and process your personal data, including data concerning your health.\n\nIn short: the only data that leaves NutriFlow for a third-party AI service is a lab analysis file that you choose to upload. It is sent to Google Gemini, and only after you allow it in the app. All other data is used by NutriFlow only to run the app's features. We do not sell your data or use it for advertising.",
     "sections": [
       {
         "heading": "1. Acceptance of the Terms",
-        "body": "By creating an account or using NutriFlow you confirm that you have read, understood and agree to these Terms. If you do not agree, please do not use the app."
+        "body": "By creating an account or using NutriFlow you confirm that you have read, understood and agree to these Terms. If you do not agree, please do not use the app. Sending data to a third-party AI service requires a separate permission, described in section 8."
       },
       {
         "heading": "2. About the app; no medical advice",
@@ -576,55 +581,59 @@
         "body": "You are responsible for the accuracy of the information you provide and for keeping your sign-in credentials secure. Notify us immediately of any unauthorised use of your account. You may sign in with Google or Apple; those services are governed by their own terms."
       },
       {
-        "heading": "5. Personal data we process",
-        "body": "Account data: email address and sign-in method. Profile data: name, profile photo, sex, age, height, weight, target weight, activity level, goal, dietary preferences and allergies. Health-related data (special category data): weight history, BMI, calorie and nutrient intake, water intake, step count, allergies and dietary restrictions, and lab results and reports you choose to upload for analysis. Usage and preference data: recipes you view or favourite, meal plans, read articles, language, theme and notification settings."
+        "heading": "5. Personal data we collect and how",
+        "body": "We collect only data that you enter or upload yourself, or that is created when you use the app:\n\n• Account data: email address and sign-in method, received from Apple or Google when you sign in.\n• Profile data: name, profile photo, sex, age, height, weight, target weight, activity level, goal, dietary preferences and allergies, entered by you during onboarding or in your profile.\n• Health-related data (special category data): weight history, BMI, calorie and nutrient intake, water intake, step count, allergies and dietary restrictions, entered by you or calculated by the app.\n• Lab analysis files: lab results and reports that you choose to upload for analysis.\n• Usage and preference data: recipes you view or favourite, meal plans, read articles, language, theme and notification settings."
       },
       {
-        "heading": "6. Your consent to the processing of personal and health data",
-        "body": "By ticking, accepting or continuing to use the app you give your free, specific, informed and explicit consent to the collection, storage and processing of your personal data, including data concerning your health, as described in these Terms. This includes your consent to (a) storing this data on your device and on our servers and those of our service providers; (b) using it to calculate your targets, personalise recommendations and track your progress; and (c) sending lab results you upload to a third-party AI service solely to generate the analysis you request. Consent is voluntary. Without it, features that require health data cannot be provided. You may withdraw your consent at any time as described in section 12."
+        "heading": "6. How we use your data",
+        "body": "All data listed in section 5, except lab analysis files sent for AI analysis, is used only by NutriFlow to provide the app's features and is not shared with any AI service. We use it to:\n\n• create and manage your account and provide the app (performance of a contract);\n• calculate your nutrition targets, build meal plans, personalise recipes and content, and track your progress (your explicit consent for health data);\n• analyse a lab file you upload, using Google Gemini as described in section 8 (your explicit consent, given in the app);\n• keep the app secure, prevent abuse and fix errors (our legitimate interests);\n• comply with legal obligations.\n\nWe do not use your data for advertising, do not sell it, and do not use it to train AI models."
       },
       {
-        "heading": "7. Purposes and legal basis",
-        "body": "We process your data to: create and manage your account and provide the app (performance of a contract); calculate nutrition targets, personalise content and generate AI insights, which involves health data (your explicit consent); keep the app secure, prevent abuse and fix errors (our legitimate interests); and comply with legal obligations. We do not use your health data for advertising."
+        "heading": "7. Your consent",
+        "body": "When you accept these Terms in the app you give your free, specific, informed and explicit consent to the collection, storage and processing of your personal data, including data concerning your health, for the purposes in section 6. This covers storing the data on your device and on our servers and those of our hosting providers.\n\nSending a lab analysis file to Google Gemini is not covered by this general consent. The app asks for that permission separately, on its own screen, before the first file is sent (see section 8). Consent is voluntary, and you can withdraw it at any time as described in section 13."
       },
       {
-        "heading": "8. Storage, AI processing and service providers",
-        "body": "Data may be stored on your device and on secure servers operated by us or our hosting providers. Sign-in is provided by Google and Apple. Lab results you upload are sent to a third-party AI provider only to produce the analysis you request; we ask such providers to process the data only on our instructions. Where data is transferred outside your country or the EEA, we rely on appropriate safeguards such as standard contractual clauses."
+        "heading": "8. AI analysis by Google Gemini",
+        "body": "NutriFlow uses a third-party AI service, the Gemini API provided by Google LLC (USA), to analyse lab results that you upload.\n\nWhat is sent: only the lab analysis file you upload (a photo, scan or PDF of your lab results) and the request to analyse it. We do not send your name, email address, profile data, health history, payment details or device identifiers. Please note that a lab report may itself show personal details printed on it, such as your name or date of birth; you can cover or crop them before uploading.\n\nWho receives it: Google LLC, as the provider of the Gemini API. No other AI service receives your data.\n\nWhen and with your permission: a file is sent only when you upload it and ask for an analysis. Before the first upload the app shows a screen that explains what is sent and to whom, and asks you to tap \"Allow\" or \"Not now.\" Nothing is sent to Google until you tap \"Allow.\" If you decline, lab analysis is unavailable and all other features keep working. You can change your choice at any time in the app's settings.\n\nHow it is used: the file is used only to generate the analysis you asked for, which is then shown to you in the app. Under Google's terms for the paid Gemini API, Google processes this data on our behalf, does not use it to train its models, and may keep it only for a limited period to detect abuse, after which it is deleted.\n\nProtection: Google is bound by its data processing terms for the Gemini API and provides the same or equal protection of personal data as described in this policy. Files are transmitted over encrypted (HTTPS/TLS) connections. Transfers to the USA rely on appropriate safeguards such as standard contractual clauses."
       },
       {
-        "heading": "9. Data sharing",
-        "body": "We do not sell your personal data and we do not share your health data with advertisers. We disclose data only to service providers acting on our behalf as described above, or where required by law or to protect legal rights."
+        "heading": "9. Storage and other service providers",
+        "body": "Data is stored on your device and on secure servers operated by us or our hosting providers, who process it only on our instructions. Sign-in is provided by Google and Apple. Where data is transferred outside your country or the EEA, we rely on appropriate safeguards such as standard contractual clauses."
       },
       {
-        "heading": "10. Retention and deletion",
-        "body": "We keep your data for as long as your account is active or as needed to provide the app. You may delete data or ask us to delete your account at any time. After deletion we remove or anonymise your data within a reasonable period, except where the law requires us to retain it."
+        "heading": "10. Data sharing",
+        "body": "We do not sell your personal data and we do not share your health data with advertisers. We share data only with Google Gemini as described in section 8, with the service providers in section 9 acting on our behalf, or where required by law or to protect legal rights."
       },
       {
-        "heading": "11. Your rights",
-        "body": "Depending on where you live (for example under the GDPR) you have the right to access your data, correct it, delete it, restrict or object to its processing, receive it in a portable format, and lodge a complaint with your data protection authority. To exercise these rights, contact us using the details in section 17."
+        "heading": "11. Retention and deletion",
+        "body": "We keep your data for as long as your account is active or as needed to provide the app. You may delete data or your account at any time in the app or by contacting us. After deletion we remove or anonymise your data within a reasonable period, except where the law requires us to retain it."
       },
       {
-        "heading": "12. Withdrawing consent",
-        "body": "You may withdraw your consent at any time by deleting the relevant data in the app, stopping use of the app, or emailing us. Withdrawal does not affect the lawfulness of processing carried out before it. After withdrawal we will stop processing your health data and, on request, delete it, but some features may no longer be available."
+        "heading": "12. Your rights",
+        "body": "Depending on where you live (for example under the GDPR) you have the right to access your data, correct it, delete it, restrict or object to its processing, receive it in a portable format, and lodge a complaint with your data protection authority. To exercise these rights, contact us using the details in section 18."
       },
       {
-        "heading": "13. Security",
-        "body": "We use reasonable technical and organisational measures to protect your data. No system is completely secure, and we cannot guarantee absolute security. You are responsible for protecting your device and account."
+        "heading": "13. Withdrawing consent",
+        "body": "You can withdraw your permission to send lab files to Google Gemini at any time in the app's settings; after that no further files are sent. You can withdraw your general consent by deleting the relevant data in the app, deleting your account, or emailing us. Withdrawal does not affect the lawfulness of processing carried out before it. Some features may no longer be available."
       },
       {
-        "heading": "14. Acceptable use and intellectual property",
+        "heading": "14. Security",
+        "body": "We use reasonable technical and organisational measures to protect your data, including encrypted connections. No system is completely secure, and we cannot guarantee absolute security. You are responsible for protecting your device and account."
+      },
+      {
+        "heading": "15. Acceptable use and intellectual property",
         "body": "You agree not to misuse the app, attempt to gain unauthorised access, reverse engineer it, or use it unlawfully. The app, its design, text, recipes and other content are owned by us or our licensors and are protected by law. We grant you a limited, personal, non-transferable licence to use the app. Content you add remains yours, and you grant us the rights needed to store and display it to provide the service."
       },
       {
-        "heading": "15. Disclaimer and limitation of liability",
+        "heading": "16. Disclaimer and limitation of liability",
         "body": "The app is provided \"as is\" and \"as available\". To the extent permitted by law, we do not guarantee that nutrition information, recipes or AI analysis are complete, accurate or suitable for you, and we are not liable for indirect or consequential loss or for any health outcome resulting from reliance on the app. Nothing in these Terms excludes liability that cannot be excluded by law or limits your mandatory consumer rights."
       },
       {
-        "heading": "16. Changes to these Terms",
-        "body": "We may update these Terms from time to time. We will update the \"last updated\" date and, where changes are material or affect your consent, ask you to review or renew it. Continued use after changes means you accept the updated Terms."
+        "heading": "17. Changes to these Terms",
+        "body": "We may update these Terms from time to time. We will update the \"last updated\" date and, where changes are material or affect your consent, ask you to review or renew it in the app. Continued use after changes means you accept the updated Terms."
       },
       {
-        "heading": "17. Governing law and contact",
+        "heading": "18. Governing law and contact",
         "body": "These Terms are governed by the laws of the country in which the app operator is established, without prejudice to mandatory consumer protection rules of your country of residence. For questions, data requests or to withdraw consent, contact us at nutrifloowapp@gmail.com or via Help & Support in the app."
       }
     ]
@@ -661,7 +670,10 @@
     "unlock": "Unlock Premium",
     "lockedProgress": "Achievements are available with Premium.",
     "lockedNutrients": "The detailed nutrients breakdown is available with Premium.",
-    "lockedShopping": "Shopping lists are available with Premium."
+    "lockedShopping": "Shopping lists are available with Premium.",
+    "currentPlan": "Current plan",
+    "currentPlanMessage": "Your current plan: {{plan}}. Pick a different plan below to switch.",
+    "changePlan": "Change plan"
   },
   "allergens": {
     "containsWarning": "Contains: {{allergens}}"

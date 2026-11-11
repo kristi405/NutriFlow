@@ -118,6 +118,14 @@ class MealPlanStore {
   removePersonData(personId) {
     this.items = this.items.filter(item => !belongsTo(item, personId));
   }
+
+  // Called on account deletion, so this account's meal plan doesn't linger
+  // in memory for whoever signs in next in the same app session.
+  reset() {
+    this.items = [];
+    this.needsPush = false;
+    this.hasSyncedOnce = false;
+  }
 }
 
 export const mealPlanStore = new MealPlanStore();

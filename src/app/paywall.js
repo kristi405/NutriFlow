@@ -24,11 +24,16 @@ function PaywallScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { packages: rawPackages, isPremium, isPurchasing, isLoading, isAvailable } = subscriptionStore;
+  const { packages: rawPackages, isPremium, activeProductId, isPurchasing, isLoading, isAvailable } = subscriptionStore;
   const packages = useMemo(() => [...rawPackages].sort((a, b) => (PLAN_ORDER[a.packageType] ?? 9) - (PLAN_ORDER[b.packageType] ?? 9)), [rawPackages]);
   const features = t('paywall.features', { returnObjects: true });
   const [selectedId, setSelectedId] = useState(null);
-  const selected = packages.find(pkg => pkg.identifier === selectedId) ?? packages.find(pkg => pkg.packageType === 'ANNUAL') ?? packages[0];
+  // An existing subscriber starts with their own plan selected (so "Change
+  // plan" is correctly disabled until they actually pick a different one);
+  // a new subscriber starts on the yearly plan, the best-value default.
+  const currentPackage = packages.find(pkg => pkg.product.identifier === activeProductId);
+  const selected = packages.find(pkg => pkg.identifier === selectedId) ?? (isPremium ? currentPackage : undefined) ?? packages.find(pkg => pkg.packageType === 'ANNUAL') ?? packages[0];
+  const isCurrentPlanSelected = isPremium && selected?.product.identifier === activeProductId;
 
   useEffect(() => {
     if (isAvailable && packages.length === 0) subscriptionStore.loadOfferings();
@@ -74,11 +79,14 @@ function PaywallScreen() {
         {packages.map(pkg => {
         const isSelected = pkg.identifier === selected?.identifier;
         const isYearly = pkg.packageType === 'ANNUAL';
+        const isCurrent = isPremium && pkg.product.identifier === activeProductId;
         return <Pressable key={pkg.identifier} onPress={() => setSelectedId(pkg.identifier)} style={[styles.plan, isSelected && styles.planSelected]}>
               <View style={styles.planText}>
                 <View style={styles.planTitleRow}>
                   <ThemedText type="smallBold" color={theme.text}>{t(packageTitleKey(pkg))}</ThemedText>
-                  {isYearly && <View style={styles.badge}>
+                  {isCurrent ? <View style={[styles.badge, styles.currentBadge]}>
+                      <ThemedText type="caption" color="#ffffff" style={styles.badgeText}>{t('paywall.currentPlan')}</ThemedText>
+                    </View> : isYearly && <View style={styles.badge}>
                       <ThemedText type="caption" color="#ffffff" style={styles.badgeText}>{t('paywall.bestValue')}</ThemedText>
                     </View>}
                 </View>
@@ -98,8 +106,18 @@ function PaywallScreen() {
             <SymbolView name={{ ios: 'crown.fill', android: 'workspace_premium', web: 'workspace_premium' }} size={26} tintColor="#ffffff" />
           </View>
           <ThemedText type="title" style={styles.title} color={theme.text}>{t('paywall.activeTitle')}</ThemedText>
-          <ThemedText type="small" color={theme.textSecondary} style={styles.center}>{t('paywall.activeMessage')}</ThemedText>
+          <ThemedText type="small" color={theme.textSecondary} style={styles.center}>
+            {currentPackage ? t('paywall.currentPlanMessage', { plan: t(packageTitleKey(currentPackage)) }) : t('paywall.activeMessage')}
+          </ThemedText>
         </View>
+
+        {renderPlans()}
+
+        <Pressable onPress={handlePurchase} disabled={!selected || isPurchasing || isCurrentPlanSelected} style={({ pressed }) => [styles.cta, { opacity: !selected || isCurrentPlanSelected ? 0.4 : isPurchasing ? 0.7 : pressed ? 0.85 : 1 }]}>
+          {isPurchasing ? <ActivityIndicator color="#ffffff" /> : <ThemedText type="smallBold" color="#ffffff" style={styles.ctaText}>{t('paywall.changePlan')}</ThemedText>}
+        </Pressable>
+
+        <ThemedText type="caption" color={theme.textSecondary} style={styles.center}>{t(Platform.OS === 'android' ? 'paywall.legalAndroid' : 'paywall.legalIos')}</ThemedText>
       </ScreenChrome>;
   }
 
@@ -243,6 +261,9 @@ const createStyles = theme => StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 8,
     paddingVertical: 2
+  },
+  currentBadge: {
+    backgroundColor: theme.textSecondary
   },
   badgeText: {
     fontWeight: '700'

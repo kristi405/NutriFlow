@@ -164,12 +164,11 @@
       "peanuts": "amendoim",
       "soy": "soja",
       "sesame": "gergelim"
-    }
+    },
+    "chooseLanguageTitle": "Escolha seu idioma",
+    "chooseLanguageSubtitle": "Receitas, artigos e todo o aplicativo serão exibidos neste idioma. Você pode alterá-lo depois nas Configurações."
   },
   "home": {
-    "greetingMorning": "Bom dia",
-    "greetingAfternoon": "Boa tarde",
-    "greetingEvening": "Boa noite",
     "trackSubtitle": "Registre sua nutrição de hoje",
     "dailyCalories": "Calorias diárias",
     "consumed": "Consumidas",
@@ -198,7 +197,8 @@
     "carbs": "Carboidratos",
     "fat": "Gordura",
     "fiber": "Fibra",
-    "steps": "Passos"
+    "steps": "Passos",
+    "greeting": "Olá"
   },
   "article": {
     "notFoundTitle": "Artigo não encontrado",
@@ -296,7 +296,9 @@
     "deleteAllDataConfirmTitle": "Excluir todos os dados?",
     "deleteAllDataConfirmMessage": "Isso excluirá permanentemente sua conta e tudo o que há nela — perfil, planos de refeições, receitas, laudos de exames e fotos. Essa ação não pode ser desfeita.",
     "deleteAllDataConfirm": "Excluir tudo",
-    "deleteAllDataFailed": "Não foi possível excluir a conta. Verifique sua conexão e tente novamente."
+    "deleteAllDataFailed": "Não foi possível excluir a conta. Verifique sua conexão e tente novamente.",
+    "managePlanTitle": "Gerenciar assinatura",
+    "managePlanSubtitle": "Plano atual: {{plan}}"
   },
   "progress": {
     "title": "Progresso",
@@ -552,80 +554,87 @@
     "indicatorTitle": "Indicador",
     "noDetails": "Não há informações adicionais disponíveis para este indicador.",
     "limitReachedTitle": "Limite de análises atingido",
-    "limitReachedMessage": "Você já usou todas as análises incluídas no seu plano por enquanto. A próxima estará disponível em {{date}}. Em breve será possível comprar análises extras."
+    "limitReachedMessage": "Você já usou todas as análises incluídas no seu plano por enquanto. A próxima estará disponível em {{date}}. Em breve será possível comprar análises extras.",
+    "aiConsentTitle": "Enviar para a IA para análise?",
+    "aiConsentMessage": "Este arquivo será enviado para o Google Gemini AI para analisar os resultados dos seus exames. Continue apenas se concordar em compartilhar esses dados.",
+    "aiConsentAllow": "Permitir"
   },
   "privacyPolicy": {
     "title": "Termos e condições",
-    "lastUpdated": "Última atualização: setembro de 2026",
-    "intro": "Leia atentamente estes Termos e Condições e o Aviso de Privacidade (os \"Termos\"). Eles constituem um acordo legal entre você e a NutriFlow (\"nós\", \"o aplicativo\") e explicam as regras de uso do aplicativo e como coletamos e tratamos seus dados pessoais, incluindo dados relativos à sua saúde.",
+    "lastUpdated": "Última atualização: novembro de 2026",
+    "intro": "Leia atentamente estes Termos e Condições e Aviso de Privacidade (os «Termos»). Eles constituem um acordo legal entre você e a NutriFlow («nós», «a aplicação») e explicam as regras de utilização da aplicação e a forma como recolhemos e tratamos os seus dados pessoais, incluindo dados relativos à sua saúde.\n\nResumindo: os únicos dados que saem da NutriFlow para um serviço de IA externo são os ficheiros de análises de laboratório que você decide carregar. São enviados para o Google Gemini apenas depois de você autorizar isso na aplicação. Todos os outros dados são utilizados pela NutriFlow apenas para o funcionamento das funcionalidades da aplicação. Não vendemos os seus dados nem os utilizamos para fins publicitários.",
     "sections": [
       {
         "heading": "1. Aceitação dos Termos",
-        "body": "Ao criar uma conta ou usar o NutriFlow, você confirma que leu, entendeu e concorda com estes Termos. Caso não concorde, não utilize o aplicativo."
+        "body": "Ao criar uma conta ou utilizar a NutriFlow, você confirma que leu, compreendeu e aceita estes Termos. Se não concordar, não utilize a aplicação. O envio de dados a um serviço de IA externo requer uma autorização separada, descrita na secção 8."
       },
       {
-        "heading": "2. Sobre o aplicativo; não é aconselhamento médico",
-        "body": "O NutriFlow é uma ferramenta de acompanhamento nutricional e bem-estar. Ele fornece estimativas de calorias e nutrientes, receitas, planos de refeições, artigos e recomendações geradas por IA apenas para fins informativos gerais. O aplicativo não é um dispositivo médico e não fornece aconselhamento médico, diagnóstico ou tratamento. A análise de resultados de exames gerada por IA pode conter erros. Sempre consulte um profissional de saúde qualificado antes de alterar sua dieta, iniciar um programa de exercícios ou tomar qualquer decisão relacionada à saúde, especialmente se estiver gestante, tiver uma condição médica, alergias alimentares ou fizer uso de medicamentos. Nunca ignore o aconselhamento profissional por causa de algo lido no aplicativo."
+        "heading": "2. Sobre a aplicação; não é aconselhamento médico",
+        "body": "A NutriFlow é uma ferramenta de acompanhamento nutricional e bem-estar. Fornece estimativas de calorias e nutrientes, receitas, planos de refeições, artigos e informações geradas por IA apenas para fins informativos gerais. A aplicação não é um dispositivo médico e não fornece aconselhamento médico, diagnóstico ou tratamento. A análise de resultados de laboratório gerada por IA pode conter erros. Consulte sempre um profissional de saúde qualificado antes de alterar a sua alimentação, iniciar um programa de exercício ou tomar qualquer decisão relacionada com a saúde, especialmente se estiver grávida, tiver uma condição médica, alergias alimentares ou tomar medicamentos. Nunca ignore o conselho de um profissional por causa de algo que leu na aplicação."
       },
       {
         "heading": "3. Elegibilidade",
-        "body": "Você deve ter pelo menos 16 anos para usar o NutriFlow. Se for menor de idade, só poderá usar o aplicativo com o consentimento verificável de um dos pais ou responsável legal, que aceitará estes Termos em seu nome."
+        "body": "Deve ter pelo menos 16 anos para utilizar a NutriFlow. Se for mais jovem, só poderá utilizar a aplicação com o consentimento verificável de um dos pais ou responsável legal, que aceite estes Termos em seu nome."
       },
       {
-        "heading": "4. Sua conta",
-        "body": "Você é responsável pela exatidão das informações fornecidas e por manter suas credenciais de acesso em segurança. Notifique-nos imediatamente sobre qualquer uso não autorizado da sua conta. Você pode entrar com o Google ou a Apple; esses serviços são regidos por seus próprios termos."
+        "heading": "4. A sua conta",
+        "body": "Você é responsável pela exatidão das informações que fornece e pela segurança das suas credenciais de acesso. Notifique-nos imediatamente sobre qualquer utilização não autorizada da sua conta. Pode iniciar sessão com o Google ou a Apple; esses serviços são regidos pelos seus próprios termos."
       },
       {
-        "heading": "5. Dados pessoais que tratamos",
-        "body": "Dados da conta: endereço de e-mail e método de login. Dados de perfil: nome, foto de perfil, sexo, idade, altura, peso, peso desejado, nível de atividade, objetivo, preferências alimentares e alergias. Dados relacionados à saúde (categoria especial de dados): histórico de peso, IMC, ingestão de calorias e nutrientes, ingestão de água, contagem de passos, alergias e restrições alimentares, e resultados e laudos de exames que você escolher enviar para análise. Dados de uso e preferências: receitas que você vê ou favorita, planos de refeições, artigos lidos, idioma, tema e configurações de notificação."
+        "heading": "5. Dados pessoais que recolhemos e como",
+        "body": "Recolhemos apenas os dados que você insere ou carrega, ou que são criados ao utilizar a aplicação:\n\n• Dados da conta: endereço de e-mail e método de início de sessão, recebidos da Apple ou do Google ao iniciar sessão.\n• Dados do perfil: nome, foto de perfil, sexo, idade, altura, peso, peso-alvo, nível de atividade, objetivo, preferências alimentares e alergias, inseridos por você durante o questionário inicial ou no seu perfil.\n• Dados relacionados com a saúde (categoria especial de dados): histórico de peso, IMC, ingestão de calorias e nutrientes, ingestão de água, número de passos, alergias e restrições alimentares, inseridos por você ou calculados pela aplicação.\n• Ficheiros de análises de laboratório: resultados e relatórios de laboratório que você decide carregar para análise.\n• Dados de utilização e preferências: receitas que visualiza ou marca como favoritas, planos de refeições, artigos lidos, idioma, tema e configurações de notificações."
       },
       {
-        "heading": "6. Seu consentimento para o tratamento de dados pessoais e de saúde",
-        "body": "Ao marcar, aceitar ou continuar usando o aplicativo, você dá seu consentimento livre, específico, informado e explícito para a coleta, armazenamento e tratamento dos seus dados pessoais, incluindo dados relativos à sua saúde, conforme descrito nestes Termos. Isso inclui seu consentimento para (a) armazenar esses dados no seu dispositivo e em nossos servidores e nos de nossos prestadores de serviço; (b) usá-los para calcular suas metas, personalizar recomendações e acompanhar seu progresso; e (c) enviar os resultados de exames que você enviar a um serviço de IA de terceiros apenas para gerar a análise solicitada. O consentimento é voluntário. Sem ele, os recursos que exigem dados de saúde não podem ser oferecidos. Você pode retirar seu consentimento a qualquer momento, conforme descrito na seção 12."
+        "heading": "6. Como utilizamos os seus dados",
+        "body": "Todos os dados indicados na secção 5, exceto os ficheiros de análises de laboratório enviados para análise por IA, são utilizados apenas pela NutriFlow para fornecer as funcionalidades da aplicação e não são partilhados com qualquer serviço de IA. Utilizamo-los para:\n\n• criar e gerir a sua conta e fornecer a aplicação (execução de um contrato);\n• calcular os seus objetivos nutricionais, elaborar planos de refeições, personalizar receitas e conteúdos, e acompanhar o seu progresso (o seu consentimento explícito para dados de saúde);\n• analisar um ficheiro de laboratório que você carregue, utilizando o Google Gemini conforme descrito na secção 8 (o seu consentimento explícito, dado na aplicação);\n• manter a aplicação segura, prevenir abusos e corrigir erros (o nosso interesse legítimo);\n• cumprir obrigações legais.\n\nNão utilizamos os seus dados para publicidade, não os vendemos e não os usamos para treinar modelos de IA."
       },
       {
-        "heading": "7. Finalidades e base legal",
-        "body": "Tratamos seus dados para: criar e gerenciar sua conta e fornecer o aplicativo (execução de um contrato); calcular metas nutricionais, personalizar conteúdo e gerar recomendações com IA, o que envolve dados de saúde (seu consentimento explícito); manter o aplicativo seguro, prevenir abusos e corrigir erros (nossos interesses legítimos); e cumprir obrigações legais. Não usamos seus dados de saúde para publicidade."
+        "heading": "7. O seu consentimento",
+        "body": "Ao aceitar estes Termos na aplicação, você dá o seu consentimento livre, específico, informado e explícito para a recolha, armazenamento e tratamento dos seus dados pessoais, incluindo dados de saúde, para os fins indicados na secção 6. Isto inclui o armazenamento dos dados no seu dispositivo e nos nossos servidores e nos dos nossos fornecedores de alojamento.\n\nO envio de um ficheiro de análises de laboratório para o Google Gemini não está incluído neste consentimento geral. A aplicação solicita essa autorização separadamente, num ecrã próprio, antes do envio do primeiro ficheiro (ver secção 8). O consentimento é voluntário e pode ser retirado em qualquer momento, conforme descrito na secção 13."
       },
       {
-        "heading": "8. Armazenamento, processamento com IA e prestadores de serviço",
-        "body": "Os dados podem ser armazenados no seu dispositivo e em servidores seguros operados por nós ou por nossos provedores de hospedagem. O login é fornecido pelo Google e pela Apple. Os resultados de exames que você enviar são encaminhados a um provedor de IA terceirizado apenas para gerar a análise solicitada; exigimos que esses provedores processem os dados somente seguindo nossas instruções. Quando os dados forem transferidos para fora do seu país ou do EEE, utilizamos salvaguardas apropriadas, como cláusulas contratuais padrão."
+        "heading": "8. Análise por IA através do Google Gemini",
+        "body": "A NutriFlow utiliza um serviço de IA externo, a API Gemini fornecida pela Google LLC (EUA), para analisar os resultados de laboratório que você carrega.\n\nO que é enviado: apenas o ficheiro de análises de laboratório que você carrega (uma foto, digitalização ou PDF dos seus resultados) e o pedido de análise. Não enviamos o seu nome, endereço de e-mail, dados do perfil, histórico de saúde, dados de pagamento ou identificadores do dispositivo. Note que o próprio relatório de laboratório pode apresentar dados pessoais impressos, como o seu nome ou data de nascimento; pode ocultá-los ou recortá-los antes de carregar.\n\nQuem recebe: a Google LLC, como fornecedora da API Gemini. Nenhum outro serviço de IA recebe os seus dados.\n\nQuando e com a sua autorização: um ficheiro só é enviado quando você o carrega e solicita uma análise. Antes do primeiro carregamento, a aplicação mostra um ecrã que explica o que é enviado e para quem, pedindo que toque em «Permitir» ou «Agora não». Nada é enviado para a Google até tocar em «Permitir». Se recusar, a análise de laboratório fica indisponível, mas todas as outras funcionalidades continuam a funcionar. Pode alterar a sua escolha em qualquer momento nas definições da aplicação.\n\nComo é utilizado: o ficheiro é utilizado apenas para gerar a análise que solicitou, que é depois mostrada a você na aplicação. Segundo os termos da Google para a API Gemini paga, a Google processa estes dados em nosso nome, não os utiliza para treinar os seus modelos e pode guardá-los apenas por um período limitado para detetar abusos, após o qual são eliminados.\n\nProteção: a Google está vinculada aos seus termos de tratamento de dados para a API Gemini e oferece o mesmo nível de proteção de dados pessoais, ou equivalente, ao descrito nesta política. Os ficheiros são transmitidos através de ligações cifradas (HTTPS/TLS). As transferências para os EUA baseiam-se em garantias adequadas, como cláusulas contratuais-tipo."
       },
       {
-        "heading": "9. Compartilhamento de dados",
-        "body": "Não vendemos seus dados pessoais e não compartilhamos seus dados de saúde com anunciantes. Divulgamos dados apenas a prestadores de serviço que atuam em nosso nome, conforme descrito acima, ou quando exigido por lei ou para proteger direitos legais."
+        "heading": "9. Armazenamento e outros fornecedores de serviços",
+        "body": "Os dados são armazenados no seu dispositivo e em servidores seguros operados por nós ou pelos nossos fornecedores de alojamento, que os processam apenas segundo as nossas instruções. O início de sessão é fornecido pela Google e pela Apple. Quando os dados são transferidos para fora do seu país ou do EEE, baseamo-nos em garantias adequadas, como cláusulas contratuais-tipo."
       },
       {
-        "heading": "10. Retenção e exclusão",
-        "body": "Mantemos seus dados enquanto sua conta estiver ativa ou conforme necessário para fornecer o aplicativo. Você pode excluir dados ou solicitar a exclusão da sua conta a qualquer momento. Após a exclusão, removemos ou anonimizamos seus dados dentro de um prazo razoável, exceto quando a lei exigir que os mantenhamos."
+        "heading": "10. Partilha de dados",
+        "body": "Não vendemos os seus dados pessoais nem partilhamos os seus dados de saúde com anunciantes. Só partilhamos dados com o Google Gemini, conforme descrito na secção 8, com os fornecedores de serviços da secção 9 que atuam em nosso nome, ou quando exigido por lei ou para proteger direitos legais."
       },
       {
-        "heading": "11. Seus direitos",
-        "body": "Dependendo de onde você mora (por exemplo, sob o RGPD), você tem o direito de acessar seus dados, corrigi-los, excluí-los, restringir ou se opor ao seu tratamento, recebê-los em formato portátil e registrar uma reclamação junto à sua autoridade de proteção de dados. Para exercer esses direitos, entre em contato usando os dados da seção 17."
+        "heading": "11. Retenção e eliminação",
+        "body": "Mantemos os seus dados enquanto a sua conta estiver ativa ou enquanto for necessário para fornecer a aplicação. Pode eliminar dados ou a sua conta em qualquer momento na aplicação ou contactando-nos. Após a eliminação, removemos ou anonimizamos os seus dados num prazo razoável, exceto quando a lei exigir que os conservemos."
       },
       {
-        "heading": "12. Retirada do consentimento",
-        "body": "Você pode retirar seu consentimento a qualquer momento excluindo os dados correspondentes no aplicativo, deixando de usar o aplicativo ou enviando um e-mail para nós. A retirada não afeta a legalidade do tratamento realizado antes dela. Após a retirada, deixaremos de tratar seus dados de saúde e, se solicitado, os excluiremos, embora alguns recursos possam deixar de estar disponíveis."
+        "heading": "12. Os seus direitos",
+        "body": "Dependendo do local onde reside (por exemplo, nos termos do RGPD), tem o direito de aceder aos seus dados, corrigi-los, eliminá-los, restringir ou opor-se ao seu tratamento, recebê-los num formato portátil e apresentar uma queixa à sua autoridade de proteção de dados. Para exercer estes direitos, contacte-nos através dos dados indicados na secção 18."
       },
       {
-        "heading": "13. Segurança",
-        "body": "Utilizamos medidas técnicas e organizacionais razoáveis para proteger seus dados. Nenhum sistema é totalmente seguro, e não podemos garantir segurança absoluta. Você é responsável por proteger seu dispositivo e sua conta."
+        "heading": "13. Retirada do consentimento",
+        "body": "Pode retirar a sua autorização para enviar ficheiros de laboratório para o Google Gemini em qualquer momento nas definições da aplicação; a partir desse momento, nenhum outro ficheiro será enviado. Pode retirar o seu consentimento geral eliminando os dados relevantes na aplicação, eliminando a sua conta ou enviando-nos um e-mail. A retirada não afeta a legalidade do tratamento efetuado anteriormente. Algumas funcionalidades podem deixar de estar disponíveis."
       },
       {
-        "heading": "14. Uso aceitável e propriedade intelectual",
-        "body": "Você se compromete a não fazer mau uso do aplicativo, tentar obter acesso não autorizado, realizar engenharia reversa ou usá-lo de forma ilegal. O aplicativo, seu design, textos, receitas e demais conteúdos pertencem a nós ou aos nossos licenciantes e são protegidos por lei. Concedemos a você uma licença limitada, pessoal e intransferível para usar o aplicativo. O conteúdo que você adicionar continua sendo seu, e você nos concede os direitos necessários para armazená-lo e exibi-lo a fim de fornecer o serviço."
+        "heading": "14. Segurança",
+        "body": "Utilizamos medidas técnicas e organizativas razoáveis para proteger os seus dados, incluindo ligações cifradas. Nenhum sistema é completamente seguro, e não podemos garantir segurança absoluta. Você é responsável por proteger o seu dispositivo e a sua conta."
       },
       {
-        "heading": "15. Isenção de responsabilidade e limitação de responsabilidade",
-        "body": "O aplicativo é fornecido \"como está\" e \"conforme disponibilidade\". Na medida permitida por lei, não garantimos que as informações nutricionais, receitas ou análises de IA sejam completas, precisas ou adequadas para você, e não somos responsáveis por perdas indiretas ou consequenciais, nem por qualquer resultado de saúde decorrente da confiança no aplicativo. Nada nestes Termos exclui responsabilidades que não possam ser excluídas por lei, nem limita seus direitos obrigatórios como consumidor."
+        "heading": "15. Utilização aceitável e propriedade intelectual",
+        "body": "Você compromete-se a não utilizar indevidamente a aplicação, não tentar obter acesso não autorizado, não realizar engenharia inversa nem utilizá-la de forma ilegal. A aplicação, o seu design, textos, receitas e demais conteúdo pertencem a nós ou aos nossos licenciantes e são protegidos por lei. Concedemos-lhe uma licença limitada, pessoal e intransmissível para utilizar a aplicação. O conteúdo que adicionar continua a ser seu, e você concede-nos os direitos necessários para o armazenar e exibir a fim de fornecer o serviço."
       },
       {
-        "heading": "16. Alterações a estes Termos",
-        "body": "Podemos atualizar estes Termos periodicamente. Atualizaremos a data de \"última atualização\" e, quando as alterações forem significativas ou afetarem seu consentimento, pediremos que você as revise ou renove. O uso continuado após as alterações significa que você aceita os Termos atualizados."
+        "heading": "16. Isenção de garantias e limitação de responsabilidade",
+        "body": "A aplicação é fornecida «tal como está» e «conforme disponível». Na medida permitida por lei, não garantimos que as informações nutricionais, as receitas ou a análise por IA sejam completas, exatas ou adequadas para você, e não seremos responsáveis por perdas indiretas ou consequenciais, nem por quaisquer consequências para a saúde resultantes de confiar na aplicação. Nada nestes Termos exclui responsabilidade que não possa ser excluída por lei nem limita os seus direitos obrigatórios enquanto consumidor."
       },
       {
-        "heading": "17. Lei aplicável e contato",
-        "body": "Estes Termos são regidos pelas leis do país em que o operador do aplicativo está estabelecido, sem prejuízo das normas obrigatórias de proteção ao consumidor do seu país de residência. Para dúvidas, solicitações de dados ou para retirar o consentimento, contate-nos em nutrifloowapp@gmail.com ou pela Ajuda e suporte no aplicativo."
+        "heading": "17. Alterações a estes Termos",
+        "body": "Podemos atualizar estes Termos periodicamente. Atualizaremos a data da «última atualização» e, quando as alterações forem substanciais ou afetarem o seu consentimento, pediremos que os reveja ou aceite novamente na aplicação. A utilização continuada após as alterações significa que você aceita os Termos atualizados."
+      },
+      {
+        "heading": "18. Lei aplicável e contacto",
+        "body": "Estes Termos são regidos pelas leis do país onde o operador da aplicação está estabelecido, sem prejuízo das normas obrigatórias de proteção ao consumidor do seu país de residência. Para questões, pedidos relativos a dados ou retirada do consentimento, contacte-nos através de nutrifloowapp@gmail.com ou através de Ajuda e Suporte na aplicação."
       }
     ]
   },
@@ -661,7 +670,10 @@
     "unlock": "Desbloquear Premium",
     "lockedProgress": "As conquistas estão disponíveis com o Premium.",
     "lockedNutrients": "O detalhamento de nutrientes está disponível com o Premium.",
-    "lockedShopping": "As listas de compras estão disponíveis com o Premium."
+    "lockedShopping": "As listas de compras estão disponíveis com o Premium.",
+    "currentPlan": "Plano atual",
+    "currentPlanMessage": "Seu plano atual: {{plan}}. Escolha outro plano abaixo para alterá-lo.",
+    "changePlan": "Alterar plano"
   },
   "allergens": {
     "containsWarning": "Contém: {{allergens}}"

@@ -46,12 +46,6 @@ import { profileStore } from '@/store/profileStore';
 import { waterStore } from '@/store/waterStore';
 import { router } from 'expo-router';
 const MEAL_ORDER = ['breakfast', 'brunch', 'lunch', 'dinner', 'snack'];
-function greetingKey() {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'home.greetingMorning';
-  if (hour < 18) return 'home.greetingAfternoon';
-  return 'home.greetingEvening';
-}
 function HomeScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -116,7 +110,7 @@ function HomeScreen() {
         <View style={styles.headerTextColumn}>
           <View style={styles.greetingRow}>
             <ThemedText type="headline" style={styles.name} color={theme.text} numberOfLines={1}>
-              {t(greetingKey())}, {profile.name.split(' ')[0]}
+              {t('home.greeting')}, {profile.name.split(' ')[0]}
             </ThemedText>
             <WavingHand size={24} />
           </View>

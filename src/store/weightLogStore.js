@@ -38,6 +38,12 @@ class WeightLogStore {
   entriesSince(startDateKey) {
     return this.sortedEntries.filter(entry => entry.date >= startDateKey);
   }
+
+  // Called on account deletion, so this account's weight log doesn't linger
+  // in memory for whoever signs in next in the same app session.
+  reset() {
+    this.entries = [];
+  }
 }
 
 export const weightLogStore = new WeightLogStore();

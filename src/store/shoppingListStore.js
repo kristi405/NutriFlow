@@ -26,6 +26,12 @@ class ShoppingListStore {
     }));
     this.checked = { ...kept, [scopeKey]: next };
   }
+
+  // Called on account deletion, so this account's checked items don't linger
+  // in memory for whoever signs in next in the same app session.
+  reset() {
+    this.checked = {};
+  }
 }
 
 export const shoppingListStore = new ShoppingListStore();

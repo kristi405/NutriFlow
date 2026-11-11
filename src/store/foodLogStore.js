@@ -48,6 +48,12 @@ class FoodLogStore {
   removeEntriesForRecipe(recipeId) {
     this.entries = this.entries.filter(entry => entry.recipeId !== recipeId);
   }
+
+  // Called on account deletion, so this account's food log doesn't linger
+  // in memory for whoever signs in next in the same app session.
+  reset() {
+    this.entries = [];
+  }
 }
 
 export const foodLogStore = new FoodLogStore();

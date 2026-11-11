@@ -80,6 +80,7 @@ function AiAnalysisScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [isSourceSheetOpen, setIsSourceSheetOpen] = useState(false);
+  const [pendingConsentFile, setPendingConsentFile] = useState(null);
   const { isLoading, isUploading, hasError } = labReportStore;
   const reports = labReportStore.visibleReports;
   const locale = localeStore.language;
@@ -88,8 +89,9 @@ function AiAnalysisScreen() {
     labReportStore.loadReports();
   }, []);
 
-  // Premium includes one analysis per rolling 30 days — buying extra ones isn't
-  // wired up yet, so once it's spent this just explains when the next is free.
+  // Limits vary per plan (see analysisUsageStore.PLAN_LIMITS) — buying extra
+  // analyses isn't wired up yet, so once the quota's spent this just explains
+  // when the next one frees up.
   function handleUploadPress() {
     if (!ensurePremium()) return;
     if (subscriptionStore.isAvailable && !analysisUsageStore.canUseFreeAnalysis) {
@@ -97,6 +99,16 @@ function AiAnalysisScreen() {
       return;
     }
     setIsSourceSheetOpen(true);
+  }
+
+  async function submitReport(file) {
+    try {
+      const report = await labReportStore.uploadReport(file);
+      if (subscriptionStore.isAvailable) analysisUsageStore.recordUse();
+      router.push({ pathname: '/lab-report/[id]', params: { id: report.id } });
+    } catch (error) {
+      Alert.alert(t('aiAnalysis.uploadErrorTitle'), error.message ?? t('aiAnalysis.uploadErrorMessage'));
+    }
   }
 
   async function handleSelectSource(source) {
@@ -110,12 +122,23 @@ function AiAnalysisScreen() {
         Alert.alert(t('aiAnalysis.uploadErrorTitle'), t('aiAnalysis.fileTooLarge'));
         return;
       }
-      const report = await labReportStore.uploadReport(file);
-      if (subscriptionStore.isAvailable) analysisUsageStore.recordUse();
-      router.push({ pathname: '/lab-report/[id]', params: { id: report.id } });
+      // The file is only sent anywhere once the person explicitly consents —
+      // it's health data, and this is the point it leaves the device for
+      // Gemini (via our backend) to read and analyze. See the consent modal below.
+      setPendingConsentFile(file);
     } catch (error) {
       Alert.alert(t('aiAnalysis.uploadErrorTitle'), error.message ?? t('aiAnalysis.uploadErrorMessage'));
     }
+  }
+
+  function handleConsentAllow() {
+    const file = pendingConsentFile;
+    setPendingConsentFile(null);
+    submitReport(file);
+  }
+
+  function handleConsentCancel() {
+    setPendingConsentFile(null);
   }
 
   function handleDelete(id) {
@@ -235,6 +258,26 @@ function AiAnalysisScreen() {
           </Pressable>
         </Pressable>
       </Modal>
+
+      <Modal visible={Boolean(pendingConsentFile)} transparent animationType="fade" onRequestClose={handleConsentCancel}>
+        <Pressable style={styles.consentBackdrop} onPress={handleConsentCancel}>
+          <Pressable style={[styles.consentCard, { backgroundColor: theme.background }]} onPress={event => event.stopPropagation()}>
+            <View style={[styles.consentIconWrapper, { backgroundColor: theme.accentSoft }]}>
+              <SymbolView name={{ ios: 'sparkles', android: 'auto_awesome', web: 'auto_awesome' }} size={26} tintColor={theme.accent} />
+            </View>
+            <ThemedText type="headline" color={theme.text} style={styles.center}>{t('aiAnalysis.aiConsentTitle')}</ThemedText>
+            <ThemedText type="small" color={theme.textSecondary} style={styles.center}>{t('aiAnalysis.aiConsentMessage')}</ThemedText>
+            <View style={styles.consentButtonRow}>
+              <Pressable onPress={handleConsentCancel} style={[styles.consentButton, styles.consentButtonOutline, { borderColor: theme.border }]}>
+                <ThemedText type="smallBold" color={theme.text}>{t('common.cancel')}</ThemedText>
+              </Pressable>
+              <Pressable onPress={handleConsentAllow} style={[styles.consentButton, { backgroundColor: theme.accent }]}>
+                <ThemedText type="smallBold" color="#ffffff">{t('aiAnalysis.aiConsentAllow')}</ThemedText>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </ScreenScrollView>
   </GuestLockOverlay>;
 }
@@ -263,6 +306,52 @@ const createStyles = theme => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.three
+  },
+  consentBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.four
+  },
+  consentCard: {
+    width: '100%',
+    alignItems: 'center',
+    gap: Spacing.two,
+    borderRadius: 24,
+    padding: Spacing.five,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 8
+  },
+  consentIconWrapper: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.one
+  },
+  center: {
+    textAlign: 'center'
+  },
+  consentButtonRow: {
+    flexDirection: 'row',
+    gap: Spacing.two,
+    width: '100%',
+    marginTop: Spacing.two
+  },
+  consentButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 14,
+    paddingVertical: Spacing.two + 2
+  },
+  consentButtonOutline: {
+    borderWidth: 1
   },
   headerRow: {
     flexDirection: 'row',

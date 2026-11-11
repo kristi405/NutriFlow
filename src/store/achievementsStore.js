@@ -143,6 +143,12 @@ class AchievementsStore {
     delete next[key];
     this.byPerson = next;
   }
+
+  // Called on account deletion, so this account's achievements don't linger
+  // in memory for whoever signs in next in the same app session.
+  reset() {
+    this.byPerson = {};
+  }
 }
 
 export const achievementsStore = new AchievementsStore();

@@ -19,6 +19,13 @@ class AppStreakStore {
     this.streak = this.lastOpenedDate === addDays(today, -1) ? this.streak + 1 : 1;
     this.lastOpenedDate = today;
   }
+
+  // Called on account deletion, so this account's streak doesn't linger
+  // in memory for whoever signs in next in the same app session.
+  reset() {
+    this.streak = 0;
+    this.lastOpenedDate = null;
+  }
 }
 
 export const appStreakStore = new AppStreakStore();

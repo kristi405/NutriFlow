@@ -3,6 +3,7 @@ import { CALCULATING_DURATION, CalculatingScreen } from '@/components/calculatin
 import { HeaderBackButton } from '@/components/header-back-button';
 import { IntroScreen } from '@/components/intro-screen';
 import { OnboardingFlow } from '@/components/onboarding/onboarding-flow';
+import { LanguageGate } from '@/components/language-gate';
 import { ThemedView } from '@/components/themed-view';
 import { useTheme } from '@/hooks/use-theme';
 import '@/i18n';
@@ -33,7 +34,7 @@ function TabLayout() {
   const theme = useTheme();
   const [showIntro, setShowIntro] = useState(true);
   const [showCalculating, setShowCalculating] = useState(false);
-  const hasHydrated = profileStore.hasHydrated && authStore.hasHydrated && peopleStore.hasHydrated;
+  const hasHydrated = profileStore.hasHydrated && authStore.hasHydrated && peopleStore.hasHydrated && localeStore.hasHydrated;
   const isAuthenticated = authStore.isAuthenticated || (SKIP_AUTH_FOR_TESTING && !authStore.hasLoggedOut);
   // "Continue without an account" on the sign-in screen — skips onboarding
   // and goes straight into the same Stack/tab navigator real users get (see
@@ -151,6 +152,10 @@ function TabLayout() {
     // first but conflicted with expo-router's route resolution, which kept
     // resolving to (tabs) regardless of which Stack.Screen list was active —
     // reusing the one real Stack avoids that entirely.
+    // Shown once, right after sign-in and before the questionnaire — never
+    // for a guest (no account to persist the choice against) or for an
+    // already-onboarded returning user.
+    if (isAuthenticated && !hasOnboarded && !localeStore.hasPickedLanguage) return <LanguageGate key="language-gate" />;
     if (!hasOnboarded && !isGuest) return <OnboardingFlow key="onboarding" />;
     if (showCalculating) return <CalculatingScreen key="calculating" />;
     return <Stack key="tabs" screenOptions={{ headerShown: false, headerLeft: () => <HeaderBackButton /> }}>

@@ -102,6 +102,18 @@ class PeopleStore {
   setActive(id) {
     this.activePersonId = id !== null && this.members.some(member => member.id === id) ? id : null;
   }
+
+  // Called on account deletion — AsyncStorage.clear() alone only wipes what's
+  // persisted, not this store's already-loaded in-memory state, which would
+  // otherwise still be sitting here (stale family members) if the person
+  // signs back in with a new account in the same app session.
+  reset() {
+    this.members = [];
+    this.activePersonId = null;
+    this.hasSyncedMembers = false;
+    this.needsPush = false;
+    this.shareMenu = false;
+  }
 }
 
 export const peopleStore = new PeopleStore();

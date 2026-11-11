@@ -98,6 +98,14 @@ class LabReportStore {
     // The endpoint spans every report on the account; keep this person's.
     return raw.map(adaptHistoryPoint).filter(point => point.reportId === null || peopleStore.ownerOfReport(point.reportId) === personId).sort((a, b) => a.takenAt.localeCompare(b.takenAt));
   }
+
+  // Called on account deletion — not persisted, but still in-memory, so the
+  // previous account's reports would otherwise flash on screen until the
+  // next loadReports() call overwrites them.
+  reset() {
+    this.reports = [];
+    this.detailCache = new Map();
+  }
 }
 
 export const labReportStore = new LabReportStore();

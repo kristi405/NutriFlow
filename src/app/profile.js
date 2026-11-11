@@ -8,10 +8,22 @@ import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { deletePhoto, pickProfilePhoto } from '@/lib/profilePhoto';
 import { PersonAvatar } from '@/components/people/person-avatar';
 import { apiRequest, apiUpload, toFileUrl } from '@/lib/api';
+import { achievementsStore } from '@/store/achievementsStore';
+import { analysisUsageStore } from '@/store/analysisUsageStore';
+import { appStreakStore } from '@/store/appStreakStore';
+import { articleStore } from '@/store/articleStore';
 import { authStore } from '@/store/authStore';
+import { favoritesStore } from '@/store/favoritesStore';
 import { foodLogStore } from '@/store/foodLogStore';
+import { labReportStore } from '@/store/labReportStore';
 import { mealPlanStore } from '@/store/mealPlanStore';
+import { myRecipesStore } from '@/store/myRecipesStore';
 import { peopleStore } from '@/store/peopleStore';
+import { recentlyViewedStore } from '@/store/recentlyViewedStore';
+import { shoppingListStore } from '@/store/shoppingListStore';
+import { termsStore } from '@/store/termsStore';
+import { waterStore } from '@/store/waterStore';
+import { weightLogStore } from '@/store/weightLogStore';
 import { removeFamilyMember } from '@/store/peopleActions';
 import { profileStore } from '@/store/profileStore';
 import { notificationsStore } from '@/store/notificationsStore';
@@ -145,6 +157,27 @@ function ProfileScreen() {
         // harmless no-op now, the session row no longer exists).
         await authStore.logout();
         await AsyncStorage.clear().catch(() => {});
+        // AsyncStorage.clear() only wipes what's persisted — these stores'
+        // already-loaded in-memory state would otherwise survive into a new
+        // sign-in during this same app session (e.g. the old anketa's
+        // hasOnboarded=true skipping onboarding for a "new" account signed
+        // up with the same email right after deleting the old one).
+        profileStore.resetOnboarding();
+        peopleStore.reset();
+        myRecipesStore.reset();
+        favoritesStore.reset();
+        mealPlanStore.reset();
+        achievementsStore.reset();
+        shoppingListStore.reset();
+        articleStore.reset();
+        foodLogStore.reset();
+        appStreakStore.reset();
+        waterStore.reset();
+        analysisUsageStore.reset();
+        weightLogStore.reset();
+        termsStore.reset();
+        recentlyViewedStore.clear();
+        labReportStore.reset();
       }
     }]);
   }

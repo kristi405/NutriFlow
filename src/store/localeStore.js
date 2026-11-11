@@ -11,10 +11,14 @@ class LocaleStore {
   language = 'en';
   availableLanguages = FALLBACK_LANGUAGES;
   hasHydrated = false;
+  // Set once the person explicitly confirms a language on the post-sign-in
+  // language gate (see components/language-gate.js) — gates that screen out
+  // of the auth → onboarding flow for good, on this device.
+  hasPickedLanguage = false;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
-    persistStore(this, 'nutriflow.locale', ['language', 'availableLanguages']);
+    persistStore(this, 'nutriflow.locale', ['language', 'availableLanguages', 'hasPickedLanguage']);
     // Applies the persisted language to i18next once hydration restores it from storage.
     reaction(() => this.hasHydrated, hydrated => {
       if (hydrated) i18next.changeLanguage(this.language);
@@ -38,6 +42,10 @@ class LocaleStore {
   setLanguage(language) {
     this.language = language;
     i18next.changeLanguage(language);
+  }
+
+  markLanguagePicked() {
+    this.hasPickedLanguage = true;
   }
 }
 

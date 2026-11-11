@@ -33,6 +33,13 @@ class TermsStore {
     this.acceptedAt = serverAcceptedAt;
     this.isPending = false;
   }
+
+  // Called on account deletion, so this account's acceptance doesn't linger
+  // in memory for whoever signs in next in the same app session.
+  reset() {
+    this.acceptedAt = null;
+    this.isPending = false;
+  }
 }
 
 export const termsStore = new TermsStore();

@@ -36,6 +36,12 @@ class WaterStore {
   removePersonData(personId) {
     this.entries = this.entries.filter(entry => !belongsTo(entry, personId));
   }
+
+  // Called on account deletion, so this account's water log doesn't linger
+  // in memory for whoever signs in next in the same app session.
+  reset() {
+    this.entries = [];
+  }
 }
 
 export const waterStore = new WaterStore();

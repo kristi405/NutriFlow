@@ -8,8 +8,8 @@ import { subscriptionStore } from './subscriptionStore';
 // analyses beyond this isn't wired up yet (no RevenueCat product for it).
 const PLAN_LIMITS = {
   weekly: { windowDays: 7, limit: 1 },
-  monthly: { windowDays: 30, limit: 1 },
-  yearly: { windowDays: 365, limit: 12 }
+  monthly: { windowDays: 30, limit: 2 },
+  yearly: { windowDays: 30, limit: 2 }
 };
 // Used only if a plan type can't be determined (e.g. offerings haven't loaded
 // yet) — conservative, so it never over-grants.
@@ -51,6 +51,12 @@ class AnalysisUsageStore {
 
   recordUse() {
     this.usedAt = [...this.usesInWindow, new Date().toISOString()];
+  }
+
+  // Called on account deletion, so this account's usage quota doesn't linger
+  // in memory for whoever signs in next in the same app session.
+  reset() {
+    this.usedAt = [];
   }
 }
 

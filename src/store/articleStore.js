@@ -101,6 +101,13 @@ class ArticleStore {
     runInAction(() => this.setFavorite(article.id, article.isFavorite));
     return article;
   }
+
+  // Called on account deletion — only the account-specific parts (favorites/
+  // read state); todayArticle/lang stay cached since they're content, not account data.
+  reset() {
+    this.favoriteIds = [];
+    this.readIds = [];
+  }
 }
 
 export const articleStore = new ArticleStore();

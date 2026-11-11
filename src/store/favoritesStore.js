@@ -22,6 +22,12 @@ class FavoritesStore {
       this.favorites.push({ recipeId, collection, savedAt: new Date().toISOString() });
     }
   }
+
+  // Called on account deletion, so this account's favorites don't linger
+  // in memory for whoever signs in next in the same app session.
+  reset() {
+    this.favorites = [];
+  }
 }
 
 export const favoritesStore = new FavoritesStore();

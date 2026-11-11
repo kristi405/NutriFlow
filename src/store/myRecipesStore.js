@@ -52,6 +52,14 @@ class MyRecipesStore {
   getById(id) {
     return this.recipes.find(recipe => recipe.id === id);
   }
+
+  // Called on account deletion, so this account's own recipes don't linger
+  // in memory for whoever signs in next in the same app session.
+  reset() {
+    this.recipes = [];
+    this.needsPush = false;
+    this.hasSyncedOnce = false;
+  }
 }
 
 export const myRecipesStore = new MyRecipesStore();
