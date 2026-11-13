@@ -446,6 +446,7 @@
     "difficultyLabel": "Poziom trudności",
     "noIngredientsYet": "Nie dodano jeszcze składników",
     "addIngredientTitle": "Dodaj składnik",
+    "specifyAmountTitle": "Ile dodać?",
     "searchIngredientsPlaceholder": "Szukaj składników",
     "stepPlaceholder": "Opisz ten krok",
     "difficulty": {

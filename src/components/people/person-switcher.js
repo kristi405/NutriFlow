@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PersonAvatar } from '@/components/people/person-avatar';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
@@ -17,6 +18,7 @@ import { profileStore } from '@/store/profileStore';
 function PersonSwitcherComponent({ style, variant = 'pill', size = 48, children }) {
   const { t } = useTranslation();
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const [isOpen, setIsOpen] = useState(false);
 
   const me = profileStore.profile;
@@ -61,9 +63,14 @@ function PersonSwitcherComponent({ style, variant = 'pill', size = 48, children 
         </Pressable>}
 
       <Modal visible={isOpen} transparent animationType="slide" onRequestClose={() => setIsOpen(false)}>
-        <Pressable style={styles.backdrop} onPress={() => setIsOpen(false)}>
-          <Pressable style={[styles.sheet, { backgroundColor: theme.background }]} onPress={event => event.stopPropagation()}>
-            <ThemedText type="smallBold" color={theme.text}>{t('people.switchTitle')}</ThemedText>
+        <Pressable style={[styles.backdrop, { backgroundColor: theme.background }]} onPress={() => setIsOpen(false)}>
+          <Pressable style={[styles.sheet, { backgroundColor: theme.background, paddingTop: insets.top + Spacing.four }]} onPress={event => event.stopPropagation()}>
+            <View style={styles.header}>
+              <ThemedText type="smallBold" color={theme.text}>{t('people.switchTitle')}</ThemedText>
+              <Pressable onPress={() => setIsOpen(false)} hitSlop={8} style={[styles.closeButton, { backgroundColor: theme.accentSoft }]}>
+                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={theme.accent} />
+              </Pressable>
+            </View>
             {people.map(person => {
             const isActive = person.id === activeId;
             return <Pressable key={person.id ?? 'me'} onPress={() => handleSelect(person.id)} style={styles.row}>
@@ -128,17 +135,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
+  // Background color is set inline (theme.background) — opaque, since the
+  // sheet is full screen (flex: 1 below); a translucent color here would
+  // only flash the screen behind through during the keyboard's animation.
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'flex-end'
   },
   sheet: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
     padding: Spacing.four,
     paddingBottom: Spacing.six,
-    gap: Spacing.three
+    gap: Spacing.three,
+    flex: 1
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   row: {
     flexDirection: 'row',

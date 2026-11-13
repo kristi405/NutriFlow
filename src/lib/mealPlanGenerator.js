@@ -1,6 +1,7 @@
 import { getIngredientById, getRecipes } from '@/data/catalog';
 import { findAllergenConflicts } from '@/lib/allergens';
 import { calculateRecipeNutrition } from '@/lib/nutrition';
+import { myRecipesStore } from '@/store/myRecipesStore';
 
 const TOLERANCE_KCAL = 50;
 const MIN_MORNING_SERVINGS = 0.5;
@@ -52,9 +53,14 @@ function toItems({ breakfast, lunch, dinner, morningServings = 1, snack }) {
  * tolerance — otherwise shuffle order could hand back the first "good enough"
  * match even when it needed a big morning-meal scale-up to get there, while a
  * combo needing little or no flexing was one step later in the loop.
+ *
+ * My Recipes (myRecipesStore) are eligible candidates too, but are never
+ * flexed — a combo whose breakfast or lunch is a user recipe only competes
+ * as a clean 1-serving-each combo, since scaling someone's own recipe to hit
+ * a calorie target would change the dish they actually planned to eat.
  */
 export function generateDailyMealPlan(targetCalories, { includeSnack = true, allergies = [] } = {}) {
-  const recipes = getRecipes().filter(recipe => findAllergenConflicts(recipe, allergies).length === 0);
+  const recipes = [...getRecipes(), ...myRecipesStore.recipes].filter(recipe => findAllergenConflicts(recipe, allergies).length === 0);
   const breakfastPool = recipes.filter(recipe => recipe.categoryId === 'breakfast');
   const lunchPool = recipes.filter(recipe => recipe.categoryId === 'lunch');
   const dinnerPool = recipes.filter(recipe => DINNER_CATEGORIES.includes(recipe.categoryId));
@@ -91,7 +97,7 @@ export function generateDailyMealPlan(targetCalories, { includeSnack = true, all
         const combo = { breakfast, lunch, dinner, snack };
         if (!bestFixed || fixedDiff < bestFixed.diff) bestFixed = { combo, diff: fixedDiff };
 
-        if (morningCal > 0) {
+        if (morningCal > 0 && !breakfast.isUserRecipe && !lunch.isUserRecipe) {
           const remainingForMorning = targetCalories - dinnerCal - snackCal;
           const rawServings = remainingForMorning / morningCal;
           const clamped = Math.min(MAX_MORNING_SERVINGS, Math.max(MIN_MORNING_SERVINGS, rawServings));

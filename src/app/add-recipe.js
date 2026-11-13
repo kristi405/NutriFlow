@@ -11,10 +11,10 @@ import { ThemedText } from '@/components/themed-text';
 import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { getCategories, getIngredients } from '@/data/catalog';
+import { guessIngredientImage } from '@/lib/ingredientImage';
 import { defaultQuantityFor, formatUnit, parseQuantity } from '@/lib/ingredientUnits';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { useFocusedRowScroll } from '@/hooks/useFocusedRowScroll';
 import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { myRecipesStore } from '@/store/myRecipesStore';
 
@@ -30,7 +30,6 @@ function AddRecipeScreen() {
   const insets = useSafeAreaInsets();
   const keyboardHeight = useKeyboardHeight();
   const scrollRef = useRef(null);
-  const { rowProps, inputProps } = useFocusedRowScroll(scrollRef, keyboardHeight);
 
   const categories = getCategories();
   const ingredients = getIngredients();
@@ -41,6 +40,10 @@ function AddRecipeScreen() {
   const [ingredientLines, setIngredientLines] = useState([]);
   const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false);
   const [ingredientQuery, setIngredientQuery] = useState('');
+  const [pendingIngredient, setPendingIngredient] = useState(null);
+  const [pendingQuantity, setPendingQuantity] = useState('');
+  const [editingQuantityIndex, setEditingQuantityIndex] = useState(null);
+  const [editingQuantityValue, setEditingQuantityValue] = useState('');
 
   const filteredIngredients = useMemo(() => {
     const normalized = ingredientQuery.trim().toLowerCase();
@@ -72,8 +75,16 @@ function AddRecipeScreen() {
     Alert.alert(t('recipes.addPhotoTitle'), undefined, [{ text: t('recipes.takePhoto'), onPress: handleTakePhoto }, { text: t('recipes.chooseFromLibrary'), onPress: handleChooseFromLibrary }, { text: t('common.cancel'), style: 'cancel' }]);
   }
 
-  function handleAddIngredient(ingredient) {
-    setIngredientLines(current => [...current, { ingredientId: ingredient.id, name: ingredient.name, unit: ingredient.defaultUnit, quantity: defaultQuantityFor(ingredient.defaultUnit) }]);
+  function handleSelectIngredient(ingredient) {
+    setPendingIngredient(ingredient);
+    setPendingQuantity(defaultQuantityFor(ingredient.defaultUnit));
+  }
+
+  function handleConfirmPendingIngredient() {
+    const ingredient = pendingIngredient;
+    if (!ingredient) return;
+    setIngredientLines(current => [...current, { ingredientId: ingredient.id, name: ingredient.name, unit: ingredient.defaultUnit, quantity: pendingQuantity }]);
+    setPendingIngredient(null);
     setIsIngredientModalOpen(false);
     setIngredientQuery('');
   }
@@ -84,6 +95,17 @@ function AddRecipeScreen() {
 
   function handleQuantityChange(index, value) {
     setIngredientLines(current => current.map((line, i) => i === index ? { ...line, quantity: value } : line));
+  }
+
+  function handleOpenQuantityEditor(index) {
+    setEditingQuantityIndex(index);
+    setEditingQuantityValue(ingredientLines[index].quantity);
+  }
+
+  function handleConfirmQuantityEdit() {
+    if (editingQuantityIndex === null) return;
+    handleQuantityChange(editingQuantityIndex, editingQuantityValue);
+    setEditingQuantityIndex(null);
   }
 
   const canSave = title.trim().length > 0 && ingredientLines.length > 0;
@@ -188,12 +210,12 @@ function AddRecipeScreen() {
               <SymbolView name={{ ios: 'leaf', android: 'eco', web: 'eco' }} size={20} tintColor={showIngredientsError ? theme.error : theme.textSecondary} />
               <ThemedText type="caption" color={showIngredientsError ? theme.error : theme.textSecondary} style={styles.emptyIngredientsText}>{showIngredientsError ? t('recipes.ingredientsRequired') : t('recipes.noIngredientsYet')}</ThemedText>
             </Pressable> : <View style={styles.list}>
-              {ingredientLines.map((line, index) => <View key={`${line.ingredientId}-${index}`} {...rowProps(index)} style={styles.ingredientRow}>
+              {ingredientLines.map((line, index) => <View key={`${line.ingredientId}-${index}`} style={styles.ingredientRow}>
                   <ThemedText type="smallBold" color={theme.text} style={styles.flex1} numberOfLines={1}>{line.name}</ThemedText>
-                  <View style={styles.quantityBox}>
-                    <TextInput value={line.quantity} onChangeText={value => handleQuantityChange(index, value)} keyboardType="decimal-pad" {...inputProps(index)} style={styles.quantityInput} />
+                  <Pressable onPress={() => handleOpenQuantityEditor(index)} style={styles.quantityBox}>
+                    <ThemedText type="smallBold" color={theme.text}>{line.quantity}</ThemedText>
                     <ThemedText type="caption" color={theme.textSecondary}>{formatUnit(t, line.unit)}</ThemedText>
-                  </View>
+                  </Pressable>
                   <Pressable onPress={() => handleRemoveIngredient(index)} hitSlop={8}>
                     <SymbolView name={{ ios: 'xmark.circle.fill', android: 'cancel', web: 'cancel' }} size={20} tintColor={theme.border} />
                   </Pressable>
@@ -209,10 +231,8 @@ function AddRecipeScreen() {
       </View>
 
       <Modal visible={isIngredientModalOpen} transparent animationType="slide" onRequestClose={() => setIsIngredientModalOpen(false)}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex1}>
-        <Pressable style={[styles.modalBackdrop, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]} onPress={() => setIsIngredientModalOpen(false)}>
-          <Pressable style={[styles.modalSheet, keyboardHeight > 0 && styles.modalSheetKeyboardOpen]} onPress={event => event.stopPropagation()}>
-            <View style={styles.modalGrabber} />
+        <Pressable style={styles.modalBackdrop} onPress={() => setIsIngredientModalOpen(false)}>
+          <Pressable style={[styles.modalSheet, { paddingTop: insets.top + Spacing.two }]} onPress={event => event.stopPropagation()}>
             <View style={styles.modalHeader}>
               <ThemedText type="smallBold" color={theme.text}>{t('recipes.addIngredientTitle')}</ThemedText>
               <Pressable onPress={() => setIsIngredientModalOpen(false)} hitSlop={8} style={styles.modalCloseButton}>
@@ -223,17 +243,70 @@ function AddRecipeScreen() {
               <SymbolView name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} size={16} tintColor={theme.textSecondary} />
               <TextInput value={ingredientQuery} onChangeText={setIngredientQuery} placeholder={t('recipes.searchIngredientsPlaceholder')} placeholderTextColor={theme.textSecondary} style={styles.searchInput} autoCorrect={false} />
             </View>
-            <ScrollView style={styles.ingredientScroll} keyboardShouldPersistTaps="handled">
-              {filteredIngredients.map(ingredient => <Pressable key={ingredient.id} onPress={() => handleAddIngredient(ingredient)} style={styles.ingredientOption}>
-                  <ThemedText type="small" color={theme.text} style={styles.flex1} numberOfLines={1}>{ingredient.name}</ThemedText>
+            {/* The sheet itself never resizes for the keyboard (no
+                KeyboardAvoidingView) — that JS-driven padding animation isn't
+                frame-synced with the keyboard's own native animation, which
+                briefly exposed the real screen behind during the transition.
+                automaticallyAdjustKeyboardInsets is native and frame-synced,
+                and only needs to shift this scroll view's content, not the
+                whole sheet. */}
+            <ScrollView style={styles.ingredientScroll} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentInsetAdjustmentBehavior="automatic">
+              {filteredIngredients.map(ingredient => <Pressable key={ingredient.id} onPress={() => handleSelectIngredient(ingredient)} style={styles.ingredientOption}>
+                  <RecipeImage uri={guessIngredientImage(ingredient)} style={styles.ingredientOptionImage} iconSize={20} />
+                  <View style={styles.flex1}>
+                    <ThemedText type="small" color={theme.text} numberOfLines={1}>{ingredient.name}</ThemedText>
+                    <ThemedText type="caption" color={theme.textSecondary}>{Math.round(ingredient.per100g.nutrition.calories)} {t('common.kcal')} / 100g</ThemedText>
+                  </View>
                   <View style={styles.ingredientAddIcon}>
                     <SymbolView name={{ ios: 'plus', android: 'add', web: 'add' }} size={12} tintColor={theme.accent} />
                   </View>
                 </Pressable>)}
             </ScrollView>
           </Pressable>
+          {pendingIngredient && <Pressable style={[StyleSheet.absoluteFill, styles.amountBackdrop]} onPress={() => setPendingIngredient(null)}>
+            <Pressable style={[styles.amountCard, { backgroundColor: theme.background }]} onPress={event => event.stopPropagation()}>
+              <View style={styles.amountHeader}>
+                <RecipeImage uri={guessIngredientImage(pendingIngredient)} style={styles.ingredientOptionImage} iconSize={20} />
+                <View style={styles.flex1}>
+                  <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{pendingIngredient.name}</ThemedText>
+                  <ThemedText type="caption" color={theme.textSecondary}>{t('recipes.specifyAmountTitle')}</ThemedText>
+                </View>
+              </View>
+              <View style={styles.amountQuantityBox}>
+                <TextInput value={pendingQuantity} onChangeText={setPendingQuantity} keyboardType="decimal-pad" autoFocus style={styles.amountQuantityInput} />
+                <ThemedText type="smallBold" color={theme.textSecondary}>{formatUnit(t, pendingIngredient.defaultUnit)}</ThemedText>
+              </View>
+              <View style={styles.amountActions}>
+                <Pressable onPress={() => setPendingIngredient(null)} style={styles.amountCancel}>
+                  <ThemedText type="smallBold" color={theme.textSecondary}>{t('common.cancel')}</ThemedText>
+                </Pressable>
+                <Pressable onPress={handleConfirmPendingIngredient} style={styles.amountConfirm}>
+                  <ThemedText type="smallBold" color="#ffffff">{t('common.add')}</ThemedText>
+                </Pressable>
+              </View>
+            </Pressable>
+          </Pressable>}
         </Pressable>
-        </KeyboardAvoidingView>
+      </Modal>
+
+      <Modal visible={editingQuantityIndex !== null} transparent animationType="fade" onRequestClose={() => setEditingQuantityIndex(null)}>
+        <Pressable style={styles.amountBackdrop} onPress={() => setEditingQuantityIndex(null)}>
+          <Pressable style={[styles.amountCard, { backgroundColor: theme.background }]} onPress={event => event.stopPropagation()}>
+            <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{editingQuantityIndex !== null ? ingredientLines[editingQuantityIndex]?.name : ''}</ThemedText>
+            <View style={styles.amountQuantityBox}>
+              <TextInput value={editingQuantityValue} onChangeText={setEditingQuantityValue} keyboardType="decimal-pad" autoFocus style={styles.amountQuantityInput} />
+              <ThemedText type="smallBold" color={theme.textSecondary}>{editingQuantityIndex !== null ? formatUnit(t, ingredientLines[editingQuantityIndex]?.unit) : ''}</ThemedText>
+            </View>
+            <View style={styles.amountActions}>
+              <Pressable onPress={() => setEditingQuantityIndex(null)} style={styles.amountCancel}>
+                <ThemedText type="smallBold" color={theme.textSecondary}>{t('common.cancel')}</ThemedText>
+              </Pressable>
+              <Pressable onPress={handleConfirmQuantityEdit} style={styles.amountConfirm}>
+                <ThemedText type="smallBold" color="#ffffff">{t('common.save')}</ThemedText>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
       </Modal>
       </LinearGradient>
     </KeyboardAvoidingView>;
@@ -474,33 +547,22 @@ const createStyles = theme => StyleSheet.create({
   saveButtonText: {
     fontWeight: '700'
   },
+  // Opaque, not a dimmed overlay — the sheet is now full screen (flex: 1
+  // below), so there's no "behind" content left to dim. A translucent
+  // backdrop here only ever showed up as a flash of the screen behind
+  // bleeding through during the keyboard's show/hide animation, while the
+  // sheet and the native keyboard frame were still catching up to each other.
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: theme.background,
     justifyContent: 'flex-end'
   },
   modalSheet: {
     backgroundColor: theme.background,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
     paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.two,
     paddingBottom: Spacing.six,
     gap: Spacing.three,
-    maxHeight: '80%'
-  },
-  // With the keyboard up, KeyboardAvoidingView already shifts the sheet to sit
-  // right above it — the sheet's own resting-state bottom padding would then
-  // show up as a gap of empty space between the list and the keyboard.
-  modalSheetKeyboardOpen: {
-    paddingBottom: Spacing.two
-  },
-  modalGrabber: {
-    alignSelf: 'center',
-    width: 40,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: theme.border
+    flex: 1
   },
   modalHeader: {
     flexDirection: 'row',
@@ -534,16 +596,20 @@ const createStyles = theme => StyleSheet.create({
     paddingVertical: 2
   },
   ingredientScroll: {
-    maxHeight: 340,
-    flexShrink: 1
+    flex: 1
   },
   ingredientOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.two,
-    paddingVertical: Spacing.three,
+    gap: Spacing.three,
+    paddingVertical: Spacing.four,
     borderBottomWidth: 1,
     borderBottomColor: theme.border
+  },
+  ingredientOptionImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 12
   },
   ingredientAddIcon: {
     width: 24,
@@ -552,5 +618,57 @@ const createStyles = theme => StyleSheet.create({
     backgroundColor: theme.accentSoft,
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  amountBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.five
+  },
+  amountCard: {
+    width: '100%',
+    maxWidth: 320,
+    borderRadius: 24,
+    padding: Spacing.four,
+    gap: Spacing.three
+  },
+  amountHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three
+  },
+  amountQuantityBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    backgroundColor: theme.accentSoft,
+    borderRadius: 14,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.three
+  },
+  amountQuantityInput: {
+    flex: 1,
+    color: theme.text,
+    textAlign: 'center',
+    fontWeight: '700',
+    fontSize: 20,
+    paddingVertical: Spacing.two
+  },
+  amountActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: Spacing.two
+  },
+  amountCancel: {
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two
+  },
+  amountConfirm: {
+    backgroundColor: theme.accent,
+    borderRadius: 14,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.two
   }
 });

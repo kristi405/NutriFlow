@@ -251,6 +251,10 @@ function MealPlanScreen() {
       // actual (post-swap) dish instead of leaving it stuck on the replaced one.
       const loggedEntry = loggedEntries.find(entry => entry.mealType === swapMealType && entry.recipeId === currentItem.recipeId);
       mealPlanStore.updateRecipe(currentItem.id, recipe.id);
+      // The old dish's servings may have been flexed (see mealPlanGenerator.js)
+      // to hit the calorie target — carrying that multiplier onto the new
+      // dish would scale its calories instead of showing its own value.
+      mealPlanStore.updateServings(currentItem.id, 1);
       if (loggedEntry) foodLogStore.updateEntry(loggedEntry.id, { recipeId: recipe.id });
     } else {
       mealPlanStore.addItem({ date, mealType: swapMealType, recipeId: recipe.id, servings: 1 });
@@ -477,7 +481,7 @@ function MealPlanScreen() {
 
       <Modal visible={!!swapMealType} transparent animationType="slide" onRequestClose={() => setSwapMealType(null)}>
         <Pressable style={styles.modalBackdrop} onPress={() => setSwapMealType(null)}>
-          <Pressable style={styles.modalSheet} onPress={event => event.stopPropagation()}>
+          <Pressable style={[styles.modalSheet, { paddingTop: insets.top + Spacing.four }]} onPress={event => event.stopPropagation()}>
             <View style={styles.modalHeader}>
               <View style={styles.modalHeaderText}>
                 <ThemedText type="smallBold" color={theme.text}>{t('mealPlan.swapTitle')}</ThemedText>
@@ -522,7 +526,7 @@ function MealPlanScreen() {
             after the real keyboard animation, instead of with it. */}
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex1}>
           <Pressable style={[styles.modalBackdrop, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]} onPress={closeSnackModal}>
-          <Pressable style={[styles.modalSheet, snackPickerMode !== null && { paddingBottom: Spacing.three }, keyboardHeight > 0 && styles.modalSheetKeyboardOpen]} onPress={event => event.stopPropagation()}>
+          <Pressable style={[styles.modalSheet, { paddingTop: insets.top + Spacing.four }, snackPickerMode !== null && { paddingBottom: Spacing.three }, keyboardHeight > 0 && styles.modalSheetKeyboardOpen]} onPress={event => event.stopPropagation()}>
             <View style={styles.modalHeader}>
               <View style={styles.modalHeaderText}>
                 <ThemedText type="smallBold" color={theme.text}>{t(editingSnackId ? 'mealPlan.editSnackTitle' : 'mealPlan.addSnackTitle')}</ThemedText>
@@ -797,10 +801,10 @@ const createStyles = theme => StyleSheet.create({
     paddingTop: Spacing.one
   },
   quickSnackScroll: {
-    maxHeight: 320
+    flex: 1
   },
   snackPickerScroll: {
-    maxHeight: 200
+    flex: 1
   },
   snackPickerButtons: {
     flexDirection: 'row',
@@ -875,19 +879,20 @@ const createStyles = theme => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
+  // Opaque — the sheet below is full screen (flex: 1), so a translucent
+  // backdrop would only flash the screen behind through during the
+  // keyboard's show/hide animation.
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: theme.background,
     justifyContent: 'flex-end'
   },
   modalSheet: {
     backgroundColor: theme.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
     padding: Spacing.four,
     paddingBottom: Spacing.six,
     gap: Spacing.three,
-    maxHeight: '90%'
+    flex: 1
   },
   // With the keyboard up, KeyboardAvoidingView already shifts the sheet to sit
   // right above it — the sheet's own resting-state bottom padding would then

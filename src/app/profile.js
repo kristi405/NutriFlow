@@ -4,7 +4,6 @@ import { PremiumCard } from '@/components/ui/premium-card';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { deletePhoto, pickProfilePhoto } from '@/lib/profilePhoto';
 import { PersonAvatar } from '@/components/people/person-avatar';
 import { apiRequest, apiUpload, toFileUrl } from '@/lib/api';
@@ -34,7 +33,8 @@ import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { Alert, KeyboardAvoidingView, Linking, Modal, Platform, Pressable, StyleSheet, Switch, TextInput, View } from 'react-native';
+import { Alert, Linking, Modal, Pressable, ScrollView, StyleSheet, Switch, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ALLERGEN_TAG_KEYS = {
   gluten: 'gluten',
@@ -56,12 +56,12 @@ const CONTACT_LINKS = [{ key: 'website', labelKey: 'profile.contactWebsite', ico
 function ProfileScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const profile = profileStore.activeProfile;
   const account = authStore.currentUser;
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [helpMessage, setHelpMessage] = useState('');
-  const keyboardHeight = useKeyboardHeight();
 
   if (!profile) return null;
 
@@ -324,9 +324,8 @@ function ProfileScreen() {
       </Pressable>
 
       <Modal visible={isHelpModalOpen} transparent animationType="slide" onRequestClose={() => setIsHelpModalOpen(false)}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex1}>
-        <Pressable style={[styles.modalBackdrop, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]} onPress={() => setIsHelpModalOpen(false)}>
-          <Pressable style={[styles.modalSheet, keyboardHeight > 0 && styles.modalSheetKeyboardOpen]} onPress={event => event.stopPropagation()}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setIsHelpModalOpen(false)}>
+          <Pressable style={[styles.modalSheet, { paddingTop: insets.top + Spacing.four }]} onPress={event => event.stopPropagation()}>
             <View style={styles.modalHeader}>
               <View>
                 <ThemedText type="smallBold" color={theme.text}>{t('profile.helpModalTitle')}</ThemedText>
@@ -337,23 +336,30 @@ function ProfileScreen() {
               </Pressable>
             </View>
 
-            <View style={styles.contactsRow}>
-              {CONTACT_LINKS.map(contact => <Pressable key={contact.key} onPress={() => showComingSoon(t(contact.labelKey))} style={styles.contactButton}>
-                  <View style={styles.contactIconWrapper}>
-                    <SymbolView name={contact.icon} size={18} tintColor={theme.accent} />
-                  </View>
-                  <ThemedText type="caption" color={theme.textSecondary}>{t(contact.labelKey)}</ThemedText>
-                </Pressable>)}
-            </View>
+            {/* No KeyboardAvoidingView here — resizing the whole sheet for the
+                keyboard via its JS-driven padding isn't frame-synced with the
+                keyboard's own native animation, which briefly exposed the
+                screen behind during the transition. automaticallyAdjustKeyboardInsets
+                is native and frame-synced, and only needs to shift this
+                scroll view's content. */}
+            <ScrollView style={styles.flex1} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.helpModalScrollContent}>
+              <View style={styles.contactsRow}>
+                {CONTACT_LINKS.map(contact => <Pressable key={contact.key} onPress={() => showComingSoon(t(contact.labelKey))} style={styles.contactButton}>
+                    <View style={styles.contactIconWrapper}>
+                      <SymbolView name={contact.icon} size={18} tintColor={theme.accent} />
+                    </View>
+                    <ThemedText type="caption" color={theme.textSecondary}>{t(contact.labelKey)}</ThemedText>
+                  </Pressable>)}
+              </View>
 
-            <TextInput value={helpMessage} onChangeText={setHelpMessage} placeholder={t('profile.helpMessagePlaceholder')} placeholderTextColor={theme.textSecondary} multiline numberOfLines={5} style={styles.helpInput} />
+              <TextInput value={helpMessage} onChangeText={setHelpMessage} placeholder={t('profile.helpMessagePlaceholder')} placeholderTextColor={theme.textSecondary} multiline numberOfLines={5} style={styles.helpInput} />
 
-            <Pressable onPress={handleSendHelp} style={styles.helpSendButton}>
-              <ThemedText type="default" color="#ffffff" style={styles.helpSendButtonText}>{t('common.send')}</ThemedText>
-            </Pressable>
+              <Pressable onPress={handleSendHelp} style={styles.helpSendButton}>
+                <ThemedText type="default" color="#ffffff" style={styles.helpSendButtonText}>{t('common.send')}</ThemedText>
+              </Pressable>
+            </ScrollView>
           </Pressable>
         </Pressable>
-        </KeyboardAvoidingView>
       </Modal>
     </ScreenScrollView>;
 }
@@ -564,24 +570,24 @@ const createStyles = theme => StyleSheet.create({
     justifyContent: 'center',
     gap: Spacing.one
   },
+  // Opaque — the sheet below is full screen (flex: 1), so a translucent
+  // backdrop would only flash the screen behind through during the
+  // keyboard's show/hide animation.
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: theme.background,
     justifyContent: 'flex-end'
   },
   modalSheet: {
     backgroundColor: theme.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
     padding: Spacing.four,
     paddingBottom: Spacing.six,
-    gap: Spacing.three
+    gap: Spacing.three,
+    flex: 1
   },
-  // With the keyboard up, KeyboardAvoidingView already shifts the sheet to sit
-  // right above it — the sheet's own resting-state bottom padding would then
-  // show up as a gap of empty space above the keyboard.
-  modalSheetKeyboardOpen: {
-    paddingBottom: Spacing.two
+  helpModalScrollContent: {
+    gap: Spacing.three,
+    paddingBottom: Spacing.four
   },
   modalHeader: {
     flexDirection: 'row',

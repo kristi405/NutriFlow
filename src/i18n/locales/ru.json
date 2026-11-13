@@ -446,6 +446,7 @@
     "difficultyLabel": "Сложность",
     "noIngredientsYet": "Ингредиенты ещё не добавлены",
     "addIngredientTitle": "Добавить ингредиент",
+    "specifyAmountTitle": "Сколько добавить?",
     "searchIngredientsPlaceholder": "Поиск ингредиентов",
     "stepPlaceholder": "Опишите этот шаг",
     "difficulty": {

@@ -7,6 +7,7 @@ import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { PersonAvatar } from '@/components/people/person-avatar';
 import { PersonSwitcher } from '@/components/people/person-switcher';
@@ -78,6 +79,7 @@ async function pickFile(source, t) {
 function AiAnalysisScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [isSourceSheetOpen, setIsSourceSheetOpen] = useState(false);
   const [pendingConsentFile, setPendingConsentFile] = useState(null);
@@ -247,8 +249,13 @@ function AiAnalysisScreen() {
 
       <Modal visible={isSourceSheetOpen} transparent animationType="slide" onRequestClose={() => setIsSourceSheetOpen(false)}>
         <Pressable style={styles.modalBackdrop} onPress={() => setIsSourceSheetOpen(false)}>
-          <Pressable style={styles.modalSheet} onPress={event => event.stopPropagation()}>
-            <ThemedText type="smallBold" color={theme.text}>{t('aiAnalysis.uploadTitle')}</ThemedText>
+          <Pressable style={[styles.modalSheet, { paddingTop: insets.top + Spacing.four }]} onPress={event => event.stopPropagation()}>
+            <View style={styles.sheetHeader}>
+              <ThemedText type="smallBold" color={theme.text}>{t('aiAnalysis.uploadTitle')}</ThemedText>
+              <Pressable onPress={() => setIsSourceSheetOpen(false)} hitSlop={8} style={[styles.closeButton, { backgroundColor: theme.accentSoft }]}>
+                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={theme.accent} />
+              </Pressable>
+            </View>
             {SOURCES.map(source => <Pressable key={source.key} onPress={() => handleSelectSource(source.key)} style={styles.sourceRow}>
                 <View style={styles.analysisIconWrapper}>
                   <SymbolView name={source.icon} size={18} tintColor={theme.accent} />
@@ -289,18 +296,32 @@ const createStyles = theme => StyleSheet.create({
     paddingVertical: Spacing.five,
     alignItems: 'center'
   },
+  // Opaque — the sheet below is full screen (flex: 1), so a translucent
+  // backdrop would only flash the screen behind through during the
+  // keyboard's show/hide animation.
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: theme.background,
     justifyContent: 'flex-end'
   },
   modalSheet: {
     backgroundColor: theme.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
     padding: Spacing.four,
     paddingBottom: Spacing.six,
-    gap: Spacing.three
+    gap: Spacing.three,
+    flex: 1
+  },
+  sheetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   sourceRow: {
     flexDirection: 'row',

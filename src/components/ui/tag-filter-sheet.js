@@ -1,11 +1,11 @@
 import { SymbolView } from 'expo-symbols';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 
 /**
  * Multi-select tag picker in a bottom sheet. Built for long tag lists: a
@@ -16,7 +16,7 @@ import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 export function TagFilterSheet({ visible, tags, selectedIds, onChange, onClose }) {
   const { t } = useTranslation();
   const theme = useTheme();
-  const keyboardHeight = useKeyboardHeight();
+  const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
 
   const visibleTags = useMemo(() => {
@@ -34,9 +34,14 @@ export function TagFilterSheet({ visible, tags, selectedIds, onChange, onClose }
   }
 
   return <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex1}>
-      <Pressable style={[styles.backdrop, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]} onPress={handleClose}>
-        <Pressable style={[styles.sheet, { backgroundColor: theme.background }, keyboardHeight > 0 && styles.sheetKeyboardOpen]} onPress={event => event.stopPropagation()}>
+      {/* No KeyboardAvoidingView — resizing the whole sheet for the keyboard
+          via its JS-driven padding isn't frame-synced with the keyboard's own
+          native animation, which briefly exposed the screen behind during
+          the transition. automaticallyAdjustKeyboardInsets on the list below
+          is native and frame-synced, and only needs to shift the list's
+          content, not the whole sheet. */}
+      <Pressable style={[styles.backdrop, { backgroundColor: theme.background }]} onPress={handleClose}>
+        <Pressable style={[styles.sheet, { backgroundColor: theme.background, paddingTop: insets.top + Spacing.four }]} onPress={event => event.stopPropagation()}>
           <View style={styles.header}>
             <ThemedText type="smallBold" color={theme.text}>{t('common.selectTags')}</ThemedText>
             <Pressable onPress={handleClose} hitSlop={8} style={[styles.closeButton, { backgroundColor: theme.accentSoft }]}>
@@ -46,7 +51,7 @@ export function TagFilterSheet({ visible, tags, selectedIds, onChange, onClose }
 
           <TextInput value={query} onChangeText={setQuery} placeholder={t('common.searchTags')} placeholderTextColor={theme.textSecondary} style={[styles.search, { borderColor: theme.border, color: theme.text }]} returnKeyType="search" />
 
-          <FlatList data={visibleTags} keyExtractor={tag => tag.id} keyboardShouldPersistTaps="handled" style={styles.list} ListEmptyComponent={<ThemedText type="small" color={theme.textSecondary} style={styles.empty}>{t('common.noTagsFound')}</ThemedText>} renderItem={({ item }) => {
+          <FlatList data={visibleTags} keyExtractor={tag => tag.id} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentInsetAdjustmentBehavior="automatic" style={styles.list} ListEmptyComponent={<ThemedText type="small" color={theme.textSecondary} style={styles.empty}>{t('common.noTagsFound')}</ThemedText>} renderItem={({ item }) => {
           const isSelected = selectedIds.includes(item.id);
           return <Pressable onPress={() => toggle(item.id)} style={[styles.row, { borderBottomColor: theme.border }]}>
                 <SymbolView name={isSelected ? { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' } : { ios: 'circle', android: 'radio_button_unchecked', web: 'radio_button_unchecked' }} size={22} tintColor={isSelected ? theme.accent : theme.border} />
@@ -65,32 +70,22 @@ export function TagFilterSheet({ visible, tags, selectedIds, onChange, onClose }
           </View>
         </Pressable>
       </Pressable>
-      </KeyboardAvoidingView>
     </Modal>;
 }
 
 const styles = StyleSheet.create({
-  flex1: {
-    flex: 1
-  },
+  // Background color is set inline (theme.background) — opaque, since the
+  // sheet is full screen (flex: 1 below); a translucent color here would
+  // only flash the screen behind through during the keyboard's animation.
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'flex-end'
   },
   sheet: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
     padding: Spacing.four,
     paddingBottom: Spacing.five,
     gap: Spacing.three,
-    height: '75%'
-  },
-  // With the keyboard up, KeyboardAvoidingView already shifts the sheet to sit
-  // right above it — the sheet's own resting-state bottom padding would then
-  // show up as a gap of empty space above the keyboard.
-  sheetKeyboardOpen: {
-    paddingBottom: Spacing.two
+    flex: 1
   },
   header: {
     flexDirection: 'row',
