@@ -17,11 +17,23 @@ export function toFileUrl(filename) {
   return `${FILES_URL}/${filename}`;
 }
 
+// `data` is the parsed error body — the backend sends `{ error }` (validation
+// text, English) and sometimes extra fields such as `code`/`recipeIds` for a
+// 409 INGREDIENT_IN_USE.
 export class ApiError extends Error {
-  constructor(message, status) {
+  constructor(message, status, data = null) {
     super(message);
     this.status = status;
+    this.data = data;
+    this.code = data?.code;
   }
+}
+
+// `message` first: auth routes reply with a serialized Fastify error
+// (`{ error: "Bad Request", message: "<real reason>" }`), the catalog/user
+// content routes with just `{ error: "<real reason>" }`.
+function errorMessageOf(data) {
+  return data?.message ?? data?.error ?? 'Request failed';
 }
 
 // Session tokens now persist across app restarts (see authStore), so a stale
@@ -53,7 +65,7 @@ export async function apiRequest(path, { method = 'GET', body, token } = {}) {
   const data = await response.json().catch(() => null);
   if (!response.ok) {
     if (response.status === 401 && token) onUnauthorized();
-    throw new ApiError(data?.message ?? 'Request failed', response.status);
+    throw new ApiError(errorMessageOf(data), response.status, data);
   }
   return data;
 }
@@ -83,7 +95,7 @@ export function apiUpload(path, { fileUri, fileName, mimeType, token }) {
         return;
       }
       if (request.status === 401 && token) onUnauthorized();
-      reject(new ApiError(data?.message ?? 'Request failed', request.status));
+      reject(new ApiError(errorMessageOf(data), request.status, data));
     };
     request.onerror = () => reject(new ApiError('Network request failed', 0));
     request.send(formData);

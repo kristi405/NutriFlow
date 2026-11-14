@@ -108,7 +108,7 @@ function RecipesScreen() {
       const matchesFilter = !selectedFilter || (selectedFilter === 'favorites' ? favoritesStore.isFavorite(recipe.id) : recipe.categoryId === selectedFilter);
       return matchesQuery && matchesFilter;
     });
-  }, [query, selectedFilter, favoritesStore.favorites.length, myRecipesStore.recipes.length, recipes]);
+  }, [query, selectedFilter, favoritesStore.favorites.length, myRecipesStore.recipes, recipes]);
 
   const collections = useMemo(() => categories.map(category => ({
     category,
@@ -118,7 +118,7 @@ function RecipesScreen() {
   const myRecipesFiltered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return myRecipesStore.recipes.filter(recipe => !normalized || recipe.title.toLowerCase().includes(normalized));
-  }, [query, myRecipesStore.recipes.length]);
+  }, [query, myRecipesStore.recipes]);
   const myRecipesRows = useMemo(() => chunkPairs(myRecipesFiltered), [myRecipesFiltered]);
 
   const addRecipeButton = <Pressable onPress={() => router.push('/add-recipe')} hitSlop={8} accessibilityLabel={t('recipes.addRecipe')} style={({ pressed }) => [styles.addRecipeButton, pressed && styles.addRecipeButtonPressed]}>

@@ -1,64 +1,79 @@
-import { makeAutoObservable } from 'mobx';
-import { persistStore } from './persist';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { autorun, makeAutoObservable, runInAction } from 'mobx';
+import { adaptRecipe } from '@/lib/catalogAdapter';
+import { authStore } from './authStore';
+import { catalogStore } from './catalogStore';
 
-function normalizeSteps(steps) {
-  return steps.map((instruction, index) => ({ order: index + 1, instruction }));
-}
+// Same key the old device-only store used — its `recipes` field is read back
+// as `legacyRecipes` so nothing created by an older app version is lost.
+const STORAGE_KEY = 'nutriflow.myRecipes';
 
+/**
+ * The user's own recipes.
+ *
+ * Own recipes now live on the server as ordinary recipe rows (user_id = me,
+ * is_public = false) and arrive through /app/sync into catalogStore like the
+ * rest of the catalog — `recipes` is derived from there, there's nothing to
+ * sync separately. Create/update/delete go through lib/userContent.js.
+ *
+ * `legacyRecipes` holds recipes an older app version kept only on the device
+ * (and in preferences.myRecipes). lib/legacyRecipeMigration.js moves them to
+ * the server; until a recipe is moved it stays here and keeps showing up, so
+ * meal-plan entries referencing it don't break.
+ */
 class MyRecipesStore {
-  recipes = [];
+  legacyRecipes = [];
   hasHydrated = false;
-  // Server sync state (see myRecipesSync.js) — same shape as peopleStore's
-  // needsPush/hasSyncedMembers for family members.
-  needsPush = false;
-  hasSyncedOnce = false;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
-    persistStore(this, 'nutriflow.myRecipes', ['recipes', 'needsPush', 'hasSyncedOnce']);
+    this.hydrate();
   }
 
-  addRecipe({ title, categoryId, imageUrl, servings, prepTimeMinutes, cookTimeMinutes, difficulty, ingredients, steps }) {
-    const id = `my-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    this.recipes = [...this.recipes, {
-      id,
-      title,
-      description: '',
-      categoryId,
-      imageUrl: imageUrl || undefined,
-      prepTimeMinutes,
-      cookTimeMinutes,
-      difficulty,
-      servings,
-      mealTypes: [],
-      dietaryTags: [],
-      allergens: [],
-      ingredients,
-      steps: normalizeSteps(steps),
-      isUserRecipe: true
-    }];
-    return id;
+  async hydrate() {
+    let saved = null;
+    try {
+      saved = JSON.parse((await AsyncStorage.getItem(STORAGE_KEY)) ?? 'null');
+    } catch {
+      // corrupt entry — treat as empty
+    }
+    runInAction(() => {
+      this.legacyRecipes = Array.isArray(saved?.recipes) ? saved.recipes : [];
+      this.hasHydrated = true;
+    });
+    autorun(() => {
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ recipes: this.legacyRecipes }));
+    });
   }
 
-  updateRecipe(id, patch) {
-    const recipe = this.recipes.find(recipe => recipe.id === id);
-    if (recipe) Object.assign(recipe, patch);
+  /** Own, still-private recipes from the server cache. */
+  get serverRecipes() {
+    const userId = authStore.currentUser?.id;
+    if (!userId) return [];
+    return catalogStore.recipes
+      .filter(raw => raw.user_id === userId && raw.is_public === false)
+      .map(raw => adaptRecipe(raw, catalogStore.tagSlugs, userId));
   }
 
-  removeRecipe(id) {
-    this.recipes = this.recipes.filter(recipe => recipe.id !== id);
+  get recipes() {
+    const legacy = this.legacyRecipes.map(recipe => ({ ...recipe, isUserRecipe: true, isLegacy: true, isOwn: true, isEditable: false }));
+    return [...this.serverRecipes, ...legacy];
   }
 
   getById(id) {
     return this.recipes.find(recipe => recipe.id === id);
   }
 
-  // Called on account deletion, so this account's own recipes don't linger
-  // in memory for whoever signs in next in the same app session.
+  removeLegacyRecipe(id) {
+    this.legacyRecipes = this.legacyRecipes.filter(recipe => recipe.id !== id);
+  }
+
+  // Called on account deletion, so this account's leftover local recipes
+  // don't linger for whoever signs in next on the same device. (Server-side
+  // own recipes disappear with the account; the catalog cache drops them on
+  // the next user's full sync.)
   reset() {
-    this.recipes = [];
-    this.needsPush = false;
-    this.hasSyncedOnce = false;
+    this.legacyRecipes = [];
   }
 }
 

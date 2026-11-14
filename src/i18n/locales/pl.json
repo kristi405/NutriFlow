@@ -678,5 +678,35 @@
   },
   "allergens": {
     "containsWarning": "Zawiera: {{allergens}}"
+  },
+  "userContent": {
+    "offline": "Brak połączenia z internetem. Spróbuj ponownie, gdy będziesz online.",
+    "saveFailedTitle": "Nie udało się zapisać",
+    "mineBadge": "Mój",
+    "myIngredients": "Moje składniki",
+    "myIngredientsEmptyTitle": "Nie masz jeszcze własnych składników",
+    "myIngredientsEmptyMessage": "Nie ma składnika w katalogu? Utwórz własny i używaj go w przepisach.",
+    "createIngredient": "Utwórz składnik",
+    "createIngredientNamed": "Utwórz składnik „{{name}}”",
+    "newIngredient": "Nowy składnik",
+    "editIngredient": "Edytuj składnik",
+    "ingredientName": "Nazwa",
+    "ingredientNamePlaceholder": "np. domowy sos",
+    "nameRequired": "Wpisz nazwę",
+    "unitWeight": "Waga 1 {{unit}}, g",
+    "unitWeightRequired": "Podaj wagę jednej jednostki w gramach",
+    "nutrientsPer100": "Wartości odżywcze na 100 g / 100 ml",
+    "moreNutrients": "Więcej składników odżywczych",
+    "nutrientsInvalid": "Wartości muszą być liczbami od 0",
+    "allergens": "Alergeny",
+    "deleteIngredientTitle": "Usunąć składnik?",
+    "deleteIngredientMessage": "Tej operacji nie można cofnąć.",
+    "ingredientInUseTitle": "Składnik jest używany",
+    "ingredientInUseMessage": "Najpierw usuń go z tych przepisów:\n{{recipes}}",
+    "myIngredientNote": "Twój składnik",
+    "ingredientPublished": "Dodany do wspólnego katalogu — nie można go już edytować.",
+    "inCatalogBadge": "W katalogu",
+    "recipePublished": "Twój przepis został dodany do katalogu — nie można go już edytować.",
+    "recipePendingUpload": "Jeszcze nie przesłany na Twoje konto — nastąpi to automatycznie, gdy będziesz online."
   }
 }

@@ -1,14 +1,15 @@
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
-import { getIngredientById } from '@/data/catalog';
+import { getIngredientById, getRecipeById } from '@/data/catalog';
 import { useTheme } from '@/hooks/use-theme';
 import { formatNutrientAmount, MINERAL_ROWS, NUTRIENT_ROWS, nonZeroRows, VITAMIN_ROWS } from '@/lib/nutrientRows';
+import { deleteIngredient, isIngredientInUseError } from '@/lib/userContent';
 
 const STATS = [
   { key: 'calories', labelKey: 'recipes.calories', unit: 'common.kcal' },
@@ -30,13 +31,44 @@ function IngredientDetailScreen() {
   }
 
   const { nutrition, vitamins, minerals } = ingredient.per100g;
+
+  async function performDelete() {
+    try {
+      await deleteIngredient(ingredient.id);
+      router.back();
+    } catch (error) {
+      if (isIngredientInUseError(error)) {
+        // 409: still part of some recipe — list them so the user knows where
+        // to remove it first.
+        const titles = (error.data?.recipeIds ?? []).map(recipeId => getRecipeById(recipeId)?.title).filter(Boolean);
+        Alert.alert(t('userContent.ingredientInUseTitle'), t('userContent.ingredientInUseMessage', { recipes: titles.length ? titles.map(title => `• ${title}`).join('\n') : error.message }));
+        return;
+      }
+      Alert.alert(t('common.errorTitle'), error.status === 0 ? t('userContent.offline') : error.message);
+    }
+  }
+
+  function handleDelete() {
+    Alert.alert(t('userContent.deleteIngredientTitle'), t('userContent.deleteIngredientMessage'), [{ text: t('common.cancel'), style: 'cancel' }, { text: t('common.delete'), style: 'destructive', onPress: performDelete }]);
+  }
   const per100Label = ingredient.defaultUnit === 'ml' || ingredient.defaultUnit === 'l' ? '100 ml' : '100 g';
 
   return <ScreenScrollView gap={Spacing.three} horizontalPadding={20} contentContainerStyle={styles.content}>
       <View>
         <ThemedText type="title" style={styles.title} color={theme.text}>{ingredient.name}</ThemedText>
         <ThemedText type="small" color={theme.textSecondary}>{t('ingredients.perAmount', { amount: per100Label })}</ThemedText>
+        {ingredient.isEditable && <ThemedText type="caption" color={theme.accent}>{t('userContent.myIngredientNote')}</ThemedText>}
+        {ingredient.isPublished && <ThemedText type="caption" color={theme.accent}>{t('userContent.ingredientPublished')}</ThemedText>}
       </View>
+
+      {ingredient.isEditable && <View style={styles.actionsRow}>
+          <Pressable onPress={() => router.push({ pathname: '/ingredient-edit', params: { id: ingredient.id } })} style={[styles.actionButton, { backgroundColor: theme.accent }]}>
+            <ThemedText type="smallBold" color="#ffffff">{t('common.edit')}</ThemedText>
+          </Pressable>
+          <Pressable onPress={handleDelete} style={[styles.actionButton, { borderColor: theme.error, borderWidth: 1.5 }]}>
+            <ThemedText type="smallBold" color={theme.error}>{t('common.delete')}</ThemedText>
+          </Pressable>
+        </View>}
 
       {ingredient.tags.length > 0 && <View style={styles.chipRow}>
           {ingredient.tags.map(tag => <View key={tag.id} style={[styles.chip, { backgroundColor: theme.accentSoft, borderColor: theme.warning }]}>
@@ -93,6 +125,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     lineHeight: 32
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    gap: Spacing.two
+  },
+  actionButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 14,
+    paddingVertical: Spacing.two + 2
   },
   chipRow: {
     flexDirection: 'row',

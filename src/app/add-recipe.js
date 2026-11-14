@@ -5,23 +5,20 @@ import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
+import IngredientPicker from '@/components/ingredient/ingredient-picker';
 import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
-import { getCategories, getIngredients } from '@/data/catalog';
-import { guessIngredientImage } from '@/lib/ingredientImage';
-import { defaultQuantityFor, formatUnit, parseQuantity } from '@/lib/ingredientUnits';
+import { getCategories, getCategoryTagId } from '@/data/catalog';
+import { formatUnit, parseQuantity } from '@/lib/ingredientUnits';
+import { createRecipe, uploadImage } from '@/lib/userContent';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
-import { myRecipesStore } from '@/store/myRecipesStore';
 
-const DIFFICULTIES = ['easy', 'medium', 'hard'];
 const DEFAULT_SERVINGS = 1;
-const DEFAULT_PREP_TIME_MINUTES = 0;
-const DEFAULT_COOK_TIME_MINUTES = 0;
 
 function AddRecipeScreen() {
   const { t } = useTranslation();
@@ -32,24 +29,14 @@ function AddRecipeScreen() {
   const scrollRef = useRef(null);
 
   const categories = getCategories();
-  const ingredients = getIngredients();
   const [title, setTitle] = useState('');
   const [imageUri, setImageUri] = useState(null);
   const [categoryId, setCategoryId] = useState(categories[0]?.id);
-  const [difficulty, setDifficulty] = useState('easy');
   const [ingredientLines, setIngredientLines] = useState([]);
   const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false);
-  const [ingredientQuery, setIngredientQuery] = useState('');
-  const [pendingIngredient, setPendingIngredient] = useState(null);
-  const [pendingQuantity, setPendingQuantity] = useState('');
   const [editingQuantityIndex, setEditingQuantityIndex] = useState(null);
   const [editingQuantityValue, setEditingQuantityValue] = useState('');
-
-  const filteredIngredients = useMemo(() => {
-    const normalized = ingredientQuery.trim().toLowerCase();
-    const pool = !normalized ? ingredients : ingredients.filter(ingredient => ingredient.name.toLowerCase().includes(normalized));
-    return pool.slice(0, 40);
-  }, [ingredientQuery, ingredients]);
+  const [isSaving, setIsSaving] = useState(false);
 
   async function handleTakePhoto() {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
@@ -75,18 +62,8 @@ function AddRecipeScreen() {
     Alert.alert(t('recipes.addPhotoTitle'), undefined, [{ text: t('recipes.takePhoto'), onPress: handleTakePhoto }, { text: t('recipes.chooseFromLibrary'), onPress: handleChooseFromLibrary }, { text: t('common.cancel'), style: 'cancel' }]);
   }
 
-  function handleSelectIngredient(ingredient) {
-    setPendingIngredient(ingredient);
-    setPendingQuantity(defaultQuantityFor(ingredient.defaultUnit));
-  }
-
-  function handleConfirmPendingIngredient() {
-    const ingredient = pendingIngredient;
-    if (!ingredient) return;
-    setIngredientLines(current => [...current, { ingredientId: ingredient.id, name: ingredient.name, unit: ingredient.defaultUnit, quantity: pendingQuantity }]);
-    setPendingIngredient(null);
-    setIsIngredientModalOpen(false);
-    setIngredientQuery('');
+  function handlePickIngredient({ ingredient, quantity, unit }) {
+    setIngredientLines(current => [...current, { ingredientId: ingredient.id, name: ingredient.name, unit, quantity }]);
   }
 
   function handleRemoveIngredient(index) {
@@ -114,7 +91,8 @@ function AddRecipeScreen() {
   const showTitleError = showValidation && title.trim().length === 0;
   const showIngredientsError = showValidation && ingredientLines.length === 0;
 
-  function handleSave() {
+  async function handleSave() {
+    if (isSaving) return;
     if (!canSave) {
       setShowValidation(true);
       // The title sits at the top of the form, the ingredients at the bottom.
@@ -122,18 +100,26 @@ function AddRecipeScreen() {
       else scrollRef.current?.scrollToEnd({ animated: true });
       return;
     }
-    const id = myRecipesStore.addRecipe({
-      title: title.trim(),
-      imageUrl: imageUri,
-      categoryId,
-      servings: DEFAULT_SERVINGS,
-      prepTimeMinutes: DEFAULT_PREP_TIME_MINUTES,
-      cookTimeMinutes: DEFAULT_COOK_TIME_MINUTES,
-      difficulty,
-      ingredients: ingredientLines.map(line => ({ ingredientId: line.ingredientId, quantity: parseQuantity(line.quantity), unit: line.unit })),
-      steps: []
-    });
-    router.replace({ pathname: '/recipes/[id]', params: { id } });
+    // Own recipes are stored on the server now (POST /app/recipes) — it
+    // validates the composition and computes КБЖУ; the response lands in the
+    // local catalog cache, so the recipe screen can open it right away.
+    setIsSaving(true);
+    try {
+      const imageFilename = imageUri ? await uploadImage(imageUri) : undefined;
+      const categoryTagId = getCategoryTagId(categoryId);
+      const raw = await createRecipe({
+        title,
+        servings: DEFAULT_SERVINGS,
+        tagIds: categoryTagId ? [categoryTagId] : [],
+        imageFilename,
+        ingredients: ingredientLines.map(line => ({ ingredientId: line.ingredientId, quantity: parseQuantity(line.quantity), unit: line.unit }))
+      });
+      router.replace({ pathname: '/recipes/[id]', params: { id: raw.id } });
+    } catch (error) {
+      Alert.alert(t('userContent.saveFailedTitle'), error.status === 0 ? t('userContent.offline') : error.message);
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   // iOS gets its keyboard-clearing room from ScreenScrollView's own
@@ -182,18 +168,6 @@ function AddRecipeScreen() {
         </View>
 
         <View style={styles.field}>
-          <ThemedText type="small" color={theme.textSecondary}>{t('recipes.difficultyLabel')}</ThemedText>
-          <View style={styles.segmented}>
-            {DIFFICULTIES.map(level => {
-            const isActive = difficulty === level;
-            return <Pressable key={level} onPress={() => setDifficulty(level)} style={[styles.segment, isActive && styles.segmentActive]}>
-                  <ThemedText type="smallBold" color={isActive ? '#ffffff' : theme.text}>{t(`recipes.difficulty.${level}`)}</ThemedText>
-                </Pressable>;
-          })}
-          </View>
-        </View>
-
-        <View style={styles.field}>
           <View style={styles.sectionHeaderRow}>
             <View style={styles.sectionTitleRow}>
               <ThemedText type="smallBold" color={theme.text}>{t('recipes.ingredients')}</ThemedText>
@@ -225,69 +199,12 @@ function AddRecipeScreen() {
       </ScreenScrollView>
 
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + Spacing.two }]}>
-        <Pressable onPress={handleSave} style={[styles.saveButton, canSave ? styles.saveButtonActive : styles.saveButtonDisabled]}>
-          <ThemedText type="default" color={canSave ? '#ffffff' : theme.textSecondary} style={styles.saveButtonText}>{t('common.save')}</ThemedText>
+        <Pressable onPress={handleSave} disabled={isSaving} style={[styles.saveButton, canSave ? styles.saveButtonActive : styles.saveButtonDisabled]}>
+          {isSaving ? <ActivityIndicator color="#ffffff" /> : <ThemedText type="default" color={canSave ? '#ffffff' : theme.textSecondary} style={styles.saveButtonText}>{t('common.save')}</ThemedText>}
         </Pressable>
       </View>
 
-      <Modal visible={isIngredientModalOpen} transparent animationType="slide" onRequestClose={() => setIsIngredientModalOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setIsIngredientModalOpen(false)}>
-          <Pressable style={[styles.modalSheet, { paddingTop: insets.top + Spacing.two }]} onPress={event => event.stopPropagation()}>
-            <View style={styles.modalHeader}>
-              <ThemedText type="smallBold" color={theme.text}>{t('recipes.addIngredientTitle')}</ThemedText>
-              <Pressable onPress={() => setIsIngredientModalOpen(false)} hitSlop={8} style={styles.modalCloseButton}>
-                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={14} tintColor={theme.textSecondary} />
-              </Pressable>
-            </View>
-            <View style={styles.searchBox}>
-              <SymbolView name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} size={16} tintColor={theme.textSecondary} />
-              <TextInput value={ingredientQuery} onChangeText={setIngredientQuery} placeholder={t('recipes.searchIngredientsPlaceholder')} placeholderTextColor={theme.textSecondary} style={styles.searchInput} autoCorrect={false} />
-            </View>
-            {/* The sheet itself never resizes for the keyboard (no
-                KeyboardAvoidingView) — that JS-driven padding animation isn't
-                frame-synced with the keyboard's own native animation, which
-                briefly exposed the real screen behind during the transition.
-                automaticallyAdjustKeyboardInsets is native and frame-synced,
-                and only needs to shift this scroll view's content, not the
-                whole sheet. */}
-            <ScrollView style={styles.ingredientScroll} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentInsetAdjustmentBehavior="automatic">
-              {filteredIngredients.map(ingredient => <Pressable key={ingredient.id} onPress={() => handleSelectIngredient(ingredient)} style={styles.ingredientOption}>
-                  <RecipeImage uri={guessIngredientImage(ingredient)} style={styles.ingredientOptionImage} iconSize={20} />
-                  <View style={styles.flex1}>
-                    <ThemedText type="small" color={theme.text} numberOfLines={1}>{ingredient.name}</ThemedText>
-                    <ThemedText type="caption" color={theme.textSecondary}>{Math.round(ingredient.per100g.nutrition.calories)} {t('common.kcal')} / 100g</ThemedText>
-                  </View>
-                  <View style={styles.ingredientAddIcon}>
-                    <SymbolView name={{ ios: 'plus', android: 'add', web: 'add' }} size={12} tintColor={theme.accent} />
-                  </View>
-                </Pressable>)}
-            </ScrollView>
-          </Pressable>
-          {pendingIngredient && <Pressable style={[StyleSheet.absoluteFill, styles.amountBackdrop]} onPress={() => setPendingIngredient(null)}>
-            <Pressable style={[styles.amountCard, { backgroundColor: theme.background }]} onPress={event => event.stopPropagation()}>
-              <View style={styles.amountHeader}>
-                <RecipeImage uri={guessIngredientImage(pendingIngredient)} style={styles.ingredientOptionImage} iconSize={20} />
-                <View style={styles.flex1}>
-                  <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{pendingIngredient.name}</ThemedText>
-                  <ThemedText type="caption" color={theme.textSecondary}>{t('recipes.specifyAmountTitle')}</ThemedText>
-                </View>
-              </View>
-              <View style={styles.amountQuantityBox}>
-                <TextInput value={pendingQuantity} onChangeText={setPendingQuantity} keyboardType="decimal-pad" autoFocus style={styles.amountQuantityInput} />
-                <ThemedText type="smallBold" color={theme.textSecondary}>{formatUnit(t, pendingIngredient.defaultUnit)}</ThemedText>
-              </View>
-              <View style={styles.amountActions}>
-                <Pressable onPress={() => setPendingIngredient(null)} style={styles.amountCancel}>
-                  <ThemedText type="smallBold" color={theme.textSecondary}>{t('common.cancel')}</ThemedText>
-                </Pressable>
-                <Pressable onPress={handleConfirmPendingIngredient} style={styles.amountConfirm}>
-                  <ThemedText type="smallBold" color="#ffffff">{t('common.add')}</ThemedText>
-                </Pressable>
-              </View>
-            </Pressable>
-          </Pressable>}
-        </Pressable>
-      </Modal>
+      <IngredientPicker visible={isIngredientModalOpen} onClose={() => setIsIngredientModalOpen(false)} onPick={handlePickIngredient} excludeIds={ingredientLines.map(line => line.ingredientId)} />
 
       <Modal visible={editingQuantityIndex !== null} transparent animationType="fade" onRequestClose={() => setEditingQuantityIndex(null)}>
         <Pressable style={styles.amountBackdrop} onPress={() => setEditingQuantityIndex(null)}>

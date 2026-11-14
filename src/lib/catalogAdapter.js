@@ -55,11 +55,23 @@ const MINERAL_KEYS = ['calcium', 'iron', 'magnesium', 'phosphorus', 'potassium',
 // alternatives for them and the shopping list groups them under "Other".
 const FALLBACK_INGREDIENT_CATEGORY_ID = 'other';
 
+// Ownership flags shared by ingredients and recipes (see NUTRIFLOW_BACKEND
+// API.md, «Пользовательские ингредиенты и рецепты»):
+// - user_id null            → admin-created catalog row
+// - own + is_public false   → the user's private row, editable
+// - own + is_public true    → an admin published it to the shared catalog:
+//                             same id, read-only from now on
+export function ownershipOf(raw, currentUserId) {
+  const isOwn = Boolean(raw.user_id) && raw.user_id === currentUserId;
+  const isPublic = raw.is_public !== false;
+  return { isOwn, isEditable: isOwn && !isPublic, isPublished: isOwn && isPublic };
+}
+
 function slugOf(tag, slugs) {
   return slugs?.[tag.id] ?? tag.name.toLowerCase();
 }
 
-export function adaptIngredient(raw, slugs) {
+export function adaptIngredient(raw, slugs, currentUserId) {
   const nutrition = {};
   for (const [dbKey, appKey] of Object.entries(NUTRITION_KEY_MAP)) {
     nutrition[appKey] = Number(raw[dbKey] ?? 0);
@@ -90,7 +102,10 @@ export function adaptIngredient(raw, slugs) {
     allergens: tagValuesByType(raw.tags, 'allergen', slugs),
     // Kept alongside `allergens` (slugs, used by existing logic) with real
     // ids/localized names — the ingredients screen's tag filter needs those.
-    tags: (raw.tags || []).map(({ id, name }) => ({ id, name }))
+    tags: (raw.tags || []).map(({ id, name }) => ({ id, name })),
+    // Raw file name (not the full URL) — what PUT /app/ingredients expects back.
+    imageFilename: raw.image_url || undefined,
+    ...ownershipOf(raw, currentUserId)
   };
 }
 
@@ -124,7 +139,7 @@ function parseCookTimeMinutes(cookTimeText) {
   return plainMatch ? Number(plainMatch[1]) : 0;
 }
 
-export function adaptRecipe(raw, slugs) {
+export function adaptRecipe(raw, slugs, currentUserId) {
   const tags = raw.tags || [];
   const mealTypes = tagValuesByType(tags, 'meal_type', slugs);
   // Recipes are grouped on-screen by category tag, but not every recipe in
@@ -152,7 +167,12 @@ export function adaptRecipe(raw, slugs) {
     prepTimeMinutes: 0,
     cookTimeText: raw.cook_time || undefined,
     cookTimeMinutes: parseCookTimeMinutes(raw.cook_time),
-    isUserRecipe: false,
+    // "My recipe" in the UI = the user's own private recipe. Once published to
+    // the catalog it behaves like any other catalog recipe (read-only).
+    ...ownershipOf(raw, currentUserId),
+    isUserRecipe: ownershipOf(raw, currentUserId).isEditable,
+    imageFilename: raw.image_url || undefined,
+    tagIds: tags.map(tag => tag.id),
     ingredients: (raw.ingredients || [])
       .map(line => ({ ingredientId: line.ingredient?.id, quantity: Number(line.quantity), unit: line.unit }))
       .filter(line => line.ingredientId),

@@ -678,5 +678,35 @@
   },
   "allergens": {
     "containsWarning": "Contém: {{allergens}}"
+  },
+  "userContent": {
+    "offline": "Sem conexão com a internet. Tente novamente quando estiver online.",
+    "saveFailedTitle": "Não foi possível salvar",
+    "mineBadge": "Meu",
+    "myIngredients": "Meus ingredientes",
+    "myIngredientsEmptyTitle": "Você ainda não tem ingredientes próprios",
+    "myIngredientsEmptyMessage": "Não encontrou um ingrediente no catálogo? Crie o seu e use-o nas suas receitas.",
+    "createIngredient": "Criar ingrediente",
+    "createIngredientNamed": "Criar ingrediente “{{name}}”",
+    "newIngredient": "Novo ingrediente",
+    "editIngredient": "Editar ingrediente",
+    "ingredientName": "Nome",
+    "ingredientNamePlaceholder": "ex.: molho caseiro",
+    "nameRequired": "Digite um nome",
+    "unitWeight": "Peso de 1 {{unit}}, g",
+    "unitWeightRequired": "Informe o peso de uma unidade em gramas",
+    "nutrientsPer100": "Valor nutricional por 100 g / 100 ml",
+    "moreNutrients": "Mais nutrientes",
+    "nutrientsInvalid": "Os valores devem ser números a partir de 0",
+    "allergens": "Alérgenos",
+    "deleteIngredientTitle": "Excluir ingrediente?",
+    "deleteIngredientMessage": "Esta ação não pode ser desfeita.",
+    "ingredientInUseTitle": "Ingrediente em uso",
+    "ingredientInUseMessage": "Remova-o primeiro destas receitas:\n{{recipes}}",
+    "myIngredientNote": "Seu ingrediente",
+    "ingredientPublished": "Adicionado ao catálogo comum — não pode mais ser editado.",
+    "inCatalogBadge": "No catálogo",
+    "recipePublished": "Sua receita foi adicionada ao catálogo — não pode mais ser editada.",
+    "recipePendingUpload": "Ainda não enviada para sua conta — isso acontecerá automaticamente quando você estiver online."
   }
 }

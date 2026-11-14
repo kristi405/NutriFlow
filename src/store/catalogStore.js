@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { apiRequest } from '@/lib/api';
+import { authStore } from './authStore';
 import { persistStore } from './persist';
 
 function upsertById(list, incoming) {
@@ -47,6 +48,11 @@ class CatalogStore {
   // signing in afterwards must force a full re-fetch rather than an
   // incremental one, or the catalog would stay stuck without them forever.
   lastSyncWasGuest = false;
+  // Account the cached rows were synced for. /app/sync also returns that
+  // user's own private ingredients/recipes, so a different account signing
+  // in on the same device must get a full fetch — a delta on top would keep
+  // the previous user's private rows in the cache.
+  syncedUserId = null;
   hasHydrated = false;
   // True while a sync request is in flight — drives the refresh button's spinner.
   isSyncing = false;
@@ -59,15 +65,36 @@ class CatalogStore {
     makeAutoObservable(this, {}, { autoBind: true });
     // v2: stored rows changed shape (localized fields instead of name_ru/name_en).
     AsyncStorage.removeItem('nutriflow.catalog').catch(() => {});
-    persistStore(this, 'nutriflow.catalog.v2', ['recipes', 'ingredients', 'tags', 'tagSlugs', 'lang', 'lastSyncedAt', 'lastSyncWasGuest']);
+    persistStore(this, 'nutriflow.catalog.v2', ['recipes', 'ingredients', 'tags', 'tagSlugs', 'lang', 'lastSyncedAt', 'lastSyncWasGuest', 'syncedUserId']);
+  }
+
+  // Local upserts after the user creates/edits/deletes their own ingredient or
+  // recipe (see lib/userContent.js) — the next /sync returns the same rows
+  // again, which is harmless.
+  upsertRecipe(raw) {
+    this.recipes = upsertById(this.recipes, [raw]);
+  }
+
+  removeRecipe(id) {
+    this.recipes = removeByIds(this.recipes, [id]);
+  }
+
+  upsertIngredient(raw) {
+    this.ingredients = upsertById(this.ingredients, [raw]);
+  }
+
+  removeIngredient(id) {
+    this.ingredients = removeByIds(this.ingredients, [id]);
   }
 
   isRecipeNew(id) {
     return this.newRecipeIds.includes(id);
   }
 
-  // This only ever touches catalogStore's own recipes/ingredients/tags; the
-  // user's own recipes live entirely in myRecipesStore and are untouched.
+  // For a signed-in user the response holds the catalog plus their own
+  // private ingredients/recipes (user_id/is_public tell them apart, see
+  // data/catalog.js). Only not-yet-migrated legacy local recipes live outside
+  // this store (myRecipesStore.legacyRecipes).
   // `manual`: pass true from the refresh button so rapid repeat taps are
   // silently capped (see MIN_MANUAL_SYNC_INTERVAL_MS) — login/language-change
   // syncs are deliberate, rare events and are never throttled.
@@ -82,11 +109,12 @@ class CatalogStore {
       lastManualSyncAt = now;
     }
     const isGuestNow = !token;
+    const userId = isGuestNow ? null : authStore.currentUser?.id ?? null;
     // A guest response has no ingredients/nutrition — merging it as a delta
     // onto an already-authenticated catalog (or vice versa, after signing in)
     // would silently leave stale/missing data, so either transition forces a
     // full fetch instead of an incremental one.
-    const isFullSync = !this.lastSyncedAt || this.lang !== lang || isGuestNow !== this.lastSyncWasGuest;
+    const isFullSync = !this.lastSyncedAt || this.lang !== lang || isGuestNow !== this.lastSyncWasGuest || userId !== this.syncedUserId;
     const params = new URLSearchParams({ lang });
     if (!isFullSync) params.set('since', this.lastSyncedAt);
     const syncId = ++latestSyncId;
@@ -130,6 +158,7 @@ class CatalogStore {
       this.lang = lang;
       this.lastSyncedAt = data.syncedAt;
       this.lastSyncWasGuest = isGuestNow;
+      this.syncedUserId = userId;
     });
   }
 }

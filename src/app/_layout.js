@@ -15,6 +15,7 @@ import { catalogStore } from '@/store/catalogStore';
 import { localeStore } from '@/store/localeStore';
 import { peopleStore } from '@/store/peopleStore';
 import { syncFamilyMembers } from '@/store/peopleSync';
+import { migrateLegacyRecipes } from '@/lib/legacyRecipeMigration';
 import { profileStore } from '@/store/profileStore';
 import { subscriptionStore } from '@/store/subscriptionStore';
 import { termsStore } from '@/store/termsStore';
@@ -129,7 +130,12 @@ function TabLayout() {
     // persisted language/catalog to load so it doesn't sync with a stale
     // default first.
     if (catalogSyncReady) {
-      catalogStore.sync(isGuest ? null : authStore.token, contentLanguage);
+      // A signed-in sync also brings the user's own recipes/ingredients;
+      // right after it, recipes an older app version kept only on this
+      // device are moved to the server (no-op once there are none left).
+      catalogStore.sync(isGuest ? null : authStore.token, contentLanguage).then(() => {
+        if (!isGuest) migrateLegacyRecipes();
+      });
     }
   }, [catalogSyncReady, contentLanguage, isGuest]);
   useEffect(() => {
@@ -227,6 +233,22 @@ function TabLayout() {
         <Stack.Screen name="ingredients" options={{
           headerShown: true,
           headerTitle: t('ingredients.title'),
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+          headerTitleStyle: { fontWeight: '700' }
+        }} />
+        <Stack.Screen name="my-ingredients" options={{
+          headerShown: true,
+          headerTitle: t('userContent.myIngredients'),
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+          headerTitleStyle: { fontWeight: '700' }
+        }} />
+        <Stack.Screen name="ingredient-edit" options={{
+          headerShown: true,
+          headerTitle: t('userContent.newIngredient'),
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,

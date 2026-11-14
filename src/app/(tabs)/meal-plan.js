@@ -295,7 +295,7 @@ function MealPlanScreen() {
       return dishes.filter(recipe => !normalized || recipe.title.toLowerCase().includes(normalized)).slice(0, 40);
     }
     return getIngredients().filter(ingredient => !normalized || ingredient.name.toLowerCase().includes(normalized)).slice(0, 40);
-  }, [snackPickerMode, snackQuery, myRecipesStore.recipes.length]);
+  }, [snackPickerMode, snackQuery, myRecipesStore.recipes]);
 
   function handlePickSnackDish(recipe) {
     const profile = calculateRecipeNutrition(recipe, getIngredientById);

@@ -678,5 +678,35 @@
   },
   "allergens": {
     "containsWarning": "Contains: {{allergens}}"
+  },
+  "userContent": {
+    "offline": "No internet connection. Please try again when you're online.",
+    "saveFailedTitle": "Couldn't save",
+    "mineBadge": "Mine",
+    "myIngredients": "My ingredients",
+    "myIngredientsEmptyTitle": "No ingredients of your own yet",
+    "myIngredientsEmptyMessage": "Can't find an ingredient in the catalog? Create your own and use it in your recipes.",
+    "createIngredient": "Create ingredient",
+    "createIngredientNamed": "Create ingredient “{{name}}”",
+    "newIngredient": "New ingredient",
+    "editIngredient": "Edit ingredient",
+    "ingredientName": "Name",
+    "ingredientNamePlaceholder": "e.g. Homemade sauce",
+    "nameRequired": "Enter a name",
+    "unitWeight": "Weight of one {{unit}}, g",
+    "unitWeightRequired": "Enter the weight of one unit in grams",
+    "nutrientsPer100": "Nutrition per 100 g / 100 ml",
+    "moreNutrients": "More nutrients",
+    "nutrientsInvalid": "Nutrient values must be numbers of 0 or more",
+    "allergens": "Allergens",
+    "deleteIngredientTitle": "Delete ingredient?",
+    "deleteIngredientMessage": "This can't be undone.",
+    "ingredientInUseTitle": "Ingredient is in use",
+    "ingredientInUseMessage": "Remove it from these recipes first:\n{{recipes}}",
+    "myIngredientNote": "Your ingredient",
+    "ingredientPublished": "Added to the shared catalog — it can no longer be edited.",
+    "inCatalogBadge": "In the catalog",
+    "recipePublished": "Your recipe was added to the catalog — it can no longer be edited.",
+    "recipePendingUpload": "Not uploaded to your account yet — it will be uploaded automatically when you're online."
   }
 }

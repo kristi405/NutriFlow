@@ -678,5 +678,35 @@
   },
   "allergens": {
     "containsWarning": "Enthält: {{allergens}}"
+  },
+  "userContent": {
+    "offline": "Keine Internetverbindung. Bitte versuche es erneut, wenn du online bist.",
+    "saveFailedTitle": "Speichern fehlgeschlagen",
+    "mineBadge": "Meine",
+    "myIngredients": "Meine Zutaten",
+    "myIngredientsEmptyTitle": "Noch keine eigenen Zutaten",
+    "myIngredientsEmptyMessage": "Zutat nicht im Katalog? Erstelle deine eigene und verwende sie in deinen Rezepten.",
+    "createIngredient": "Zutat erstellen",
+    "createIngredientNamed": "Zutat „{{name}}“ erstellen",
+    "newIngredient": "Neue Zutat",
+    "editIngredient": "Zutat bearbeiten",
+    "ingredientName": "Name",
+    "ingredientNamePlaceholder": "z. B. Hausgemachte Soße",
+    "nameRequired": "Gib einen Namen ein",
+    "unitWeight": "Gewicht von 1 {{unit}}, g",
+    "unitWeightRequired": "Gib das Gewicht einer Einheit in Gramm an",
+    "nutrientsPer100": "Nährwerte pro 100 g / 100 ml",
+    "moreNutrients": "Weitere Nährwerte",
+    "nutrientsInvalid": "Nährwerte müssen Zahlen ab 0 sein",
+    "allergens": "Allergene",
+    "deleteIngredientTitle": "Zutat löschen?",
+    "deleteIngredientMessage": "Das kann nicht rückgängig gemacht werden.",
+    "ingredientInUseTitle": "Zutat wird verwendet",
+    "ingredientInUseMessage": "Entferne sie zuerst aus diesen Rezepten:\n{{recipes}}",
+    "myIngredientNote": "Deine Zutat",
+    "ingredientPublished": "Zum gemeinsamen Katalog hinzugefügt – kann nicht mehr bearbeitet werden.",
+    "inCatalogBadge": "Im Katalog",
+    "recipePublished": "Dein Rezept wurde zum Katalog hinzugefügt – es kann nicht mehr bearbeitet werden.",
+    "recipePendingUpload": "Noch nicht in deinem Konto gespeichert – das passiert automatisch, sobald du online bist."
   }
 }

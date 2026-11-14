@@ -678,5 +678,35 @@
   },
   "allergens": {
     "containsWarning": "Содержит: {{allergens}}"
+  },
+  "userContent": {
+    "offline": "Нет подключения к интернету. Попробуйте ещё раз, когда появится сеть.",
+    "saveFailedTitle": "Не удалось сохранить",
+    "mineBadge": "Мой",
+    "myIngredients": "Мои ингредиенты",
+    "myIngredientsEmptyTitle": "Своих ингредиентов пока нет",
+    "myIngredientsEmptyMessage": "Не нашли ингредиент в каталоге? Создайте свой и используйте его в рецептах.",
+    "createIngredient": "Создать ингредиент",
+    "createIngredientNamed": "Создать ингредиент «{{name}}»",
+    "newIngredient": "Новый ингредиент",
+    "editIngredient": "Изменить ингредиент",
+    "ingredientName": "Название",
+    "ingredientNamePlaceholder": "Например, домашний соус",
+    "nameRequired": "Введите название",
+    "unitWeight": "Вес одной единицы ({{unit}}), г",
+    "unitWeightRequired": "Укажите вес одной единицы в граммах",
+    "nutrientsPer100": "Пищевая ценность на 100 г / 100 мл",
+    "moreNutrients": "Дополнительно",
+    "nutrientsInvalid": "Значения должны быть числами от 0",
+    "allergens": "Аллергены",
+    "deleteIngredientTitle": "Удалить ингредиент?",
+    "deleteIngredientMessage": "Это действие нельзя отменить.",
+    "ingredientInUseTitle": "Ингредиент используется",
+    "ingredientInUseMessage": "Сначала уберите его из этих рецептов:\n{{recipes}}",
+    "myIngredientNote": "Ваш ингредиент",
+    "ingredientPublished": "Добавлен в общий каталог — изменить его больше нельзя.",
+    "inCatalogBadge": "В каталоге",
+    "recipePublished": "Ваш рецепт добавлен в каталог — изменить его больше нельзя.",
+    "recipePendingUpload": "Ещё не загружен в ваш аккаунт — это произойдёт автоматически, когда появится интернет."
   }
 }

@@ -12,6 +12,7 @@ import { TagFilterSheet } from '@/components/ui/tag-filter-sheet';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { getIngredients } from '@/data/catalog';
+import { authStore } from '@/store/authStore';
 import { guessIngredientImage } from '@/lib/ingredientImage';
 import { ensurePremium } from '@/lib/premium';
 
@@ -57,6 +58,11 @@ function IngredientsScreen() {
   }
 
   return <ScreenScrollView gap={Spacing.three} horizontalPadding={20}>
+      {!authStore.isGuest && <Pressable onPress={() => router.push('/my-ingredients')} style={({ pressed }) => [styles.myIngredientsButton, { borderColor: theme.accent, backgroundColor: theme.accentSoft, opacity: pressed ? 0.85 : 1 }]}>
+          <SymbolView name={{ ios: 'person.crop.circle', android: 'person', web: 'person' }} size={18} tintColor={theme.accent} />
+          <ThemedText type="smallBold" color={theme.accent} style={styles.rowBody}>{t('userContent.myIngredients')}</ThemedText>
+          <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={14} tintColor={theme.accent} />
+        </Pressable>}
       <View style={styles.searchRow}>
         <View style={[styles.searchBar, { backgroundColor: theme.backgroundElement }]}>
           <SymbolView name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} size={16} tintColor={theme.textSecondary} />
@@ -84,9 +90,10 @@ function IngredientsScreen() {
 
       {visibleIngredients.length === 0 ? <EmptyState icon={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} title={t('ingredients.noResultsTitle')} message={t('ingredients.noResultsMessage')} actionLabel={hasFilters ? t('articles.clearFilters') : undefined} onAction={hasFilters ? clearFilters : undefined} /> : <View style={styles.list}>
           {visibleIngredients.map(ingredient => <Pressable key={ingredient.id} onPress={() => ensurePremium() && router.push({ pathname: '/ingredient/[id]', params: { id: ingredient.id } })} style={({ pressed }) => [styles.row, { backgroundColor: theme.background, borderColor: theme.border, opacity: pressed ? 0.85 : 1 }]}>
-              <RecipeImage uri={guessIngredientImage(ingredient)} style={styles.thumbnail} iconSize={18} />
+              <RecipeImage uri={ingredient.imageUrl ?? guessIngredientImage(ingredient)} style={styles.thumbnail} iconSize={18} />
               <View style={styles.rowBody}>
                 <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{ingredient.name}</ThemedText>
+                {ingredient.isOwn && <ThemedText type="caption" color={theme.accent}>{t('userContent.mineBadge')}</ThemedText>}
                 {ingredient.tags.length > 0 && <View style={styles.allergenRow}>
                     {ingredient.tags.map(tag => <ThemedText key={tag.id} type="caption" color={theme.warning} numberOfLines={1}>{tag.name}</ThemedText>)}
                   </View>}
@@ -105,6 +112,15 @@ function IngredientsScreen() {
 export default observer(IngredientsScreen);
 
 const styles = StyleSheet.create({
+  myIngredientsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    borderWidth: 1.5,
+    borderRadius: 16,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two + 4
+  },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
