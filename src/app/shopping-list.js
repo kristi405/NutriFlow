@@ -1,19 +1,23 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
 import { MacroBar } from '@/components/ui/macro-bar';
 import { LockedFeature } from '@/components/ui/locked-feature';
+import { RecipeImage } from '@/components/ui/recipe-image';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
+import { getIngredientById } from '@/data/catalog';
 import { useTheme } from '@/hooks/use-theme';
 import { todayKey, weekContaining } from '@/lib/date';
+import { guessIngredientImage, ingredientThumbUri } from '@/lib/ingredientImage';
 import { buildShoppingList } from '@/lib/shoppingList';
 import { mealPlanStore } from '@/store/mealPlanStore';
 import { shoppingListStore } from '@/store/shoppingListStore';
@@ -53,6 +57,7 @@ const CATEGORY_ICONS = {
 function ShoppingListScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { range } = useLocalSearchParams();
   const isWeek = range === 'week';
@@ -60,14 +65,42 @@ function ShoppingListScreen() {
   // "Week" = the rest of the current week (today onward), same span the weekly menu generator fills.
   const days = isWeek ? weekContaining(today).filter(day => day >= today) : [today];
   const planItems = days.flatMap(day => mealPlanStore.itemsForShopping(day));
-  const groups = buildShoppingList(planItems);
   const scopeKey = isWeek ? `week@${weekContaining(today)[0]}` : `today@${today}`;
+  const baseGroups = buildShoppingList(planItems);
+  // Manually-typed items (toothpaste, etc.) don't belong to any catalog
+  // category, so they get their own group at the end instead of trying to
+  // guess a category for them.
+  const customEntries = shoppingListStore.customItemsFor(scopeKey);
+  const groups = customEntries.length === 0 ? baseGroups : [...baseGroups, {
+    categoryId: 'custom',
+    categoryName: t('shoppingList.customCategory'),
+    items: customEntries.map(entry => ({ ingredientId: entry.id, name: entry.name, isCustom: true }))
+  }];
   // Only ids still on the current list count, so removing a recipe from the plan can't leave phantom checks.
   const checkedIds = new Set(shoppingListStore.checkedFor(scopeKey).filter(id => groups.some(group => group.items.some(item => item.ingredientId === id))));
   const totalCount = useMemo(() => groups.reduce((sum, group) => sum + group.items.length, 0), [groups]);
 
+  const [isAddingItem, setIsAddingItem] = useState(false);
+  const [newItemName, setNewItemName] = useState('');
+
   function toggleChecked(ingredientId) {
     shoppingListStore.toggle(scopeKey, ingredientId);
+  }
+
+  function handleCloseAddItem() {
+    setIsAddingItem(false);
+    setNewItemName('');
+  }
+
+  function handleConfirmAddItem() {
+    const trimmed = newItemName.trim();
+    if (!trimmed) return;
+    shoppingListStore.addCustomItem(scopeKey, trimmed);
+    handleCloseAddItem();
+  }
+
+  function handleRemoveCustomItem(id) {
+    shoppingListStore.removeCustomItem(scopeKey, id);
   }
 
   async function handleShare() {
@@ -98,10 +131,11 @@ function ShoppingListScreen() {
       </ScreenScrollView>;
   }
 
-  return <ScreenScrollView gap={Spacing.four} horizontalPadding={20}>
+  return <View style={styles.flex1}>
+      <ScreenScrollView gap={Spacing.four} horizontalPadding={20} contentContainerStyle={styles.scrollContent}>
       {groups.length > 0 && <Stack.Screen options={{
       headerRight: () => <Pressable onPress={handleShare} hitSlop={8}>
-            <SymbolView name="square.and.arrow.up" size={20} tintColor={theme.text} />
+            <SymbolView name="square.and.arrow.up" size={24} tintColor={theme.text} />
           </Pressable>
     }} />}
 
@@ -128,17 +162,48 @@ function ShoppingListScreen() {
               <View style={styles.list}>
                 {group.items.map((item, index) => {
               const isChecked = checkedIds.has(item.ingredientId);
+              const ingredient = item.isCustom ? null : getIngredientById(item.ingredientId);
               return <Pressable key={item.ingredientId} onPress={() => toggleChecked(item.ingredientId)} style={[styles.row, index === group.items.length - 1 && styles.rowLast]}>
                       <SymbolView name={isChecked ? 'checkmark.circle.fill' : 'circle'} size={22} tintColor={isChecked ? theme.accent : theme.border} />
-                      <ThemedText type="default" color={isChecked ? theme.textSecondary : theme.text} style={isChecked && styles.checkedText}>
-                        {item.name}
-                      </ThemedText>
+                      {item.isCustom ? <View style={[styles.customItemIcon, { backgroundColor: theme.accentSoft }, isChecked && styles.itemImageChecked]}>
+                          <SymbolView name="cart.fill" size={16} tintColor={theme.accent} />
+                        </View> : <RecipeImage uri={ingredientThumbUri(ingredient)} fallbackUri={guessIngredientImage(ingredient)} style={[styles.itemImage, isChecked && styles.itemImageChecked]} iconSize={18} />}
+                      <View style={styles.itemNameWrapper}>
+                        <ThemedText type="default" color={isChecked ? theme.textSecondary : theme.text} style={isChecked && styles.checkedText}>
+                          {item.name}
+                        </ThemedText>
+                      </View>
+                      {item.isCustom && <Pressable onPress={() => handleRemoveCustomItem(item.ingredientId)} hitSlop={8}>
+                          <SymbolView name="xmark.circle.fill" size={20} tintColor={theme.border} />
+                        </Pressable>}
                     </Pressable>;
             })}
               </View>
             </View>)}
         </>}
-    </ScreenScrollView>;
+      </ScreenScrollView>
+
+      <Pressable onPress={() => setIsAddingItem(true)} hitSlop={8} style={[styles.fab, { bottom: insets.bottom + Spacing.four, backgroundColor: theme.accent }]}>
+        <SymbolView name="plus" size={28} tintColor="#ffffff" />
+      </Pressable>
+
+      <Modal visible={isAddingItem} transparent animationType="fade" onRequestClose={handleCloseAddItem}>
+        <Pressable style={styles.amountBackdrop} onPress={handleCloseAddItem}>
+          <Pressable style={[styles.amountCard, { backgroundColor: theme.background }]} onPress={event => event.stopPropagation()}>
+            <ThemedText type="headline" color={theme.text}>{t('shoppingList.addItemTitle')}</ThemedText>
+            <TextInput value={newItemName} onChangeText={setNewItemName} placeholder={t('shoppingList.addItemPlaceholder')} placeholderTextColor={theme.textSecondary + '80'} selectionColor="#1B5E20" autoFocus returnKeyType="done" onSubmitEditing={handleConfirmAddItem} style={[styles.addItemInput, { borderColor: theme.border, color: theme.text }]} />
+            <View style={styles.amountActions}>
+              <Pressable onPress={handleCloseAddItem} style={styles.amountCancel}>
+                <ThemedText type="smallBold" color={theme.textSecondary}>{t('common.cancel')}</ThemedText>
+              </Pressable>
+              <Pressable onPress={handleConfirmAddItem} style={[styles.amountConfirm, { backgroundColor: theme.accent }]}>
+                <ThemedText type="smallBold" color="#ffffff">{t('common.add')}</ThemedText>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </View>;
 }
 
 export default observer(ShoppingListScreen);
@@ -203,7 +268,82 @@ const createStyles = theme => StyleSheet.create({
   rowLast: {
     borderBottomWidth: 0
   },
+  itemNameWrapper: {
+    flex: 1
+  },
   checkedText: {
     textDecorationLine: 'line-through'
+  },
+  itemImage: {
+    width: 32,
+    height: 32,
+    borderRadius: 8
+  },
+  itemImageChecked: {
+    opacity: 0.5
+  },
+  flex1: {
+    flex: 1
+  },
+  scrollContent: {
+    paddingTop: Spacing.three,
+    paddingBottom: Spacing.six
+  },
+  customItemIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  fab: {
+    position: 'absolute',
+    right: Spacing.four,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5
+  },
+  amountBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.five
+  },
+  amountCard: {
+    width: '100%',
+    maxWidth: 340,
+    borderRadius: 24,
+    padding: Spacing.four,
+    gap: Spacing.three
+  },
+  addItemInput: {
+    borderWidth: 1.5,
+    borderRadius: 14,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.three,
+    fontSize: 16
+  },
+  amountActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: Spacing.two
+  },
+  amountCancel: {
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two
+  },
+  amountConfirm: {
+    borderRadius: 14,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.two
   }
 });

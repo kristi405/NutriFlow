@@ -1,11 +1,11 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Easing, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import IngredientPicker from '@/components/ingredient/ingredient-picker';
@@ -14,11 +14,30 @@ import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { getCategories, getCategoryTagId } from '@/data/catalog';
 import { formatUnit, parseQuantity } from '@/lib/ingredientUnits';
 import { createRecipe, uploadImage } from '@/lib/userContent';
+import { persistPickedImage } from '@/lib/persistPickedImage';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 
 const DEFAULT_SERVINGS = 1;
+
+// Same overshoot-then-settle bump the recipes tab's category circles use
+// when one becomes selected (see (tabs)/recipes/index.js's PulseItem) — a
+// gentler scale here since this wraps a full-width grid tile, not a small
+// circular icon.
+function PulseTile({ active, style, children }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    if (!active) return;
+    Animated.sequence([Animated.timing(scale, { toValue: 1.06, duration: 140, easing: Easing.out(Easing.quad), useNativeDriver: true }), Animated.spring(scale, { toValue: 1, friction: 4, tension: 140, useNativeDriver: true })]).start();
+  }, [active]);
+  return <Animated.View style={[style, { transform: [{ scale }] }]}>{children}</Animated.View>;
+}
 
 function AddRecipeScreen() {
   const { t } = useTranslation();
@@ -45,7 +64,7 @@ function AddRecipeScreen() {
       return;
     }
     const result = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [4, 3], quality: 0.7 });
-    if (!result.canceled && result.assets[0]) setImageUri(result.assets[0].uri);
+    if (!result.canceled && result.assets[0]) setImageUri(persistPickedImage(result.assets[0].uri, 'recipe-photo'));
   }
 
   async function handleChooseFromLibrary() {
@@ -55,7 +74,7 @@ function AddRecipeScreen() {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [4, 3], quality: 0.7 });
-    if (!result.canceled && result.assets[0]) setImageUri(result.assets[0].uri);
+    if (!result.canceled && result.assets[0]) setImageUri(persistPickedImage(result.assets[0].uri, 'recipe-photo'));
   }
 
   function handlePickPhoto() {
@@ -150,7 +169,7 @@ function AddRecipeScreen() {
 
         <View style={styles.field}>
           <ThemedText type="small" color={theme.textSecondary}>{t('recipes.recipeTitle')}</ThemedText>
-          <TextInput value={title} onChangeText={setTitle} placeholder={t('recipes.recipeTitlePlaceholder')} placeholderTextColor={theme.textSecondary} style={[styles.titleInput, showTitleError && styles.inputError]} />
+          <TextInput selectionColor="#1B5E20" value={title} onChangeText={setTitle} placeholder={t('recipes.recipeTitlePlaceholder')} placeholderTextColor={theme.textSecondary + '80'} style={[styles.titleInput, showTitleError && styles.inputError]} />
           {showTitleError && <ThemedText type="caption" color={theme.error}>{t('recipes.titleRequired')}</ThemedText>}
         </View>
 
@@ -159,9 +178,11 @@ function AddRecipeScreen() {
           <View style={styles.optionGrid}>
             {categories.map(category => {
             const isActive = categoryId === category.id;
-            return <Pressable key={category.id} onPress={() => setCategoryId(category.id)} style={[styles.optionTile, isActive && styles.optionTileActive]}>
-                  <ThemedText type="smallBold" color={isActive ? theme.accent : theme.text} numberOfLines={2} style={styles.optionLabel}>{category.name}</ThemedText>
-                  {isActive && <SymbolView name={{ ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }} size={16} tintColor={theme.accent} />}
+            return <Pressable key={category.id} onPress={() => setCategoryId(category.id)} style={styles.optionTileWrapper}>
+                  <PulseTile active={isActive} style={[styles.optionTile, isActive && styles.optionTileActive]}>
+                    <ThemedText type="smallBold" color={isActive ? theme.accent : theme.text} numberOfLines={2} style={styles.optionLabel}>{category.name}</ThemedText>
+                    {isActive && <SymbolView name={{ ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }} size={16} tintColor={theme.accent} />}
+                  </PulseTile>
                 </Pressable>;
           })}
           </View>
@@ -211,7 +232,7 @@ function AddRecipeScreen() {
           <Pressable style={[styles.amountCard, { backgroundColor: theme.background }]} onPress={event => event.stopPropagation()}>
             <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{editingQuantityIndex !== null ? ingredientLines[editingQuantityIndex]?.name : ''}</ThemedText>
             <View style={styles.amountQuantityBox}>
-              <TextInput value={editingQuantityValue} onChangeText={setEditingQuantityValue} keyboardType="decimal-pad" autoFocus style={styles.amountQuantityInput} />
+              <TextInput selectionColor="#1B5E20" value={editingQuantityValue} onChangeText={setEditingQuantityValue} keyboardType="decimal-pad" autoFocus style={styles.amountQuantityInput} />
               <ThemedText type="smallBold" color={theme.textSecondary}>{editingQuantityIndex !== null ? formatUnit(t, ingredientLines[editingQuantityIndex]?.unit) : ''}</ThemedText>
             </View>
             <View style={styles.amountActions}>
@@ -304,8 +325,10 @@ const createStyles = theme => StyleSheet.create({
     flexWrap: 'wrap',
     gap: Spacing.two
   },
+  optionTileWrapper: {
+    width: '48.5%'
+  },
   optionTile: {
-    width: '48.5%',
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.two,
@@ -457,9 +480,9 @@ const createStyles = theme => StyleSheet.create({
     elevation: 4
   },
   saveButtonDisabled: {
-    backgroundColor: theme.background,
+    backgroundColor: theme.backgroundSelected,
     borderColor: theme.border,
-    borderWidth: 1
+    borderWidth: 1.5
   },
   saveButtonText: {
     fontWeight: '700'

@@ -94,9 +94,28 @@ const BUCKETS = [
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200';
 
+// `\b` is an ASCII-only notion in JS regex (it's a transition to/from `\w`,
+// which never matches Cyrillic) — it silently never matched any Russian
+// ingredient name, so every Russian name fell through to the fallback bucket
+// and never looked "swappable". A naive fix (a Unicode-flagged `\p{L}`/`\p{N}`
+// regex, compiled fresh on every call — this runs over every word of every
+// bucket, for every ingredient, every render) turned out to be dramatically
+// slower on-device than the plain `\b` version was, to the point of visibly
+// freezing the ingredients screen for several seconds. `indexOf` for the
+// search plus a single reused, precompiled regex just to classify one
+// character (not to run the search) is both Unicode-correct and fast.
+const WORD_CHAR = /[\p{L}\p{N}]/u;
+
 function hasWord(name, phrase) {
-  const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`\\b${escaped}`, 'i').test(name);
+  const haystack = name.toLowerCase();
+  const needle = phrase.toLowerCase();
+  let fromIndex = 0;
+  for (;;) {
+    const index = haystack.indexOf(needle, fromIndex);
+    if (index === -1) return false;
+    if (index === 0 || !WORD_CHAR.test(haystack[index - 1])) return true;
+    fromIndex = index + 1;
+  }
 }
 
 const PANTRY_BUCKET = BUCKETS.find(bucket => bucket.key === 'pantry');

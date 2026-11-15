@@ -11,6 +11,7 @@
   },
   "common": {
     "seeAll": "Alle anzeigen",
+    "all": "Alle",
     "retry": "Erneut versuchen",
     "errorTitle": "Konnte nicht geladen werden",
     "errorDefault": "Etwas ist schiefgelaufen.",
@@ -45,7 +46,8 @@
       "Oktober",
       "November",
       "Dezember"
-    ]
+    ],
+    "weekdaysShort": ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"]
   },
   "auth": {
     "entry": {
@@ -502,7 +504,10 @@
     "allDone": "Alles erledigt — nichts mehr zu kaufen",
     "emptyTitle": "Noch nichts zum Einkaufen",
     "emptyMessage": "Plane zuerst die heutigen Mahlzeiten und komm dann zurück, um deine Einkaufsliste zu erstellen.",
-    "emptyMessageWeek": "Plane zuerst Mahlzeiten für diese Woche und komm dann für deine Einkaufsliste zurück."
+    "emptyMessageWeek": "Plane zuerst Mahlzeiten für diese Woche und komm dann für deine Einkaufsliste zurück.",
+    "customCategory": "Eigene Artikel",
+    "addItemTitle": "Artikel hinzufügen",
+    "addItemPlaceholder": "z. B. Zahnpasta"
   },
   "aiAnalysis": {
     "title": "KI-Analyse",

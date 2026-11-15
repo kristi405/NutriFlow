@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { todayKey, weekContaining, weekdayLabel } from '@/lib/date';
+import { todayKey, weekContaining, weekdayOf } from '@/lib/date';
 
 function DayButton({ isSelected, isToday, onPress, weekday, dayNumber, theme }) {
   const scale = useRef(new Animated.Value(1)).current;
@@ -29,6 +30,7 @@ function DayButton({ isSelected, isToday, onPress, weekday, dayNumber, theme }) 
 }
 
 export function DateStrip({ selectedDate, onSelectDate, style }) {
+  const { t } = useTranslation();
   const theme = useTheme();
   // The week shown is whichever one contains selectedDate — on Home that's
   // always today's week (selectedDate never leaves it there), but meal-plan.js
@@ -39,7 +41,7 @@ export function DateStrip({ selectedDate, onSelectDate, style }) {
       const dayNumber = Number(dateKey.split('-')[2]);
       const isSelected = dateKey === selectedDate;
       const isToday = dateKey === todayKey();
-      return <DayButton key={dateKey} isSelected={isSelected} isToday={isToday} onPress={() => onSelectDate(dateKey)} weekday={weekdayLabel(dateKey)} dayNumber={dayNumber} theme={theme} />;
+      return <DayButton key={dateKey} isSelected={isSelected} isToday={isToday} onPress={() => onSelectDate(dateKey)} weekday={t(`common.weekdaysShort.${weekdayOf(dateKey)}`)} dayNumber={dayNumber} theme={theme} />;
     })}
     </View>;
 }

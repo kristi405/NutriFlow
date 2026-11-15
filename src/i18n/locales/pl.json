@@ -11,6 +11,7 @@
   },
   "common": {
     "seeAll": "Zobacz wszystkie",
+    "all": "Wszystkie",
     "retry": "Spróbuj ponownie",
     "errorTitle": "Nie udało się wczytać",
     "errorDefault": "Coś poszło nie tak.",
@@ -45,7 +46,8 @@
       "Październik",
       "Listopad",
       "Grudzień"
-    ]
+    ],
+    "weekdaysShort": ["Nd", "Pn", "Wt", "Śr", "Cz", "Pt", "Sb"]
   },
   "auth": {
     "entry": {
@@ -502,7 +504,10 @@
     "allDone": "Wszystko gotowe — nic więcej do kupienia",
     "emptyTitle": "Na razie nie ma czego kupować",
     "emptyMessage": "Najpierw zaplanuj dzisiejsze posiłki, a następnie wróć, aby utworzyć listę zakupów.",
-    "emptyMessageWeek": "Najpierw zaplanuj posiłki na ten tydzień, potem wróć po listę zakupów."
+    "emptyMessageWeek": "Najpierw zaplanuj posiłki na ten tydzień, potem wróć po listę zakupów.",
+    "customCategory": "Moje produkty",
+    "addItemTitle": "Dodaj produkt",
+    "addItemPlaceholder": "np. pasta do zębów"
   },
   "aiAnalysis": {
     "title": "Analiza AI",

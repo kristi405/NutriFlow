@@ -196,7 +196,7 @@ function RecipesScreen() {
           </Pressable>
           <View style={styles.searchBar}>
             <SymbolView name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} size={16} tintColor={theme.textSecondary} />
-            <TextInput value={query} onChangeText={setQuery} placeholder={t('recipes.searchPlaceholder')} placeholderTextColor={theme.textSecondary} style={styles.searchInput} returnKeyType="search" />
+            <TextInput selectionColor="#1B5E20" value={query} onChangeText={setQuery} placeholder={t('recipes.searchPlaceholder')} placeholderTextColor={theme.textSecondary} style={styles.searchInput} returnKeyType="search" />
             {query.length > 0 && <Pressable onPress={() => setQuery('')} hitSlop={8}>
                 <SymbolView name={{ ios: 'xmark.circle.fill', android: 'cancel', web: 'cancel' }} size={18} tintColor={theme.textSecondary} />
               </Pressable>}

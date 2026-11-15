@@ -10,12 +10,18 @@ import { useTheme } from '@/hooks/use-theme';
 import { formatUnit } from '@/lib/ingredientUnits';
 import { BASIC_NUTRIENTS, createIngredient, EXTRA_NUTRIENTS, INGREDIENT_UNITS, isWeightUnit, updateIngredient } from '@/lib/userContent';
 
+// Same per-macro colors as the recipe detail screen's stats row, so a
+// macro reads the same way everywhere it shows up in the app.
+const WATER_BLUE = '#2F80ED';
+const FAT_ORANGE = '#F2994A';
+const CARBS_PURPLE = '#9B51E0';
+
 // Form field key (server name) → i18n label + unit shown next to the input.
 const NUTRIENT_FIELDS = {
   calories: { labelKey: 'recipes.calories', unit: 'kcal' },
-  protein: { labelKey: 'home.protein', unit: 'g' },
-  fat: { labelKey: 'home.fat', unit: 'g' },
-  carbs: { labelKey: 'home.carbs', unit: 'g' },
+  protein: { labelKey: 'home.protein', unit: 'g', color: WATER_BLUE },
+  fat: { labelKey: 'home.fat', unit: 'g', color: FAT_ORANGE },
+  carbs: { labelKey: 'home.carbs', unit: 'g', color: CARBS_PURPLE },
   fiber: { labelKey: 'recipes.fiber', unit: 'g' },
   sugar: { labelKey: 'recipes.sugar', unit: 'g' },
   saturated_fat: { labelKey: 'recipes.saturatedFat', unit: 'g' },
@@ -112,10 +118,11 @@ function IngredientForm({ ingredient, initialName = '', onSaved, onCancel }) {
   function renderNutrientInput(key) {
     const field = NUTRIENT_FIELDS[key];
     const hasError = showValidation && invalidNutrients.includes(key);
+    const labelColor = field.color ?? theme.textSecondary;
     return <View key={key} style={styles.nutrientCell}>
-        <ThemedText type="caption" color={theme.textSecondary} numberOfLines={1}>{t(field.labelKey)}</ThemedText>
-        <View style={[styles.inputRow, hasError && styles.inputError]}>
-          <TextInput value={nutrients[key]} onChangeText={value => setNutrient(key, value)} keyboardType="decimal-pad" placeholder="0" placeholderTextColor={theme.textSecondary} style={styles.numberInput} />
+        <ThemedText type="caption" color={labelColor} numberOfLines={1} style={field.color && styles.nutrientLabelBold}>{t(field.labelKey)}</ThemedText>
+        <View style={[styles.inputRow, field.color && { borderColor: field.color + '40' }, hasError && styles.inputError]}>
+          <TextInput selectionColor="#1B5E20" value={nutrients[key]} onChangeText={value => setNutrient(key, value)} keyboardType="decimal-pad" placeholder="0" placeholderTextColor={theme.textSecondary} style={[styles.numberInput, field.color && { color: field.color }]} />
           <ThemedText type="caption" color={theme.textSecondary}>{field.unit === 'kcal' ? t('common.kcal') : field.unit}</ThemedText>
         </View>
       </View>;
@@ -123,13 +130,17 @@ function IngredientForm({ ingredient, initialName = '', onSaved, onCancel }) {
 
   return <View style={styles.container}>
       <View style={styles.field}>
-        <ThemedText type="small" color={theme.textSecondary}>{t('userContent.ingredientName')}</ThemedText>
-        <TextInput value={name} onChangeText={setName} maxLength={100} placeholder={t('userContent.ingredientNamePlaceholder')} placeholderTextColor={theme.textSecondary} style={[styles.textInput, nameError && styles.inputError]} />
+        <TextInput selectionColor="#1B5E20" value={name} onChangeText={setName} maxLength={100} placeholder={t('userContent.ingredientNamePlaceholder')} placeholderTextColor={theme.textSecondary + '80'} style={[styles.nameInput, nameError && styles.inputError]} />
         {nameError && <ThemedText type="caption" color={theme.error}>{t('userContent.nameRequired')}</ThemedText>}
       </View>
 
-      <View style={styles.field}>
-        <ThemedText type="small" color={theme.textSecondary}>{t('ingredients.measuredIn')}</ThemedText>
+      <View style={styles.sectionCard}>
+        <View style={styles.sectionHeader}>
+          <View style={[styles.sectionIcon, { backgroundColor: theme.accentSoft }]}>
+            <SymbolView name={{ ios: 'ruler.fill', android: 'straighten', web: 'straighten' }} size={15} tintColor={theme.accent} />
+          </View>
+          <ThemedText type="smallBold" color={theme.text}>{t('ingredients.measuredIn')}</ThemedText>
+        </View>
         <View style={styles.chipRow}>
           {INGREDIENT_UNITS.map(option => {
           const isActive = option === unit;
@@ -139,18 +150,33 @@ function IngredientForm({ ingredient, initialName = '', onSaved, onCancel }) {
         })}
         </View>
         {needsUnitWeight && <View style={styles.unitWeightRow}>
-            <ThemedText type="small" color={theme.text} style={styles.flex1}>{t('userContent.unitWeight', { unit: formatUnit(t, unit) })}</ThemedText>
+            <ThemedText type="small" color={theme.textSecondary} style={styles.flex1}>{t('userContent.unitWeight', { unit: formatUnit(t, unit) })}</ThemedText>
             <View style={[styles.inputRow, styles.unitWeightInput, unitWeightError && styles.inputError]}>
-              <TextInput value={gramsPerUnitByUnit[unit] ?? ''} onChangeText={value => setGramsPerUnitByUnit(current => ({ ...current, [unit]: value }))} keyboardType="decimal-pad" placeholder="0" placeholderTextColor={theme.textSecondary} style={styles.numberInput} />
+              <TextInput selectionColor="#1B5E20" value={gramsPerUnitByUnit[unit] ?? ''} onChangeText={value => setGramsPerUnitByUnit(current => ({ ...current, [unit]: value }))} keyboardType="decimal-pad" placeholder="0" placeholderTextColor={theme.textSecondary} style={styles.numberInput} />
               <ThemedText type="caption" color={theme.textSecondary}>g</ThemedText>
             </View>
           </View>}
         {unitWeightError && <ThemedText type="caption" color={theme.error}>{t('userContent.unitWeightRequired')}</ThemedText>}
       </View>
 
-      <View style={styles.field}>
-        <ThemedText type="small" color={theme.textSecondary}>{t('userContent.nutrientsPer100')}</ThemedText>
-        <View style={styles.nutrientGrid}>{BASIC_NUTRIENTS.map(renderNutrientInput)}</View>
+      <View style={styles.sectionCard}>
+        <View style={styles.sectionHeader}>
+          <View style={[styles.sectionIcon, { backgroundColor: theme.primarySoft }]}>
+            <SymbolView name={{ ios: 'flame.fill', android: 'local_fire_department', web: 'local_fire_department' }} size={15} tintColor={theme.primary} />
+          </View>
+          <ThemedText type="smallBold" color={theme.text}>{t('userContent.nutrientsPer100')}</ThemedText>
+        </View>
+
+        <View style={styles.caloriesRow}>
+          <ThemedText type="headline" color={theme.primary} style={styles.flex1}>{t('recipes.calories')}</ThemedText>
+          <View style={[styles.caloriesInputBox, { backgroundColor: theme.primarySoft }, showValidation && invalidNutrients.includes('calories') && styles.inputError]}>
+            <TextInput selectionColor="#1B5E20" value={nutrients.calories} onChangeText={value => setNutrient('calories', value)} keyboardType="decimal-pad" placeholder="0" placeholderTextColor={theme.textSecondary + '80'} style={[styles.numberInput, styles.caloriesInput, { color: theme.primary }]} />
+            <ThemedText type="smallBold" color={theme.primary}>{t('common.kcal')}</ThemedText>
+          </View>
+        </View>
+
+        <View style={styles.nutrientGrid}>{BASIC_NUTRIENTS.filter(key => key !== 'calories').map(renderNutrientInput)}</View>
+
         <Pressable onPress={() => setShowMore(current => !current)} style={styles.moreToggle} hitSlop={6}>
           <ThemedText type="smallBold" color={theme.accent}>{t('userContent.moreNutrients')}</ThemedText>
           <SymbolView name={showMore ? { ios: 'chevron.up', android: 'expand_less', web: 'expand_less' } : { ios: 'chevron.down', android: 'expand_more', web: 'expand_more' }} size={14} tintColor={theme.accent} />
@@ -159,8 +185,13 @@ function IngredientForm({ ingredient, initialName = '', onSaved, onCancel }) {
         {showValidation && invalidNutrients.length > 0 && <ThemedText type="caption" color={theme.error}>{t('userContent.nutrientsInvalid')}</ThemedText>}
       </View>
 
-      {allergenTags.length > 0 && <View style={styles.field}>
-          <ThemedText type="small" color={theme.textSecondary}>{t('userContent.allergens')}</ThemedText>
+      {allergenTags.length > 0 && <View style={styles.sectionCard}>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.sectionIcon, { backgroundColor: theme.accentSoft }]}>
+              <SymbolView name={{ ios: 'exclamationmark.triangle.fill', android: 'warning', web: 'warning' }} size={14} tintColor={theme.warning} />
+            </View>
+            <ThemedText type="smallBold" color={theme.text}>{t('userContent.allergens')}</ThemedText>
+          </View>
           <View style={styles.chipRow}>
             {allergenTags.map(tag => {
             const isActive = tagIds.includes(tag.id);
@@ -171,16 +202,21 @@ function IngredientForm({ ingredient, initialName = '', onSaved, onCancel }) {
           </View>
         </View>}
 
-      {serverError && <ThemedText type="small" color={theme.error}>{serverError}</ThemedText>}
+      {serverError && <View style={[styles.errorBanner, { backgroundColor: theme.error + '18' }]}>
+          <SymbolView name={{ ios: 'exclamationmark.triangle.fill', android: 'warning', web: 'warning' }} size={14} tintColor={theme.error} />
+          <ThemedText type="small" color={theme.error} style={styles.flex1}>{serverError}</ThemedText>
+        </View>}
 
-      <View style={styles.actions}>
-        {onCancel && <Pressable onPress={onCancel} style={styles.cancelButton} disabled={isSaving}>
+      {onCancel ? <View style={styles.actions}>
+          <Pressable onPress={onCancel} style={styles.cancelButton} disabled={isSaving}>
             <ThemedText type="smallBold" color={theme.textSecondary}>{t('common.cancel')}</ThemedText>
-          </Pressable>}
-        <Pressable onPress={handleSave} disabled={isSaving} style={[styles.saveButton, isSaving && styles.saveButtonBusy]}>
+          </Pressable>
+          <Pressable onPress={handleSave} disabled={isSaving} style={[styles.saveButton, styles.saveButtonInline, isSaving && styles.saveButtonBusy]}>
+            {isSaving ? <ActivityIndicator color="#ffffff" /> : <ThemedText type="smallBold" color="#ffffff">{ingredient ? t('common.save') : t('userContent.createIngredient')}</ThemedText>}
+          </Pressable>
+        </View> : <Pressable onPress={handleSave} disabled={isSaving} style={[styles.saveButton, isSaving && styles.saveButtonBusy]}>
           {isSaving ? <ActivityIndicator color="#ffffff" /> : <ThemedText type="smallBold" color="#ffffff">{ingredient ? t('common.save') : t('userContent.createIngredient')}</ThemedText>}
-        </Pressable>
-      </View>
+        </Pressable>}
     </View>;
 }
 
@@ -196,18 +232,71 @@ const createStyles = theme => StyleSheet.create({
   field: {
     gap: Spacing.two
   },
-  textInput: {
+  nameInput: {
     backgroundColor: theme.background,
     borderColor: theme.border,
     borderWidth: 1.5,
-    borderRadius: 14,
+    borderRadius: 16,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two + 2,
-    fontSize: 16,
+    paddingVertical: Spacing.three,
+    fontSize: 17,
+    fontWeight: '600',
     color: theme.text
   },
   inputError: {
     borderColor: theme.error
+  },
+  sectionCard: {
+    backgroundColor: theme.background,
+    borderColor: theme.border,
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: Spacing.four,
+    gap: Spacing.three
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two
+  },
+  sectionIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  caloriesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two
+  },
+  caloriesInputBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+    borderRadius: 12,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two
+  },
+  caloriesInput: {
+    flex: 0,
+    minWidth: 46,
+    textAlign: 'right',
+    fontSize: 20,
+    fontWeight: '700'
+  },
+  nutrientLabelBold: {
+    fontWeight: '700'
+  },
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    borderRadius: 12,
+    padding: Spacing.three
   },
   chipRow: {
     flexDirection: 'row',
@@ -244,7 +333,7 @@ const createStyles = theme => StyleSheet.create({
     gap: Spacing.two
   },
   nutrientCell: {
-    width: '48.5%',
+    width: '31%',
     gap: 4
   },
   inputRow: {
@@ -280,8 +369,10 @@ const createStyles = theme => StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two
   },
+  saveButtonInline: {
+    flexGrow: 1
+  },
   saveButton: {
-    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: theme.accent,

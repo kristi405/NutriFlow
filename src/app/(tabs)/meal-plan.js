@@ -3,13 +3,15 @@ import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
-import { Alert, KeyboardAvoidingView, Modal, PanResponder, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Modal, PanResponder, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DateStrip } from '@/components/home/date-strip';
 import { PersonAvatar } from '@/components/people/person-avatar';
 import { PersonSwitcher } from '@/components/people/person-switcher';
 import { AllergenWarning } from '@/components/allergen-warning';
 import { MealRow } from '@/components/home/meal-row';
+import IngredientForm from '@/components/ingredient/ingredient-form';
+import { MineFilterToggle } from '@/components/ingredient/mine-filter-toggle';
 import { ShoppingRangeModal } from '@/components/meal-plan/shopping-range-modal';
 import { WeeklyMenuModal } from '@/components/meal-plan/weekly-menu-modal';
 import { ThemedText } from '@/components/themed-text';
@@ -21,7 +23,6 @@ import { TAB_BAR_HEIGHT, tabBarBottomGap } from '@/components/custom-tab-bar';
 import { Spacing } from '@/constants/theme';
 import { getIngredientById, getIngredients, getRecipeById, getRecipes } from '@/data/catalog';
 import { useTheme } from '@/hooks/use-theme';
-import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { addDays, monthOf, todayKey, weekContaining, yearOf } from '@/lib/date';
 import { defaultQuantityFor, formatQuantity, formatUnit, parseQuantity } from '@/lib/ingredientUnits';
 import { guessIngredientImage, ingredientThumbUri } from '@/lib/ingredientImage';
@@ -80,7 +81,6 @@ function MealPlanScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
-  const keyboardHeight = useKeyboardHeight();
   const tabBarOffset = TAB_BAR_HEIGHT + tabBarBottomGap(insets.bottom);
   const [date, setDate] = useState(todayKey());
   const [swapMealType, setSwapMealType] = useState(null);
@@ -90,9 +90,10 @@ function MealPlanScreen() {
   const [weekGenerationStatus, setWeekGenerationStatus] = useState(null);
   const [generationScope, setGenerationScope] = useState('week');
   const [isAddSnackModalOpen, setIsAddSnackModalOpen] = useState(false);
-  const [customSnackCalories, setCustomSnackCalories] = useState('');
   const [snackPickerMode, setSnackPickerMode] = useState(null);
   const [snackQuery, setSnackQuery] = useState('');
+  const [snackOnlyMine, setSnackOnlyMine] = useState(false);
+  const [isCreatingSnackIngredient, setIsCreatingSnackIngredient] = useState(false);
   const [pendingSnackIngredient, setPendingSnackIngredient] = useState(null);
   const [snackAmount, setSnackAmount] = useState('');
   const [editingSnackId, setEditingSnackId] = useState(null);
@@ -280,9 +281,10 @@ function MealPlanScreen() {
   function closeSnackModal() {
     setIsAddSnackModalOpen(false);
     setEditingSnackId(null);
-    setCustomSnackCalories('');
     setSnackPickerMode(null);
     setSnackQuery('');
+    setSnackOnlyMine(false);
+    setIsCreatingSnackIngredient(false);
     setPendingSnackIngredient(null);
     setSnackAmount('');
   }
@@ -291,11 +293,11 @@ function MealPlanScreen() {
     if (snackPickerMode === null) return [];
     const normalized = snackQuery.trim().toLowerCase();
     if (snackPickerMode === 'dish') {
-      const dishes = [...myRecipesStore.recipes, ...getRecipes()];
+      const dishes = snackOnlyMine ? myRecipesStore.recipes : [...myRecipesStore.recipes, ...getRecipes()];
       return dishes.filter(recipe => !normalized || recipe.title.toLowerCase().includes(normalized)).slice(0, 40);
     }
-    return getIngredients().filter(ingredient => !normalized || ingredient.name.toLowerCase().includes(normalized)).slice(0, 40);
-  }, [snackPickerMode, snackQuery, myRecipesStore.recipes]);
+    return getIngredients().filter(ingredient => (!snackOnlyMine || ingredient.isOwn) && (!normalized || ingredient.name.toLowerCase().includes(normalized))).slice(0, 40);
+  }, [snackPickerMode, snackQuery, snackOnlyMine, myRecipesStore.recipes]);
 
   function handlePickSnackDish(recipe) {
     const profile = calculateRecipeNutrition(recipe, getIngredientById);
@@ -305,6 +307,12 @@ function MealPlanScreen() {
   function handlePickSnackIngredient(ingredient) {
     setPendingSnackIngredient(ingredient);
     setSnackAmount(defaultQuantityFor(ingredient.defaultUnit));
+  }
+
+  function handleCreatedSnackIngredient(raw) {
+    setIsCreatingSnackIngredient(false);
+    const created = getIngredientById(raw.id);
+    if (created) handlePickSnackIngredient(created);
   }
 
   function confirmSnackIngredient() {
@@ -318,13 +326,11 @@ function MealPlanScreen() {
 
   function handleOpenAddSnack() {
     setEditingSnackId(null);
-    setCustomSnackCalories('');
     setIsAddSnackModalOpen(true);
   }
 
   function handleOpenEditSnack(entry) {
     setEditingSnackId(entry.id);
-    setCustomSnackCalories(String(entry.manualCalories));
     setIsAddSnackModalOpen(true);
   }
 
@@ -337,13 +343,6 @@ function MealPlanScreen() {
       foodLogStore.logMeal({ date, mealType: 'snack', label, manualCalories: calories, profile });
     }
     closeSnackModal();
-  }
-
-  function handleLogCustomSnack() {
-    const calories = Math.round(Number(customSnackCalories));
-    if (!Number.isFinite(calories) || calories <= 0) return;
-    const editingEntry = editingSnackId ? quickSnackEntries.find(entry => entry.id === editingSnackId) : undefined;
-    commitSnack(editingEntry?.label ?? t('mealPlan.customSnackLabel'), calories);
   }
 
   return <GuestLockOverlay message={t('auth.guestLockedMealPlan')}>
@@ -487,8 +486,8 @@ function MealPlanScreen() {
                 <ThemedText type="smallBold" color={theme.text}>{t('mealPlan.swapTitle')}</ThemedText>
                 <ThemedText type="caption" color={theme.textSecondary}>{t('mealPlan.swapSubtitle')}</ThemedText>
               </View>
-              <Pressable onPress={() => setSwapMealType(null)} hitSlop={8} style={styles.editButton}>
-                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={theme.accent} />
+              <Pressable onPress={() => setSwapMealType(null)} hitSlop={8} style={[styles.editButton, styles.modalXButton, { backgroundColor: theme.accent, shadowColor: theme.accent }]}>
+                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} weight="semibold" tintColor="#ffffff" />
               </Pressable>
             </View>
 
@@ -516,46 +515,53 @@ function MealPlanScreen() {
       </Modal>
 
       <Modal visible={isAddSnackModalOpen} transparent animationType="slide" onRequestClose={closeSnackModal}>
-        {/* Modals present in their own native root, so the keyboard-avoidance
-            fix applied to the main screens (automaticallyAdjustKeyboardInsets
-            on a ScrollView) doesn't reach in here — this sheet has no scroll
-            view of its own, just a fixed card, so KeyboardAvoidingView's
-            native, frame-synced "padding" is the right tool. It replaces the
-            old `paddingBottom: keyboardHeight` state-driven snap, which moved
-            the whole sheet (search field and close button included) a beat
-            after the real keyboard animation, instead of with it. */}
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex1}>
-          <Pressable style={[styles.modalBackdrop, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]} onPress={closeSnackModal}>
-          <Pressable style={[styles.modalSheet, { paddingTop: insets.top + Spacing.four }, snackPickerMode !== null && { paddingBottom: Spacing.three }, keyboardHeight > 0 && styles.modalSheetKeyboardOpen]} onPress={event => event.stopPropagation()}>
+        <Pressable style={styles.modalBackdrop} onPress={closeSnackModal}>
+          <Pressable style={[styles.modalSheet, { paddingTop: insets.top + Spacing.four }, snackPickerMode !== null && { paddingBottom: Spacing.three }]} onPress={event => event.stopPropagation()}>
             <View style={styles.modalHeader}>
               <View style={styles.modalHeaderText}>
                 <ThemedText type="smallBold" color={theme.text}>{t(editingSnackId ? 'mealPlan.editSnackTitle' : 'mealPlan.addSnackTitle')}</ThemedText>
                 <ThemedText type="caption" color={theme.textSecondary}>{t('mealPlan.addSnackSubtitle')}</ThemedText>
               </View>
-              <Pressable onPress={closeSnackModal} hitSlop={8} style={styles.editButton}>
-                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={theme.accent} />
-              </Pressable>
+              <View style={styles.modalHeaderRight}>
+                {snackPickerMode !== null && !isCreatingSnackIngredient && <MineFilterToggle value={snackOnlyMine} onChange={setSnackOnlyMine} />}
+                <Pressable onPress={closeSnackModal} hitSlop={8} style={[styles.modalCloseButton, { backgroundColor: theme.accent, shadowColor: theme.accent }]}>
+                  <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} weight="semibold" tintColor="#ffffff" />
+                </Pressable>
+              </View>
             </View>
 
             <View style={styles.snackPickerButtons}>
-              <Pressable onPress={() => { setSnackPickerMode(current => current === 'dish' ? null : 'dish'); setSnackQuery(''); setPendingSnackIngredient(null); }} style={[styles.snackPickerButton, snackPickerMode === 'dish' && styles.snackPickerButtonActive]}>
+              <Pressable onPress={() => { setSnackPickerMode(current => current === 'dish' ? null : 'dish'); setSnackQuery(''); setSnackOnlyMine(false); setIsCreatingSnackIngredient(false); setPendingSnackIngredient(null); }} style={[styles.snackPickerButton, snackPickerMode === 'dish' && styles.snackPickerButtonActive]}>
                 <ThemedText type="smallBold" color={snackPickerMode === 'dish' ? '#ffffff' : theme.accent}>{t('mealPlan.chooseDish')}</ThemedText>
               </Pressable>
-              <Pressable onPress={() => { setSnackPickerMode(current => current === 'ingredient' ? null : 'ingredient'); setSnackQuery(''); setPendingSnackIngredient(null); }} style={[styles.snackPickerButton, snackPickerMode === 'ingredient' && styles.snackPickerButtonActive]}>
+              <Pressable onPress={() => { setSnackPickerMode(current => current === 'ingredient' ? null : 'ingredient'); setSnackQuery(''); setSnackOnlyMine(false); setIsCreatingSnackIngredient(false); setPendingSnackIngredient(null); }} style={[styles.snackPickerButton, snackPickerMode === 'ingredient' && styles.snackPickerButtonActive]}>
                 <ThemedText type="smallBold" color={snackPickerMode === 'ingredient' ? '#ffffff' : theme.accent}>{t('mealPlan.chooseIngredient')}</ThemedText>
               </Pressable>
             </View>
 
-            {snackPickerMode !== null ? <>
-                <ScrollView style={styles.snackPickerScroll} keyboardShouldPersistTaps="handled">
-                  <View style={styles.swapList}>
-                    {snackPickerItems.map(item => <Pressable key={item.id} onPress={() => snackPickerMode === 'dish' ? handlePickSnackDish(item) : handlePickSnackIngredient(item)} style={styles.swapRow}>
-                        {snackPickerMode === 'dish' ? <RecipeImage uri={recipeThumbUri(item)} fallbackUri={recipeImageUri(item)} style={styles.swapImage} iconSize={18} /> : <RecipeImage uri={ingredientThumbUri(item)} fallbackUri={guessIngredientImage(item)} style={styles.swapImage} iconSize={18} />}
-                        <ThemedText type="smallBold" color={theme.text} style={styles.flex1} numberOfLines={1}>{snackPickerMode === 'dish' ? item.title : item.name}</ThemedText>
-                      </Pressable>)}
-                  </View>
-                </ScrollView>
-              </> : <ScrollView style={styles.quickSnackScroll}>
+            {snackPickerMode !== null && !isCreatingSnackIngredient && <TextInput selectionColor="#1B5E20" value={snackQuery} onChangeText={setSnackQuery} placeholder={t(snackPickerMode === 'dish' ? 'mealPlan.searchDishPlaceholder' : 'mealPlan.searchIngredientPlaceholder')} placeholderTextColor={theme.textSecondary} style={[styles.snackSearchInput, { color: theme.text, borderColor: theme.border }]} />}
+
+            {/* No KeyboardAvoidingView — resizing the whole sheet for the
+                keyboard via its JS-driven padding isn't frame-synced with the
+                keyboard's own native animation. The search field sits above
+                this list now, so automaticallyAdjustKeyboardInsets is native
+                and frame-synced, and only needs to shift the list's content. */}
+            {isCreatingSnackIngredient ? <ScrollView style={styles.snackPickerScroll} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.formContent}>
+                <IngredientForm initialName={snackQuery.trim()} onSaved={handleCreatedSnackIngredient} onCancel={() => setIsCreatingSnackIngredient(false)} />
+              </ScrollView> : snackPickerMode !== null ? <ScrollView style={styles.snackPickerScroll} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentInsetAdjustmentBehavior="automatic">
+                <View style={styles.swapList}>
+                  {snackPickerItems.map(item => <Pressable key={item.id} onPress={() => snackPickerMode === 'dish' ? handlePickSnackDish(item) : handlePickSnackIngredient(item)} style={styles.swapRow}>
+                      {snackPickerMode === 'dish' ? <RecipeImage uri={recipeThumbUri(item)} fallbackUri={recipeImageUri(item)} style={styles.swapImage} iconSize={18} /> : <RecipeImage uri={ingredientThumbUri(item)} fallbackUri={guessIngredientImage(item)} style={styles.swapImage} iconSize={18} />}
+                      <ThemedText type="smallBold" color={theme.text} style={styles.flex1} numberOfLines={1}>{snackPickerMode === 'dish' ? item.title : item.name}</ThemedText>
+                    </Pressable>)}
+                  {snackPickerMode === 'ingredient' && <Pressable onPress={() => setIsCreatingSnackIngredient(true)} style={styles.createIngredientRow}>
+                      <SymbolView name={{ ios: 'plus.circle.fill', android: 'add_circle', web: 'add_circle' }} size={20} tintColor={theme.accent} />
+                      <ThemedText type="smallBold" color={theme.accent} style={styles.flex1}>
+                        {snackQuery.trim() ? t('userContent.createIngredientNamed', { name: snackQuery.trim() }) : t('userContent.createIngredient')}
+                      </ThemedText>
+                    </Pressable>}
+                </View>
+              </ScrollView> : <ScrollView style={styles.quickSnackScroll}>
               <View style={styles.swapList}>
                 {QUICK_SNACKS.map(snack => <Pressable key={snack.id} onPress={() => commitSnack(t(snack.nameKey), snack.calories)} style={styles.swapRow}>
                     <View style={styles.quickSnackIconWrapper}>
@@ -566,20 +572,13 @@ function MealPlanScreen() {
                   </Pressable>)}
               </View>
             </ScrollView>}
-
-            {snackPickerMode !== null ? <TextInput value={snackQuery} onChangeText={setSnackQuery} placeholder={t(snackPickerMode === 'dish' ? 'mealPlan.searchDishPlaceholder' : 'mealPlan.searchIngredientPlaceholder')} placeholderTextColor={theme.textSecondary} style={[styles.snackSearchInput, { color: theme.text, borderColor: theme.border }]} /> : <View style={styles.customSnackRow}>
-              <TextInput value={customSnackCalories} onChangeText={setCustomSnackCalories} keyboardType="number-pad" placeholder={t('mealPlan.customSnackPlaceholder')} placeholderTextColor={theme.textSecondary} style={styles.customSnackInput} />
-              <Pressable onPress={handleLogCustomSnack} style={styles.customSnackButton}>
-                <ThemedText type="smallBold" color="#ffffff">{t(editingSnackId ? 'common.save' : 'common.add')}</ThemedText>
-              </Pressable>
-            </View>}
           </Pressable>
           {pendingSnackIngredient && <Pressable style={[StyleSheet.absoluteFill, styles.amountBackdrop]} onPress={() => setPendingSnackIngredient(null)}>
           <Pressable style={[styles.amountCard, { backgroundColor: theme.background }]} onPress={event => event.stopPropagation()}>
             <ThemedText type="smallBold" color={theme.text}>{t('mealPlan.howMuchEaten')}</ThemedText>
             <ThemedText type="small" color={theme.textSecondary}>{pendingSnackIngredient.name}</ThemedText>
             <View style={styles.customSnackRow}>
-              <TextInput value={snackAmount} onChangeText={setSnackAmount} keyboardType="decimal-pad" autoFocus placeholder={formatUnit(t, pendingSnackIngredient.defaultUnit)} placeholderTextColor={theme.textSecondary} style={styles.customSnackInput} />
+              <TextInput selectionColor="#1B5E20" value={snackAmount} onChangeText={setSnackAmount} keyboardType="decimal-pad" autoFocus placeholder={formatUnit(t, pendingSnackIngredient.defaultUnit)} placeholderTextColor={theme.textSecondary} style={styles.customSnackInput} />
               <ThemedText type="smallBold" color={theme.textSecondary}>{formatUnit(t, pendingSnackIngredient.defaultUnit)}</ThemedText>
             </View>
             <View style={styles.amountActions}>
@@ -592,8 +591,7 @@ function MealPlanScreen() {
             </View>
           </Pressable>
         </Pressable>}
-          </Pressable>
-        </KeyboardAvoidingView>
+        </Pressable>
       </Modal>
     </View>
   </GuestLockOverlay>;
@@ -747,6 +745,18 @@ const createStyles = theme => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
+  // Overrides editButton's size/shadow for the one "close whole modal" use
+  // of it, without touching the shared style's look for its other (edit/swap
+  // icon) uses elsewhere on this screen.
+  modalXButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3
+  },
   iconWrapper: {
     width: 36,
     height: 36,
@@ -805,6 +815,15 @@ const createStyles = theme => StyleSheet.create({
   },
   snackPickerScroll: {
     flex: 1
+  },
+  formContent: {
+    paddingBottom: Spacing.six
+  },
+  createIngredientRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    paddingVertical: Spacing.four
   },
   snackPickerButtons: {
     flexDirection: 'row',
@@ -894,16 +913,26 @@ const createStyles = theme => StyleSheet.create({
     gap: Spacing.three,
     flex: 1
   },
-  // With the keyboard up, KeyboardAvoidingView already shifts the sheet to sit
-  // right above it — the sheet's own resting-state bottom padding would then
-  // show up as a gap of empty space above the keyboard.
-  modalSheetKeyboardOpen: {
-    paddingBottom: Spacing.two
-  },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: Spacing.two
+  },
+  modalCloseButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3
+  },
+  modalHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: Spacing.two
   },
   // Without this, the title/subtitle block has no shrink limit, so a longer

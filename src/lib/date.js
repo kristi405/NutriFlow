@@ -12,10 +12,10 @@ export function addDays(dateKey, days) {
   const date = new Date(year, month - 1, day + days);
   return toDateKey(date);
 }
-const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-export function weekdayLabel(dateKey) {
+// 0-6 (Sun-Sat), matching the `common.weekdaysShort` translation array.
+export function weekdayOf(dateKey) {
   const [year, month, day] = dateKey.split('-').map(Number);
-  return WEEKDAY_LABELS[new Date(year, month - 1, day).getDay()];
+  return new Date(year, month - 1, day).getDay();
 }
 
 // 0-11, matching the `common.months` translation array.

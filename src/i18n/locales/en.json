@@ -11,6 +11,7 @@
   },
   "common": {
     "seeAll": "See all",
+    "all": "All",
     "retry": "Retry",
     "errorTitle": "Couldn't load this",
     "errorDefault": "Something went wrong.",
@@ -45,7 +46,8 @@
       "October",
       "November",
       "December"
-    ]
+    ],
+    "weekdaysShort": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
   },
   "auth": {
     "entry": {
@@ -502,7 +504,10 @@
     "allDone": "All done — nothing left to buy",
     "emptyTitle": "Nothing to shop for yet",
     "emptyMessage": "Plan today's meals first, then come back to generate your shopping list.",
-    "emptyMessageWeek": "Plan some meals for this week first, then come back to generate your shopping list."
+    "emptyMessageWeek": "Plan some meals for this week first, then come back to generate your shopping list.",
+    "customCategory": "My items",
+    "addItemTitle": "Add an item",
+    "addItemPlaceholder": "e.g. toothpaste"
   },
   "aiAnalysis": {
     "title": "AI Analysis",

@@ -82,7 +82,7 @@ function EditPersonalGoalsScreen() {
       <ScreenScrollView gap={Spacing.four} horizontalPadding={20} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
         <View style={styles.field}>
           <ThemedText type="small" color={theme.textSecondary}>{t('onboarding.personalInfo.name')}</ThemedText>
-          <TextInput value={name} onChangeText={setName} onFocus={() => setFocusedField('name')} onBlur={() => setFocusedField(null)} autoCapitalize="words" autoCorrect={false} placeholder={t('onboarding.personalInfo.namePlaceholder')} style={[inputStyle('name'), styles.nameInput]} placeholderTextColor={theme.textSecondary} />
+          <TextInput selectionColor="#1B5E20" value={name} onChangeText={setName} onFocus={() => setFocusedField('name')} onBlur={() => setFocusedField(null)} autoCapitalize="words" autoCorrect={false} placeholder={t('onboarding.personalInfo.namePlaceholder')} style={[inputStyle('name'), styles.nameInput]} placeholderTextColor={theme.textSecondary} />
         </View>
 
         <View style={styles.field}>
@@ -112,7 +112,7 @@ function EditPersonalGoalsScreen() {
                   <ThemedText type="caption" color={theme.textSecondary} numberOfLines={1} style={styles.statLabel}>{t(field.labelKey)}</ThemedText>
                 </View>
                 <View style={styles.statValueRow}>
-                  <TextInput ref={ref => {
+                  <TextInput selectionColor="#1B5E20" ref={ref => {
                 inputRefs.current[field.key] = ref;
               }} value={values[field.key]} onChangeText={setters[field.key]} onFocus={() => setFocusedField(field.key)} onBlur={() => setFocusedField(null)} keyboardType={field.keyboardType} selectTextOnFocus style={styles.statInput} placeholder="—" placeholderTextColor={theme.textSecondary} />
                   <ThemedText type="small" color={theme.textSecondary}>{field.unit}</ThemedText>

@@ -67,8 +67,8 @@ function PersonSwitcherComponent({ style, variant = 'pill', size = 48, children 
           <Pressable style={[styles.sheet, { backgroundColor: theme.background, paddingTop: insets.top + Spacing.four }]} onPress={event => event.stopPropagation()}>
             <View style={styles.header}>
               <ThemedText type="smallBold" color={theme.text}>{t('people.switchTitle')}</ThemedText>
-              <Pressable onPress={() => setIsOpen(false)} hitSlop={8} style={[styles.closeButton, { backgroundColor: theme.accentSoft }]}>
-                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={theme.accent} />
+              <Pressable onPress={() => setIsOpen(false)} hitSlop={8} style={[styles.closeButton, { backgroundColor: theme.accent, shadowColor: theme.accent }]}>
+                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} weight="semibold" tintColor="#ffffff" />
               </Pressable>
             </View>
             {people.map(person => {
@@ -154,11 +154,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3
   },
   row: {
     flexDirection: 'row',

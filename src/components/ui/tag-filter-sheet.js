@@ -44,12 +44,12 @@ export function TagFilterSheet({ visible, tags, selectedIds, onChange, onClose }
         <Pressable style={[styles.sheet, { backgroundColor: theme.background, paddingTop: insets.top + Spacing.four }]} onPress={event => event.stopPropagation()}>
           <View style={styles.header}>
             <ThemedText type="smallBold" color={theme.text}>{t('common.selectTags')}</ThemedText>
-            <Pressable onPress={handleClose} hitSlop={8} style={[styles.closeButton, { backgroundColor: theme.accentSoft }]}>
-              <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={theme.accent} />
+            <Pressable onPress={handleClose} hitSlop={8} style={[styles.closeButton, { backgroundColor: theme.accent, shadowColor: theme.accent }]}>
+              <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} weight="semibold" tintColor="#ffffff" />
             </Pressable>
           </View>
 
-          <TextInput value={query} onChangeText={setQuery} placeholder={t('common.searchTags')} placeholderTextColor={theme.textSecondary} style={[styles.search, { borderColor: theme.border, color: theme.text }]} returnKeyType="search" />
+          <TextInput selectionColor="#1B5E20" value={query} onChangeText={setQuery} placeholder={t('common.searchTags')} placeholderTextColor={theme.textSecondary} style={[styles.search, { borderColor: theme.border, color: theme.text }]} returnKeyType="search" />
 
           <FlatList data={visibleTags} keyExtractor={tag => tag.id} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentInsetAdjustmentBehavior="automatic" style={styles.list} ListEmptyComponent={<ThemedText type="small" color={theme.textSecondary} style={styles.empty}>{t('common.noTagsFound')}</ThemedText>} renderItem={({ item }) => {
           const isSelected = selectedIds.includes(item.id);
@@ -93,11 +93,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3
   },
   search: {
     borderWidth: 1,

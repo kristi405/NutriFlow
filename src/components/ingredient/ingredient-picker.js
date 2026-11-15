@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import IngredientForm from '@/components/ingredient/ingredient-form';
+import { MineFilterToggle } from '@/components/ingredient/mine-filter-toggle';
 import { ThemedText } from '@/components/themed-text';
 import { RecipeImage } from '@/components/ui/recipe-image';
 import { Spacing } from '@/constants/theme';
@@ -39,6 +40,7 @@ function IngredientPicker({ visible, onClose, onPick, excludeIds = [] }) {
 
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState('search'); // 'search' | 'create'
+  const [onlyMine, setOnlyMine] = useState(false);
   const [pendingIngredient, setPendingIngredient] = useState(null);
   const [pendingQuantity, setPendingQuantity] = useState('');
   const [pendingUnit, setPendingUnit] = useState('g');
@@ -47,14 +49,15 @@ function IngredientPicker({ visible, onClose, onPick, excludeIds = [] }) {
   const excluded = useMemo(() => new Set(excludeIds), [excludeIds]);
   const results = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    const pool = ingredients.filter(ingredient => !excluded.has(ingredient.id) && (!normalized || ingredient.name.toLowerCase().includes(normalized)));
+    const pool = ingredients.filter(ingredient => !excluded.has(ingredient.id) && (!onlyMine || ingredient.isOwn) && (!normalized || ingredient.name.toLowerCase().includes(normalized)));
     // Own ingredients first — they're what the user most likely came back for.
     return pool.sort((a, b) => Number(b.isOwn) - Number(a.isOwn)).slice(0, MAX_RESULTS);
-  }, [query, ingredients, excluded]);
+  }, [query, ingredients, excluded, onlyMine]);
 
   function reset() {
     setQuery('');
     setMode('search');
+    setOnlyMine(false);
     setPendingIngredient(null);
   }
 
@@ -87,21 +90,24 @@ function IngredientPicker({ visible, onClose, onPick, excludeIds = [] }) {
 
   return <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <View style={styles.backdrop}>
-        <View style={[styles.sheet, { paddingTop: insets.top + Spacing.two }]}>
-          <View style={styles.header}>
-            <ThemedText type="smallBold" color={theme.text}>{mode === 'create' ? t('userContent.newIngredient') : t('recipes.addIngredientTitle')}</ThemedText>
-            <Pressable onPress={mode === 'create' ? () => setMode('search') : handleClose} hitSlop={8} style={styles.closeButton}>
-              <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={14} tintColor={theme.textSecondary} />
+        <View style={[styles.sheet, { paddingTop: insets.top + Spacing.two }, mode === 'create' && styles.sheetNoBottomPadding]}>
+          <View style={styles.topRow}>
+            <View style={styles.flex1}>
+              {mode === 'search' ? <MineFilterToggle value={onlyMine} onChange={setOnlyMine} /> : <ThemedText type="headline" color={theme.text}>{t('userContent.newIngredient')}</ThemedText>}
+            </View>
+            <Pressable onPress={mode === 'create' ? () => setMode('search') : handleClose} hitSlop={8} style={[styles.closeButton, { backgroundColor: theme.accent }]}>
+              <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} weight="semibold" tintColor="#ffffff" />
             </Pressable>
           </View>
 
-          {mode === 'create' ? <ScrollView style={styles.flex1} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.formContent}>
-              <IngredientForm initialName={trimmedQuery} onSaved={handleCreated} onCancel={() => setMode('search')} />
+          {mode === 'search' && <View style={styles.searchBox}>
+              <SymbolView name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} size={16} tintColor={theme.textSecondary} />
+              <TextInput selectionColor="#1B5E20" value={query} onChangeText={setQuery} placeholder={t('recipes.searchIngredientsPlaceholder')} placeholderTextColor={theme.textSecondary} style={styles.searchInput} autoCorrect={false} />
+            </View>}
+
+          {mode === 'create' ? <ScrollView style={styles.flex1} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets showsVerticalScrollIndicator={false} contentContainerStyle={styles.formContent}>
+              <IngredientForm initialName={trimmedQuery} onSaved={handleCreated} />
             </ScrollView> : <>
-              <View style={styles.searchBox}>
-                <SymbolView name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} size={16} tintColor={theme.textSecondary} />
-                <TextInput value={query} onChangeText={setQuery} placeholder={t('recipes.searchIngredientsPlaceholder')} placeholderTextColor={theme.textSecondary} style={styles.searchInput} autoCorrect={false} />
-              </View>
               {/* The sheet itself never resizes for the keyboard — the native,
                   frame-synced automaticallyAdjustKeyboardInsets only shifts
                   this list's content (see add-recipe.js history). */}
@@ -121,7 +127,7 @@ function IngredientPicker({ visible, onClose, onPick, excludeIds = [] }) {
                       <ThemedText type="caption" color={theme.textSecondary}>{Math.round(ingredient.per100g.nutrition.calories)} {t('common.kcal')} / 100g</ThemedText>
                     </View>
                     <View style={styles.addIcon}>
-                      <SymbolView name={{ ios: 'plus', android: 'add', web: 'add' }} size={12} tintColor={theme.accent} />
+                      <SymbolView name={{ ios: 'plus', android: 'add', web: 'add' }} size={18} weight="semibold" tintColor={theme.accent} />
                     </View>
                   </Pressable>)}
                 <Pressable onPress={() => setMode('create')} style={styles.createRow}>
@@ -144,7 +150,7 @@ function IngredientPicker({ visible, onClose, onPick, excludeIds = [] }) {
                 </View>
               </View>
               <View style={styles.amountQuantityBox}>
-                <TextInput value={pendingQuantity} onChangeText={setPendingQuantity} keyboardType="decimal-pad" autoFocus style={styles.amountQuantityInput} />
+                <TextInput selectionColor="#1B5E20" value={pendingQuantity} onChangeText={setPendingQuantity} keyboardType="decimal-pad" autoFocus style={styles.amountQuantityInput} />
                 <ThemedText type="smallBold" color={theme.textSecondary}>{formatUnit(t, pendingUnit)}</ThemedText>
               </View>
               <View style={styles.unitRow}>
@@ -192,21 +198,28 @@ const createStyles = theme => StyleSheet.create({
     paddingBottom: Spacing.six,
     gap: Spacing.three
   },
-  header: {
+  sheetNoBottomPadding: {
+    paddingBottom: 0
+  },
+  topRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between'
+    gap: Spacing.two
   },
   closeButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: theme.accentSoft,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    shadowColor: theme.accent,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3
   },
   formContent: {
-    paddingBottom: Spacing.six
+    paddingBottom: 0
   },
   searchBox: {
     flexDirection: 'row',
@@ -257,9 +270,9 @@ const createStyles = theme => StyleSheet.create({
     fontWeight: '700'
   },
   addIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: theme.accentSoft,
     alignItems: 'center',
     justifyContent: 'center'

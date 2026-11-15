@@ -252,8 +252,8 @@ function AiAnalysisScreen() {
           <Pressable style={[styles.modalSheet, { paddingTop: insets.top + Spacing.four }]} onPress={event => event.stopPropagation()}>
             <View style={styles.sheetHeader}>
               <ThemedText type="smallBold" color={theme.text}>{t('aiAnalysis.uploadTitle')}</ThemedText>
-              <Pressable onPress={() => setIsSourceSheetOpen(false)} hitSlop={8} style={[styles.closeButton, { backgroundColor: theme.accentSoft }]}>
-                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={theme.accent} />
+              <Pressable onPress={() => setIsSourceSheetOpen(false)} hitSlop={8} style={[styles.closeButton, { backgroundColor: theme.accent, shadowColor: theme.accent }]}>
+                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} weight="semibold" tintColor="#ffffff" />
               </Pressable>
             </View>
             {SOURCES.map(source => <Pressable key={source.key} onPress={() => handleSelectSource(source.key)} style={styles.sourceRow}>
@@ -317,11 +317,15 @@ const createStyles = theme => StyleSheet.create({
     justifyContent: 'space-between'
   },
   closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3
   },
   sourceRow: {
     flexDirection: 'row',

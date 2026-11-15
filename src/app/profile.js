@@ -335,8 +335,8 @@ function ProfileScreen() {
                 <ThemedText type="smallBold" color={theme.text}>{t('profile.helpModalTitle')}</ThemedText>
                 <ThemedText type="caption" color={theme.textSecondary}>{t('profile.helpModalSubtitle')}</ThemedText>
               </View>
-              <Pressable onPress={() => setIsHelpModalOpen(false)} hitSlop={8} style={styles.personalGoalsEditButton}>
-                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={theme.accent} />
+              <Pressable onPress={() => setIsHelpModalOpen(false)} hitSlop={8} style={[styles.personalGoalsEditButton, styles.modalXButton, { backgroundColor: theme.accent, shadowColor: theme.accent }]}>
+                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} weight="semibold" tintColor="#ffffff" />
               </Pressable>
             </View>
 
@@ -356,7 +356,7 @@ function ProfileScreen() {
                   </Pressable>)}
               </View>
 
-              <TextInput value={helpMessage} onChangeText={setHelpMessage} placeholder={t('profile.helpMessagePlaceholder')} placeholderTextColor={theme.textSecondary} multiline numberOfLines={5} style={styles.helpInput} />
+              <TextInput selectionColor="#1B5E20" value={helpMessage} onChangeText={setHelpMessage} placeholder={t('profile.helpMessagePlaceholder')} placeholderTextColor={theme.textSecondary} multiline numberOfLines={5} style={styles.helpInput} />
 
               <Pressable onPress={handleSendHelp} style={styles.helpSendButton}>
                 <ThemedText type="default" color="#ffffff" style={styles.helpSendButtonText}>{t('common.send')}</ThemedText>
@@ -460,6 +460,17 @@ const createStyles = theme => StyleSheet.create({
     backgroundColor: theme.accentSoft,
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  // Overrides personalGoalsEditButton's size/shadow for the one "close whole
+  // modal" use of it, without touching the shared style's look elsewhere.
+  modalXButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3
   },
   statsRow: {
     flexDirection: 'row',

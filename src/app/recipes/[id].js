@@ -1,4 +1,5 @@
 import IngredientPicker from '@/components/ingredient/ingredient-picker';
+import { MineFilterToggle } from '@/components/ingredient/mine-filter-toggle';
 import { ThemedText } from '@/components/themed-text';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LockedFeature } from '@/components/ui/locked-feature';
@@ -9,12 +10,13 @@ import { getIngredientById, getIngredients, getRecipeById } from '@/data/catalog
 import { useTheme } from '@/hooks/use-theme';
 import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { formatQuantity, formatUnit, parseQuantity } from '@/lib/ingredientUnits';
-import { guessIngredientCategory } from '@/lib/ingredientImage';
+import { guessIngredientCategory, guessIngredientImage, ingredientThumbUri } from '@/lib/ingredientImage';
 import { calculateRecipeNutrition, canMeasureIn, scaleForServings } from '@/lib/nutrition';
 import { recipeImageUri, recipeThumbUri } from '@/lib/recipeImage';
 import { formatNutrientAmount, MINERAL_ROWS, NUTRIENT_ROWS, nonZeroRows, VITAMIN_ROWS } from '@/lib/nutrientRows';
 import { authStore } from '@/store/authStore';
 import { deleteRecipe, updateRecipe, uploadImage } from '@/lib/userContent';
+import { persistPickedImage } from '@/lib/persistPickedImage';
 import { mealPlanStore } from '@/store/mealPlanStore';
 import { recentlyViewedStore } from '@/store/recentlyViewedStore';
 import { subscriptionStore } from '@/store/subscriptionStore';
@@ -87,6 +89,7 @@ function RecipeDetailScreen() {
   const [isEditingIngredients, setIsEditingIngredients] = useState(false);
   const [substitutions, setSubstitutions] = useState(() => planItem?.substitutions ?? {});
   const [swapIngredientId, setSwapIngredientId] = useState(null);
+  const [swapOnlyMine, setSwapOnlyMine] = useState(false);
   const [activeTab, setActiveTab] = useState('ingredients');
   const [headerHeight, setHeaderHeight] = useState(0);
   const [isScrolledPastImage, setIsScrolledPastImage] = useState(false);
@@ -146,7 +149,15 @@ function RecipeDetailScreen() {
 
   const swapLine = swapIngredientId ? recipe?.ingredients.find(line => line.ingredientId === swapIngredientId) : undefined;
   const swapCurrentIngredient = swapLine ? getIngredientById(substitutions[swapLine.ingredientId] ?? swapLine.ingredientId) : undefined;
-  const swapCandidates = swapLine ? swapPoolForIngredient(swapCurrentIngredient, swapLine.unit, ingredients) : [];
+  // Scans every catalog ingredient (category-guessing included) to build the
+  // pool — expensive enough that recomputing it on every render the parent
+  // happens to do (e.g. from unrelated MobX updates) made the screen's
+  // scroll feel stuck for a moment, so it's memoized.
+  const swapCandidatesAll = useMemo(() => {
+    if (!swapLine) return [];
+    return swapPoolForIngredient(swapCurrentIngredient, swapLine.unit, ingredients);
+  }, [swapLine, swapCurrentIngredient, ingredients]);
+  const swapCandidates = swapOnlyMine ? swapCandidatesAll.filter(item => item.isOwn) : swapCandidatesAll;
 
   function toggleIngredient(ingredientId) {
     setExcludedIngredientIds(current => {
@@ -166,6 +177,12 @@ function RecipeDetailScreen() {
       });
     }
     setSwapIngredientId(null);
+    setSwapOnlyMine(false);
+  }
+
+  function handleCloseSwap() {
+    setSwapIngredientId(null);
+    setSwapOnlyMine(false);
   }
 
   useEffect(() => {
@@ -228,7 +245,7 @@ function RecipeDetailScreen() {
       return;
     }
     const result = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [4, 3], quality: 0.7 });
-    if (!result.canceled && result.assets[0]) setEditedImageUri(result.assets[0].uri);
+    if (!result.canceled && result.assets[0]) setEditedImageUri(persistPickedImage(result.assets[0].uri, 'recipe-photo'));
   }
 
   async function handleChooseFromLibrary() {
@@ -238,7 +255,7 @@ function RecipeDetailScreen() {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [4, 3], quality: 0.7 });
-    if (!result.canceled && result.assets[0]) setEditedImageUri(result.assets[0].uri);
+    if (!result.canceled && result.assets[0]) setEditedImageUri(persistPickedImage(result.assets[0].uri, 'recipe-photo'));
   }
 
   function handlePickPhoto() {
@@ -389,7 +406,7 @@ function RecipeDetailScreen() {
     }]} pointerEvents="box-none" onLayout={event => setHeaderHeight(event.nativeEvent.layout.height)}>
         <View style={styles.paddedContainer} pointerEvents="box-none">
           <View style={styles.header} pointerEvents="box-none">
-            {isOwnRecipe && isEditingRecipe ? <TextInput value={editedTitle} onChangeText={setEditedTitle} placeholder={t('recipes.recipeTitlePlaceholder')} style={[styles.titleInput, showEditErrors && !editedTitle.trim() && { borderBottomColor: theme.error, borderBottomWidth: 2 }]} placeholderTextColor={theme.textSecondary} /> : <ThemedText type="title" style={styles.title} color={theme.text} pointerEvents="none">
+            {isOwnRecipe && isEditingRecipe ? <TextInput selectionColor="#1B5E20" value={editedTitle} onChangeText={setEditedTitle} placeholder={t('recipes.recipeTitlePlaceholder')} style={[styles.titleInput, showEditErrors && !editedTitle.trim() && { borderBottomColor: theme.error, borderBottomWidth: 2 }]} placeholderTextColor={theme.textSecondary} /> : <ThemedText type="title" style={styles.title} color={theme.text} pointerEvents="none">
                 {recipe.title}
               </ThemedText>}
             {isOwnRecipe && isEditingRecipe && showEditErrors && !editedTitle.trim() && <ThemedText type="caption" color={theme.error} pointerEvents="none">{t('recipes.titleRequired')}</ThemedText>}
@@ -487,10 +504,10 @@ function RecipeDetailScreen() {
                             <SymbolView name={{ ios: 'arrow.triangle.2.circlepath', android: 'sync', web: 'sync' }} size={20} tintColor={theme.accent} />
                           </Pressable>}
                         <View style={styles.ingredientCard}>
-                          <ThemedText type="small" color={isExcluded ? theme.textSecondary : theme.text} style={isExcluded && styles.strikethrough}>
+                          <ThemedText type="small" color={isExcluded ? theme.textSecondary : theme.text} numberOfLines={1} style={[styles.ingredientCardName, isExcluded && styles.strikethrough]}>
                             {ingredient?.name ?? line.ingredientId}
                           </ThemedText>
-                          <ThemedText type="small" color={theme.textSecondary}>
+                          <ThemedText type="small" color={theme.textSecondary} style={styles.ingredientCardQuantity}>
                             {formatQuantity(line.quantity * ingredientGramScale)} {formatUnit(t, line.unit)}
                           </ThemedText>
                         </View>
@@ -574,25 +591,23 @@ function RecipeDetailScreen() {
         </Pressable>
       </View>}
 
-      <Modal visible={!!swapIngredientId} transparent animationType="slide" onRequestClose={() => setSwapIngredientId(null)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setSwapIngredientId(null)}>
+      <Modal visible={!!swapIngredientId} transparent animationType="slide" onRequestClose={handleCloseSwap}>
+        <Pressable style={styles.modalBackdrop} onPress={handleCloseSwap}>
           <Pressable style={[styles.modalSheet, { paddingTop: insets.top + Spacing.four }]} onPress={event => event.stopPropagation()}>
             <View style={styles.modalHeader}>
-              <View>
-                <ThemedText type="smallBold" color={theme.text}>{t('recipes.swapTitle')}</ThemedText>
-                <ThemedText type="caption" color={theme.textSecondary}>{t('recipes.swapSubtitle')}</ThemedText>
+              <View style={styles.flex1}>
+                <MineFilterToggle value={swapOnlyMine} onChange={setSwapOnlyMine} />
               </View>
-              <Pressable onPress={() => setSwapIngredientId(null)} hitSlop={8} style={styles.modalCloseButton}>
-                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} tintColor={theme.accent} />
+              <Pressable onPress={handleCloseSwap} hitSlop={8} style={[styles.modalCloseButton, { backgroundColor: theme.accent, shadowColor: theme.accent }]}>
+                <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={16} weight="semibold" tintColor="#ffffff" />
               </Pressable>
             </View>
 
-            {swapCandidates.length === 0 ? <ThemedText type="small" color={theme.textSecondary}>{t('recipes.swapEmpty')}</ThemedText> : <ScrollView style={styles.ingredientScroll}>
+            <ScrollView style={styles.ingredientScroll}>
                 <View style={styles.swapList}>
+                  {swapCandidates.length === 0 && <ThemedText type="small" color={theme.textSecondary}>{t('recipes.swapEmpty')}</ThemedText>}
                   {swapCandidates.map(item => <Pressable key={item.id} onPress={() => handleSelectSwap(item.id)} style={styles.swapRow}>
-                      <View style={styles.swapIconWrapper}>
-                        <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={16} tintColor={theme.accent} />
-                      </View>
+                      <RecipeImage uri={ingredientThumbUri(item)} fallbackUri={guessIngredientImage(item)} style={styles.swapImage} iconSize={18} />
                       <View style={styles.swapTextWrapper}>
                         <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{item.name}</ThemedText>
                         <ThemedText type="small" color={theme.textSecondary}>{Math.round(item.per100g.nutrition.calories)} {t('common.kcal')} / 100g</ThemedText>
@@ -600,7 +615,7 @@ function RecipeDetailScreen() {
                       <SymbolView name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }} size={16} tintColor={theme.textSecondary} />
                     </Pressable>)}
                 </View>
-              </ScrollView>}
+              </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>
@@ -612,7 +627,7 @@ function RecipeDetailScreen() {
           <Pressable style={[styles.quantityEditCard, { backgroundColor: theme.background }]} onPress={event => event.stopPropagation()}>
             <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{editingQuantityIndex !== null ? editedIngredients[editingQuantityIndex]?.name : ''}</ThemedText>
             <View style={styles.amountQuantityBox}>
-              <TextInput value={editingQuantityValue} onChangeText={setEditingQuantityValue} keyboardType="decimal-pad" autoFocus style={styles.amountQuantityInput} />
+              <TextInput selectionColor="#1B5E20" value={editingQuantityValue} onChangeText={setEditingQuantityValue} keyboardType="decimal-pad" autoFocus style={styles.amountQuantityInput} />
               <ThemedText type="smallBold" color={theme.textSecondary}>{editingQuantityIndex !== null ? formatUnit(t, editedIngredients[editingQuantityIndex]?.unit) : ''}</ThemedText>
             </View>
             <View style={styles.quantityEditActions}>
@@ -759,12 +774,19 @@ const createStyles = theme => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: Spacing.two,
     backgroundColor: theme.background,
     borderColor: theme.border,
     borderWidth: 1,
     borderRadius: 14,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two
+  },
+  ingredientCardName: {
+    flex: 1
+  },
+  ingredientCardQuantity: {
+    flexShrink: 0
   },
   cardTitle: {
     marginBottom: Spacing.two
@@ -849,12 +871,15 @@ const createStyles = theme => StyleSheet.create({
     gap: Spacing.two
   },
   modalCloseButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: theme.primarySoft,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3
   },
   swapList: {
     gap: Spacing.two
@@ -867,13 +892,10 @@ const createStyles = theme => StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: theme.border
   },
-  swapIconWrapper: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: theme.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center'
+  swapImage: {
+    width: 44,
+    height: 44,
+    borderRadius: 12
   },
   swapTextWrapper: {
     flex: 1,

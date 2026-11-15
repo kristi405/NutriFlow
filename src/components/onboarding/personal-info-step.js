@@ -120,7 +120,7 @@ export function PersonalInfoStep({
       <View style={styles.nameAgeRow}>
         <View style={[styles.field, styles.nameField]}>
           <ThemedText type="small" color={theme.textSecondary}>{t('onboarding.personalInfo.name')}</ThemedText>
-          <TextInput value={value.name} onChangeText={name => onChange({
+          <TextInput selectionColor="#1B5E20" value={value.name} onChangeText={name => onChange({
           name
         })} placeholder={t('onboarding.personalInfo.namePlaceholder')} placeholderTextColor={theme.textSecondary} style={[fieldStyle(nameInvalid), Platform.OS === 'ios' && styles.nameInput]} />
         </View>
