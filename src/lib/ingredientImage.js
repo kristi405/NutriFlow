@@ -117,6 +117,11 @@ export function guessIngredientImage(ingredient) {
   return matchBucket(ingredient)?.image ?? FALLBACK_IMAGE;
 }
 
+/** List-row image: the server thumbnail when the ingredient has a photo, else the guessed stock photo. Pair with guessIngredientImage as the fallback. */
+export function ingredientThumbUri(ingredient) {
+  return ingredient.thumbUrl ?? guessIngredientImage(ingredient);
+}
+
 // The backend doesn't tag ingredients with a food category (categoryId/subcategoryId
 // always come back as a generic fallback — see catalogAdapter's adaptIngredient), so
 // this is also the only way to group ingredients for substitution-by-category. Returns

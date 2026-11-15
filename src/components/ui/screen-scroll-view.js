@@ -1,20 +1,12 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TAB_BAR_HEIGHT, tabBarBottomGap } from '@/components/custom-tab-bar';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-/** Shared scroll container matching the scaffold's insets pattern (see explore.tsx). */
-export function ScreenScrollView({
-  children,
-  contentContainerStyle,
-  gap = Spacing.five,
-  horizontalPadding = Spacing.four,
-  isTabScreen = false,
-  ...rest
-}) {
-  const theme = useTheme();
+// Insets/padding shared by ScreenScrollView and ScreenFlatList.
+function useScreenPadding(isTabScreen) {
   const safeAreaInsets = useSafeAreaInsets();
   // The custom tab bar floats over content (position: absolute) instead of
   // reserving its own layout space, so every scrollable screen needs enough
@@ -44,10 +36,45 @@ export function ScreenScrollView({
       paddingBottom: Spacing.four
     }
   });
+  return { insets, tabScreenPadding, platformStyle };
+}
+
+/** Shared scroll container matching the scaffold's insets pattern (see explore.tsx). */
+export function ScreenScrollView({
+  children,
+  contentContainerStyle,
+  gap = Spacing.five,
+  horizontalPadding = Spacing.four,
+  isTabScreen = false,
+  ...rest
+}) {
+  const theme = useTheme();
+  const { insets, tabScreenPadding, platformStyle } = useScreenPadding(isTabScreen);
   return <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
       <ScrollView style={styles.scrollView} contentInset={isTabScreen ? undefined : insets} contentContainerStyle={[styles.contentContainer, tabScreenPadding, platformStyle, contentContainerStyle]} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} {...rest}>
         <View style={[styles.container, { gap, paddingHorizontal: horizontalPadding }]}>{children}</View>
       </ScrollView>
+      {Platform.OS === 'android' && <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.10)']} style={styles.tabBarShadow} pointerEvents="none" />}
+    </LinearGradient>;
+}
+
+/**
+ * Virtualized counterpart of ScreenScrollView for long lists (catalog
+ * ingredients/recipes): same background, insets and side padding, but rows
+ * are rendered lazily by FlatList. `gap` becomes the spacing between rows;
+ * everything above the rows goes into `ListHeaderComponent`.
+ */
+export function ScreenFlatList({
+  contentContainerStyle,
+  gap = Spacing.two,
+  horizontalPadding = Spacing.four,
+  isTabScreen = false,
+  ...rest
+}) {
+  const theme = useTheme();
+  const { insets, tabScreenPadding, platformStyle } = useScreenPadding(isTabScreen);
+  return <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
+      <FlatList style={[styles.scrollView, styles.list]} contentInset={isTabScreen ? undefined : insets} contentContainerStyle={[tabScreenPadding, platformStyle, { gap, paddingHorizontal: horizontalPadding }, contentContainerStyle]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" initialNumToRender={12} maxToRenderPerBatch={12} windowSize={7} removeClippedSubviews={Platform.OS === 'android'} {...rest} />
       {Platform.OS === 'android' && <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.10)']} style={styles.tabBarShadow} pointerEvents="none" />}
     </LinearGradient>;
 }
@@ -57,6 +84,11 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1
+  },
+  list: {
+    width: '100%',
+    maxWidth: MaxContentWidth,
+    alignSelf: 'center'
   },
   contentContainer: {
     flexGrow: 1,

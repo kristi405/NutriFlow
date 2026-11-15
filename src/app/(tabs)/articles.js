@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
@@ -7,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { TagFilterSheet } from '@/components/ui/tag-filter-sheet';
 import { ThemedText } from '@/components/themed-text';
+import { RecipeImage } from '@/components/ui/recipe-image';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { Spacing } from '@/constants/theme';
@@ -80,9 +80,7 @@ function ArticlesScreen() {
           articleStore.markRead(article.id);
           router.push({ pathname: '/article/[id]', params: { id: article.id } });
         }} style={({ pressed }) => [styles.card, { backgroundColor: theme.background, borderColor: articleStore.isRead(article.id) ? theme.border : theme.accent, opacity: pressed ? 0.85 : 1 }]}>
-              {article.imageUrl ? <Image source={{ uri: article.imageUrl }} style={styles.thumbnail} contentFit="cover" /> : <View style={[styles.thumbnail, styles.thumbnailFallback, { backgroundColor: theme.accentSoft }]}>
-                  <SymbolView name={{ ios: 'newspaper.fill', android: 'article', web: 'article' }} size={22} tintColor={theme.accent} />
-                </View>}
+              <RecipeImage uri={article.thumbUrl ?? article.imageUrl} fallbackUri={article.imageUrl} style={styles.thumbnail} fallbackStyle={[styles.thumbnailFallback, { backgroundColor: theme.accentSoft }]} icon={{ ios: 'newspaper.fill', android: 'article', web: 'article' }} iconColor={theme.accent} />
               <View style={styles.cardBody}>
                 <ThemedText type="smallBold" color={theme.text} numberOfLines={2}>{article.title}</ThemedText>
                 {article.excerpt ? <ThemedText type="caption" color={theme.textSecondary} numberOfLines={2}>{article.excerpt}</ThemedText> : null}

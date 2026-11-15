@@ -10,7 +10,7 @@ import { RecipeImage } from '@/components/ui/recipe-image';
 import { Spacing } from '@/constants/theme';
 import { getIngredientById, getIngredients } from '@/data/catalog';
 import { useTheme } from '@/hooks/use-theme';
-import { guessIngredientImage } from '@/lib/ingredientImage';
+import { guessIngredientImage, ingredientThumbUri } from '@/lib/ingredientImage';
 import { defaultQuantityFor, formatUnit } from '@/lib/ingredientUnits';
 import { unitsForIngredient } from '@/lib/userContent';
 
@@ -110,7 +110,7 @@ function IngredientPicker({ visible, onClose, onPick, excludeIds = [] }) {
                     <ThemedText type="small" color={theme.textSecondary} style={styles.centerText}>{t('ingredients.noResultsTitle')}</ThemedText>
                   </View>}
                 {results.map(ingredient => <Pressable key={ingredient.id} onPress={() => startAmountStep(ingredient)} style={styles.option}>
-                    <RecipeImage uri={ingredient.imageUrl ?? guessIngredientImage(ingredient)} style={styles.optionImage} iconSize={20} />
+                    <RecipeImage uri={ingredientThumbUri(ingredient)} fallbackUri={guessIngredientImage(ingredient)} style={styles.optionImage} iconSize={20} />
                     <View style={styles.flex1}>
                       <View style={styles.nameRow}>
                         <ThemedText type="small" color={theme.text} numberOfLines={1} style={styles.flexShrink}>{ingredient.name}</ThemedText>
@@ -137,7 +137,7 @@ function IngredientPicker({ visible, onClose, onPick, excludeIds = [] }) {
         {pendingIngredient && <Pressable style={[StyleSheet.absoluteFill, styles.amountBackdrop]} onPress={() => setPendingIngredient(null)}>
             <Pressable style={[styles.amountCard, { backgroundColor: theme.background }]} onPress={event => event.stopPropagation()}>
               <View style={styles.amountHeader}>
-                <RecipeImage uri={pendingIngredient.imageUrl ?? guessIngredientImage(pendingIngredient)} style={styles.optionImage} iconSize={20} />
+                <RecipeImage uri={ingredientThumbUri(pendingIngredient)} fallbackUri={guessIngredientImage(pendingIngredient)} style={styles.optionImage} iconSize={20} />
                 <View style={styles.flex1}>
                   <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{pendingIngredient.name}</ThemedText>
                   <ThemedText type="caption" color={theme.textSecondary}>{t('recipes.specifyAmountTitle')}</ThemedText>

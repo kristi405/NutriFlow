@@ -1,8 +1,8 @@
-import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
+import { RecipeImage } from '@/components/ui/recipe-image';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -16,9 +16,7 @@ export function ArticleCard({ article, onPress }) {
     borderColor: theme.border,
     opacity: pressed ? 0.85 : 1
   }]}>
-      {article.imageUrl ? <Image source={{ uri: article.imageUrl }} style={styles.thumbnail} contentFit="cover" /> : <View style={[styles.thumbnail, styles.thumbnailFallback, { backgroundColor: theme.accentSoft }]}>
-          <SymbolView name={{ ios: 'newspaper.fill', android: 'article', web: 'article' }} size={22} tintColor={theme.accent} />
-        </View>}
+      <RecipeImage uri={article.thumbUrl ?? article.imageUrl} fallbackUri={article.imageUrl} style={styles.thumbnail} fallbackStyle={[styles.thumbnailFallback, { backgroundColor: theme.accentSoft }]} icon={{ ios: 'newspaper.fill', android: 'article', web: 'article' }} iconColor={theme.accent} />
       <View style={styles.body}>
         <View style={styles.badgeRow}>
           <SymbolView name={{ ios: 'sparkles', android: 'auto_awesome', web: 'auto_awesome' }} size={12} tintColor={theme.accent} />

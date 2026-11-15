@@ -22,7 +22,7 @@ import { PremiumCard } from '@/components/ui/premium-card';
 import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
 import { SectionHeader } from '@/components/ui/section-header';
 import { getIngredientById, getRecipeById } from '@/data/catalog';
-import { toFileUrl } from '@/lib/api';
+import { useImageFallback } from '@/hooks/useImageFallback';
 import { useDailyNutrition } from '@/hooks/useDailyNutrition';
 import { useNutritionScore } from '@/hooks/useNutritionScore';
 import { useStepCount } from '@/hooks/useStepCount';
@@ -32,7 +32,7 @@ import { GUEST_MOCK_PROFILE } from '@/lib/guestMockProfile';
 import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
 import { planningCalories } from '@/lib/mealPlanning';
 import { todayKey } from '@/lib/date';
-import { recipeImageUri } from '@/lib/recipeImage';
+import { avatarSources, recipeImageUri, recipeThumbUri } from '@/lib/recipeImage';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { articleStore } from '@/store/articleStore';
@@ -51,6 +51,8 @@ function HomeScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const profile = authStore.isGuest ? GUEST_MOCK_PROFILE : profileStore.activeProfile;
+  const avatarSource = avatarSources(profile);
+  const avatar = useImageFallback(avatarSource.uri, avatarSource.fallbackUri);
   const [date, setDate] = useState(todayKey());
   const { total } = useDailyNutrition(date);
   const scoreResult = useNutritionScore(date);
@@ -95,14 +97,15 @@ function HomeScreen() {
   const burnedCalories = isMe ? Math.round(steps * profile.weightKg * 0.0005) : 0;
   const remainingCalories = Math.max(0, targets.calories - consumedCalories);
   // photoUrl (backend filename) wins when present — same priority as the Profile screen.
-  const avatarUri = profile.photoUrl ? toFileUrl(profile.photoUrl) : profile.photoUri;
+  const avatarUri = avatar.uri;
   return <GuestLockOverlay message={t('auth.guestLockedHome')}>
       <TermsAcceptanceModal />
       <ScreenScrollView isTabScreen gap={Spacing.three}>
       <Pressable onPress={() => router.push('/profile')} style={styles.headerRow}>
         <PersonSwitcher variant="avatarBadge">
           <View style={styles.avatar}>
-            {avatarUri ? <Image source={{ uri: avatarUri }} style={styles.avatarImage} contentFit="cover" onError={() => {
+            {avatarUri ? <Image source={{ uri: avatarUri }} style={styles.avatarImage} contentFit="cover" cachePolicy="memory-disk" onError={() => {
+              avatar.onError();
               if (!profile.photoUrl) profileStore.updateProfile({ photoUri: null });
             }} /> : <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={22} tintColor={theme.accent} />}
           </View>
@@ -178,7 +181,7 @@ function HomeScreen() {
 
       {nextMeal ? <View style={styles.section}>
           <SectionHeader title={t('home.nextMeal')} />
-          <MealRow recipeId={nextMeal.recipe.id} planItemId={nextMeal.id} mealType={nextMeal.mealType} title={nextMeal.recipe.title} imageUrl={recipeImageUri(nextMeal.recipe)} calories={nextMeal.calories} servings={nextMeal.servings} allergens={findAllergenConflicts(nextMeal.recipe, profile?.preferences?.allergies)} />
+          <MealRow recipeId={nextMeal.recipe.id} planItemId={nextMeal.id} mealType={nextMeal.mealType} title={nextMeal.recipe.title} imageUrl={recipeThumbUri(nextMeal.recipe)} fallbackImageUrl={recipeImageUri(nextMeal.recipe)} calories={nextMeal.calories} servings={nextMeal.servings} allergens={findAllergenConflicts(nextMeal.recipe, profile?.preferences?.allergies)} />
         </View> : <View style={styles.section}>
           <SectionHeader title={t('home.nextMeal')} />
           {allMealsEaten ? <View style={styles.planCompleteCard}>

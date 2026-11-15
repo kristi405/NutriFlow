@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { router } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { pushOnce } from '@/lib/navigation';
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
 import { SymbolView } from 'expo-symbols';
 import { observer } from 'mobx-react-lite';
@@ -10,12 +10,11 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { LockedFeature } from '@/components/ui/locked-feature';
 import { RecipeCard } from '@/components/ui/recipe-card';
 import { RecipeImage } from '@/components/ui/recipe-image';
-import { ScreenScrollView } from '@/components/ui/screen-scroll-view';
+import { ScreenFlatList } from '@/components/ui/screen-scroll-view';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { getCategories, getIngredientById, getRecipeById, getRecipes } from '@/data/catalog';
-import { calculateRecipeNutrition } from '@/lib/nutrition';
+import { getCategories, getRecipeCalories, getRecipes } from '@/data/catalog';
 import { authStore } from '@/store/authStore';
 import { catalogStore } from '@/store/catalogStore';
 import { favoritesStore } from '@/store/favoritesStore';
@@ -58,6 +57,27 @@ function PulseItem({ active, onPress, style, children }) {
     </Pressable>;
 }
 
+// One row of two recipe cards. observer() also memoizes it: `pair` arrays are
+// rebuilt only when the filtered list changes and recipe objects are cached by
+// data/catalog.js; calories are observed so they follow ingredient updates.
+const RecipePairRow = observer(function RecipePairRow({ pair, showCalories, styles }) {
+  return <View style={[styles.row, styles.paddedX]}>
+      {pair.map(recipe => <View key={recipe.id} style={styles.cardSlot}>
+          <RecipeCard recipe={recipe} calories={showCalories ? getRecipeCalories(recipe) : undefined} style={styles.cardFill} />
+        </View>)}
+      {pair.length === 1 && <View style={styles.cardSlot} />}
+    </View>;
+});
+
+const keyExtractor = item => item.key;
+
+/**
+ * Recipes tab. Everything comes from the local catalog cache (/app/sync fills
+ * it in the background), so the screen opens instantly and works offline;
+ * search/filters are local. The collections are flattened into one
+ * virtualized FlatList — section headers and two-card rows — instead of
+ * rendering every card up front.
+ */
 function RecipesScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -110,33 +130,65 @@ function RecipesScreen() {
     });
   }, [query, selectedFilter, favoritesStore.favorites.length, myRecipesStore.recipes, recipes]);
 
-  const collections = useMemo(() => categories.map(category => ({
-    category,
-    rows: chunkPairs(filteredRecipes.filter(recipe => recipe.categoryId === category.id))
-  })).filter(collection => collection.rows.length > 0), [filteredRecipes, categories]);
+  // Flattened list items: a section header followed by its rows of two cards.
+  const listItems = useMemo(() => {
+    const items = [];
+    const addSection = (key, title, right, recipesInSection) => {
+      items.push({ type: 'section', key: `section-${key}`, title, right, isFirst: items.length === 0 });
+      chunkPairs(recipesInSection).forEach((pair, index) => items.push({ type: 'pair', key: `${key}-${pair.map(recipe => recipe.id).join('-')}`, pair, isFirst: index === 0 }));
+    };
+    if (selectedFilter === MY_RECIPES_FILTER) {
+      const normalized = query.trim().toLowerCase();
+      const mine = myRecipesStore.recipes.filter(recipe => !normalized || recipe.title.toLowerCase().includes(normalized));
+      items.push({ type: 'section', key: 'section-mine', title: t('recipes.myRecipes'), right: 'add', isFirst: true });
+      if (mine.length === 0) items.push({ type: 'myEmpty', key: 'my-empty' });
+      else chunkPairs(mine).forEach((pair, index) => items.push({ type: 'pair', key: `mine-${pair.map(recipe => recipe.id).join('-')}`, pair, isFirst: index === 0 }));
+      return items;
+    }
+    categories.forEach(category => {
+      const inCategory = filteredRecipes.filter(recipe => recipe.categoryId === category.id);
+      if (inCategory.length > 0) addSection(category.id, category.name, !isGuest && items.length === 0 ? 'add' : undefined, inCategory);
+    });
+    return items;
+  }, [selectedFilter, query, myRecipesStore.recipes, categories, filteredRecipes, isGuest, t]);
 
-  const myRecipesFiltered = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    return myRecipesStore.recipes.filter(recipe => !normalized || recipe.title.toLowerCase().includes(normalized));
-  }, [query, myRecipesStore.recipes]);
-  const myRecipesRows = useMemo(() => chunkPairs(myRecipesFiltered), [myRecipesFiltered]);
-
-  const addRecipeButton = <Pressable onPress={() => router.push('/add-recipe')} hitSlop={8} accessibilityLabel={t('recipes.addRecipe')} style={({ pressed }) => [styles.addRecipeButton, pressed && styles.addRecipeButtonPressed]}>
+  const addRecipeButton = useMemo(() => <Pressable onPress={() => pushOnce('/add-recipe')} hitSlop={8} accessibilityLabel={t('recipes.addRecipe')} style={({ pressed }) => [styles.addRecipeButton, pressed && styles.addRecipeButtonPressed]}>
       <SymbolView name={{ ios: 'plus', android: 'add', web: 'add' }} size={16} tintColor="#ffffff" />
       <ThemedText type="smallBold" color="#ffffff" style={styles.addRecipeLabel}>{t('recipes.addRecipe')}</ThemedText>
-    </Pressable>;
+    </Pressable>, [styles, t]);
 
+  // Rows fade/slide in together when the filter changes (shared animated value).
+  const contentAnimStyle = useMemo(() => ({ opacity: contentAnim, transform: [{ translateY: contentAnim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }), [contentAnim]);
+  // Guests have no nutrition data (guest /sync omits ingredients) and no My Recipes.
+  const showCalories = !isGuest;
+
+  const renderItem = useCallback(({ item }) => {
+    let content;
+    if (item.type === 'section') {
+      content = <View style={[styles.paddedX, styles.sectionHeader, !item.isFirst && styles.sectionSpacing]}>
+          <SectionHeader title={item.title} right={item.right === 'add' ? addRecipeButton : undefined} />
+        </View>;
+    } else if (item.type === 'myEmpty') {
+      content = <View style={styles.paddedX}>
+          <EmptyState icon={{ ios: 'book.closed', android: 'menu_book', web: 'menu_book' }} title={t('recipes.myRecipesEmptyTitle')} message={t('recipes.myRecipesEmptyMessage')} actionLabel={t('recipes.addRecipe')} onAction={() => pushOnce('/add-recipe')} />
+        </View>;
+    } else {
+      content = <View style={!item.isFirst && styles.rowSpacing}>
+          <RecipePairRow pair={item.pair} showCalories={showCalories} styles={styles} />
+        </View>;
+    }
+    return <Animated.View style={contentAnimStyle}>{content}</Animated.View>;
+  }, [styles, addRecipeButton, contentAnimStyle, showCalories, t]);
 
   function handleRefresh() {
     // The backend now reports deletions in the delta too (deletedIds), so a
     // plain sync is enough — no need to force a full re-fetch just to catch
-    // removed recipes. myRecipesStore (the user's own recipes) is a separate
-    // store this never touches. `manual: true` silently caps rapid repeat
-    // taps — no spinner flash, no message, the extra tap just does nothing.
+    // removed recipes. `manual: true` silently caps rapid repeat taps — no
+    // spinner flash, no message, the extra tap just does nothing.
     catalogStore.sync(authStore.token, localeStore.language, { manual: true });
   }
 
-  return <ScreenScrollView isTabScreen gap={Spacing.five} horizontalPadding={0}>
+  const listHeader = <View style={styles.listHeader}>
       <View style={styles.searchSection}>
         <View style={styles.searchRow}>
           <Pressable onPress={handleRefresh} disabled={catalogStore.isSyncing} hitSlop={8} accessibilityLabel={t('recipes.refresh')} style={[styles.refreshButton, catalogStore.isSyncing && styles.refreshButtonActive]}>
@@ -191,7 +243,7 @@ function RecipesScreen() {
       </View>
 
       <View style={[styles.paddedX, styles.ingredientsBannerWrapper]}>
-          <Pressable onPress={() => isGuest ? setIsGuestLockVisible(true) : router.push('/ingredients')} style={({ pressed }) => [styles.ingredientsBanner, { backgroundColor: theme.background, borderColor: theme.accent, opacity: pressed ? 0.85 : 1 }]}>
+          <Pressable onPress={() => isGuest ? setIsGuestLockVisible(true) : pushOnce('/ingredients')} style={({ pressed }) => [styles.ingredientsBanner, { backgroundColor: theme.background, borderColor: theme.accent, opacity: pressed ? 0.85 : 1 }]}>
             <View style={[styles.ingredientsBannerIcon, { backgroundColor: theme.accentSoft }]}>
               <SymbolView name={{ ios: 'leaf.fill', android: 'eco', web: 'eco' }} size={20} tintColor={theme.accent} />
             </View>
@@ -204,38 +256,12 @@ function RecipesScreen() {
             </View>
           </Pressable>
         </View>
+    </View>;
 
-      <Animated.View style={{ gap: Spacing.five, opacity: contentAnim, transform: [{ translateY: contentAnim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }}>
-      {selectedFilter === MY_RECIPES_FILTER ? <View style={styles.section}>
-          <View style={styles.paddedX}>
-            <SectionHeader title={t('recipes.myRecipes')} right={addRecipeButton} />
-          </View>
-          {myRecipesFiltered.length === 0 ? <View style={styles.paddedX}>
-              <EmptyState icon={{ ios: 'book.closed', android: 'menu_book', web: 'menu_book' }} title={t('recipes.myRecipesEmptyTitle')} message={t('recipes.myRecipesEmptyMessage')} actionLabel={t('recipes.addRecipe')} onAction={() => router.push('/add-recipe')} />
-            </View> : <View style={[styles.rows, styles.paddedX]}>
-              {myRecipesRows.map((pair, index) => <View key={index} style={styles.row}>
-                  {pair.map(recipe => <View key={recipe.id} style={styles.cardSlot}>
-                      <RecipeCard recipe={recipe} calories={calculateRecipeNutrition(recipe, getIngredientById).nutrition.calories} style={styles.cardFill} />
-                    </View>)}
-                  {pair.length === 1 && <View style={styles.cardSlot} />}
-                </View>)}
-            </View>}
-        </View> : collections.length === 0 ? <View style={styles.paddedX}>
-          <EmptyState icon={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} title={t('recipes.noResults')} message={t('recipes.noResultsMessage')} />
-        </View> : collections.map(({ category, rows }, collectionIndex) => <View key={category.id} style={styles.section}>
-          <View style={styles.paddedX}>
-            <SectionHeader title={category.name} right={!isGuest && collectionIndex === 0 ? addRecipeButton : undefined} />
-          </View>
-          <View style={[styles.rows, styles.paddedX]}>
-            {rows.map((pair, index) => <View key={index} style={styles.row}>
-                {pair.map(recipe => <View key={recipe.id} style={styles.cardSlot}>
-                    <RecipeCard recipe={recipe} calories={isGuest ? undefined : calculateRecipeNutrition(recipe, getIngredientById).nutrition.calories} style={styles.cardFill} />
-                  </View>)}
-                {pair.length === 1 && <View style={styles.cardSlot} />}
-              </View>)}
-          </View>
-        </View>)}
-      </Animated.View>
+  return <>
+      <ScreenFlatList isTabScreen gap={0} horizontalPadding={0} data={listItems} keyExtractor={keyExtractor} renderItem={renderItem} ListHeaderComponent={listHeader} ListEmptyComponent={<View style={styles.paddedX}>
+            <EmptyState icon={{ ios: 'magnifyingglass', android: 'search', web: 'search' }} title={t('recipes.noResults')} message={t('recipes.noResultsMessage')} />
+          </View>} />
 
       <Modal visible={isGuestLockVisible} transparent animationType="fade" onRequestClose={() => setIsGuestLockVisible(false)}>
         <Pressable style={styles.guestLockBackdrop} onPress={() => setIsGuestLockVisible(false)}>
@@ -247,7 +273,7 @@ function RecipesScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-    </ScreenScrollView>;
+    </>;
 }
 
 const createStyles = theme => StyleSheet.create({
@@ -393,11 +419,18 @@ const createStyles = theme => StyleSheet.create({
   categoryLabel: {
     textAlign: 'center'
   },
-  section: {
-    gap: Spacing.three
+  listHeader: {
+    gap: Spacing.five,
+    marginBottom: Spacing.five
   },
-  rows: {
-    gap: Spacing.two
+  sectionHeader: {
+    marginBottom: Spacing.three
+  },
+  sectionSpacing: {
+    marginTop: Spacing.five
+  },
+  rowSpacing: {
+    marginTop: Spacing.two
   },
   row: {
     flexDirection: 'row',

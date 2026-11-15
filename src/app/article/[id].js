@@ -59,7 +59,7 @@ function ArticleScreen() {
           </Pressable>
     }} />
       <ScreenScrollView gap={Spacing.three} horizontalPadding={20}>
-      {article.imageUrl && <Image source={{ uri: article.imageUrl }} style={styles.heroImage} contentFit="cover" />}
+      {article.imageUrl && <Image source={{ uri: article.imageUrl }} placeholder={article.thumbUrl ? { uri: article.thumbUrl } : undefined} placeholderContentFit="cover" style={styles.heroImage} contentFit="cover" />}
       <ThemedText type="title" style={styles.title} color={theme.text}>
         {article.title}
       </ThemedText>

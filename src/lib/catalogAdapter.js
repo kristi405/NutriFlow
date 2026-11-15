@@ -13,7 +13,7 @@
  */
 
 import { Image } from 'react-native';
-import { toFileUrl } from './api';
+import { toFileUrl, toThumbUrl } from './api';
 
 const NUTRITION_KEY_MAP = {
   calories: 'calories',
@@ -93,6 +93,7 @@ export function adaptIngredient(raw, slugs, currentUserId) {
     id: raw.id,
     name: raw.name,
     imageUrl: toFileUrl(raw.image_url),
+    thumbUrl: toThumbUrl(raw.image_url),
     categoryId: FALLBACK_INGREDIENT_CATEGORY_ID,
     subcategoryId: undefined,
     // The unit this ingredient is normally measured in (g, piece, tbsp, ...).
@@ -154,6 +155,7 @@ export function adaptRecipe(raw, slugs, currentUserId) {
     title: raw.name,
     description: raw.description,
     imageUrl: toFileUrl(raw.image_url),
+    thumbUrl: toThumbUrl(raw.image_url),
     servings: raw.servings || 1,
     categoryId,
     mealTypes,

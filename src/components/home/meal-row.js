@@ -13,6 +13,7 @@ export function MealRow({
   mealType,
   title,
   imageUrl,
+  fallbackImageUrl,
   calories,
   servings,
   isEaten,
@@ -39,7 +40,7 @@ export function MealRow({
             {onToggleEaten && <Pressable onPress={onToggleEaten} hitSlop={8}>
                 <SymbolView name={isEaten ? { ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' } : { ios: 'circle', android: 'radio_button_unchecked', web: 'radio_button_unchecked' }} size={24} tintColor={isEaten ? theme.accent : theme.border} />
               </Pressable>}
-            <RecipeImage uri={imageUrl} style={styles.image} iconSize={18} />
+            <RecipeImage uri={imageUrl} fallbackUri={fallbackImageUrl} style={styles.image} iconSize={18} />
             <View style={styles.textWrapper}>
               <ThemedText type="caption" color={theme.textSecondary}>
                 {mealTypeLabel}

@@ -11,7 +11,7 @@ import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { formatQuantity, formatUnit, parseQuantity } from '@/lib/ingredientUnits';
 import { guessIngredientCategory } from '@/lib/ingredientImage';
 import { calculateRecipeNutrition, canMeasureIn, scaleForServings } from '@/lib/nutrition';
-import { recipeImageUri } from '@/lib/recipeImage';
+import { recipeImageUri, recipeThumbUri } from '@/lib/recipeImage';
 import { formatNutrientAmount, MINERAL_ROWS, NUTRIENT_ROWS, nonZeroRows, VITAMIN_ROWS } from '@/lib/nutrientRows';
 import { authStore } from '@/store/authStore';
 import { deleteRecipe, updateRecipe, uploadImage } from '@/lib/userContent';
@@ -344,7 +344,7 @@ function RecipeDetailScreen() {
       <View style={[styles.fixedImageWrapper, {
       height: imageHeight
     }]}>
-        <RecipeImage uri={isOwnRecipe && isEditingRecipe ? editedImageUri || recipeImageUri(recipe) : recipeImageUri(recipe)} style={styles.image} iconSize={48} />
+        <RecipeImage uri={isOwnRecipe && isEditingRecipe ? editedImageUri || recipeImageUri(recipe) : recipeImageUri(recipe)} placeholderUri={recipeThumbUri(recipe)} style={styles.image} iconSize={48} />
       </View>
 
       {isOwnRecipe && isEditingRecipe && !hasScrolledAny && <Pressable onPress={handlePickPhoto} hitSlop={8} style={[styles.imageEditBadge, {

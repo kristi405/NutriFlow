@@ -7,7 +7,7 @@ import { ThemedText } from '@/components/themed-text';
 import { RecipeImage } from '@/components/ui/recipe-image';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { recipeImageUri } from '@/lib/recipeImage';
+import { recipeImageUri, recipeThumbUri } from '@/lib/recipeImage';
 export function RecentRecipeRow({ recipe, calories, style }) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -20,7 +20,7 @@ export function RecentRecipeRow({ recipe, calories, style }) {
   }} asChild>
       <Pressable style={StyleSheet.flatten([styles.row, style])}>
         {({ pressed }) => <View style={[styles.rowInner, pressed && styles.pressed]}>
-            <RecipeImage uri={recipeImageUri(recipe)} style={styles.image} iconSize={16} />
+            <RecipeImage uri={recipeThumbUri(recipe)} fallbackUri={recipeImageUri(recipe)} style={styles.image} iconSize={16} />
             <View style={styles.textWrapper}>
               <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>
                 {recipe.title}

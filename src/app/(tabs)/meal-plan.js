@@ -24,12 +24,12 @@ import { useTheme } from '@/hooks/use-theme';
 import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { addDays, monthOf, todayKey, weekContaining, yearOf } from '@/lib/date';
 import { defaultQuantityFor, formatQuantity, formatUnit, parseQuantity } from '@/lib/ingredientUnits';
-import { guessIngredientImage } from '@/lib/ingredientImage';
+import { guessIngredientImage, ingredientThumbUri } from '@/lib/ingredientImage';
 import { generateDailyMealPlan } from '@/lib/mealPlanGenerator';
 import { planningCalories } from '@/lib/mealPlanning';
 import { findAllergenConflicts } from '@/lib/allergens';
 import { GUEST_MOCK_PROFILE } from '@/lib/guestMockProfile';
-import { recipeImageUri } from '@/lib/recipeImage';
+import { recipeImageUri, recipeThumbUri } from '@/lib/recipeImage';
 import { calculateDailyTargets, calculateRecipeNutrition, planItemNutrition, scaleForServings, scaleIngredient } from '@/lib/nutrition';
 import { ensurePremium } from '@/lib/premium';
 import { authStore } from '@/store/authStore';
@@ -425,7 +425,7 @@ function MealPlanScreen() {
                 if (!recipe) return null;
                 const calories = scaleForServings(planItemNutrition(recipe, item, getIngredientById), item.servings).nutrition.calories;
                 const isEaten = loggedEntries.some(entry => entry.mealType === item.mealType && entry.recipeId === item.recipeId);
-                return <MealRow key={item.id} recipeId={item.recipeId} planItemId={item.id} mealType={item.mealType} title={recipe.title} imageUrl={recipeImageUri(recipe)} calories={calories} servings={item.servings} isEaten={isEaten} onToggleEaten={() => toggleEaten(item)} allergens={findAllergenConflicts(recipe, profile?.preferences?.allergies)} />;
+                return <MealRow key={item.id} recipeId={item.recipeId} planItemId={item.id} mealType={item.mealType} title={recipe.title} imageUrl={recipeThumbUri(recipe)} fallbackImageUrl={recipeImageUri(recipe)} calories={calories} servings={item.servings} isEaten={isEaten} onToggleEaten={() => toggleEaten(item)} allergens={findAllergenConflicts(recipe, profile?.preferences?.allergies)} />;
               })}
                 </View>}
             </View>;
@@ -496,7 +496,7 @@ function MealPlanScreen() {
                 {(isShowingAllSwap ? allSwapRecipes : swapCandidates).map(recipe => {
               const calories = calculateRecipeNutrition(recipe, getIngredientById).nutrition.calories;
               return <Pressable key={recipe.id} onPress={() => handleSelectSwap(recipe)} style={styles.swapRow}>
-                      <RecipeImage uri={recipeImageUri(recipe)} style={styles.swapImage} iconSize={18} />
+                      <RecipeImage uri={recipeThumbUri(recipe)} fallbackUri={recipeImageUri(recipe)} style={styles.swapImage} iconSize={18} />
                       <View style={styles.swapTextWrapper}>
                         <ThemedText type="smallBold" color={theme.text} numberOfLines={1}>{recipe.title}</ThemedText>
                         <ThemedText type="small" color={theme.textSecondary}>{Math.round(calories)} {t('common.kcal')}</ThemedText>
@@ -550,7 +550,7 @@ function MealPlanScreen() {
                 <ScrollView style={styles.snackPickerScroll} keyboardShouldPersistTaps="handled">
                   <View style={styles.swapList}>
                     {snackPickerItems.map(item => <Pressable key={item.id} onPress={() => snackPickerMode === 'dish' ? handlePickSnackDish(item) : handlePickSnackIngredient(item)} style={styles.swapRow}>
-                        {snackPickerMode === 'dish' ? <RecipeImage uri={recipeImageUri(item)} style={styles.swapImage} iconSize={18} /> : <RecipeImage uri={guessIngredientImage(item)} style={styles.swapImage} iconSize={18} />}
+                        {snackPickerMode === 'dish' ? <RecipeImage uri={recipeThumbUri(item)} fallbackUri={recipeImageUri(item)} style={styles.swapImage} iconSize={18} /> : <RecipeImage uri={ingredientThumbUri(item)} fallbackUri={guessIngredientImage(item)} style={styles.swapImage} iconSize={18} />}
                         <ThemedText type="smallBold" color={theme.text} style={styles.flex1} numberOfLines={1}>{snackPickerMode === 'dish' ? item.title : item.name}</ThemedText>
                       </Pressable>)}
                   </View>

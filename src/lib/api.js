@@ -17,6 +17,15 @@ export function toFileUrl(filename) {
   return `${FILES_URL}/${filename}`;
 }
 
+// The server keeps a small preview (webp, ≤480×480, ~16 KB) of every uploaded
+// image next to the original (~0.6 MB): {FILES_URL}/thumbs/<name>.webp. Lists
+// and small cards show it; full-width views show the original. Anything that
+// isn't a server image filename (lab report PDFs, local file:// uris) has none.
+export function toThumbUrl(filename) {
+  if (!filename || !/\.(jpe?g|png|webp|gif|avif|tiff?)$/i.test(filename) || filename.includes('/')) return undefined;
+  return `${FILES_URL}/thumbs/${filename.replace(/\.[^.]+$/, '')}.webp`;
+}
+
 // `data` is the parsed error body — the backend sends `{ error }` (validation
 // text, English) and sometimes extra fields such as `code`/`recipeIds` for a
 // 409 INGREDIENT_IN_USE.

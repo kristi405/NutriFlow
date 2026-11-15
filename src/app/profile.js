@@ -6,7 +6,9 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { deletePhoto, pickProfilePhoto } from '@/lib/profilePhoto';
 import { PersonAvatar } from '@/components/people/person-avatar';
-import { apiRequest, apiUpload, toFileUrl } from '@/lib/api';
+import { apiRequest, apiUpload } from '@/lib/api';
+import { useImageFallback } from '@/hooks/useImageFallback';
+import { avatarSources } from '@/lib/recipeImage';
 import { achievementsStore } from '@/store/achievementsStore';
 import { analysisUsageStore } from '@/store/analysisUsageStore';
 import { appStreakStore } from '@/store/appStreakStore';
@@ -59,6 +61,8 @@ function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const profile = profileStore.activeProfile;
+  const avatarSource = avatarSources(profile);
+  const avatar = useImageFallback(avatarSource.uri, avatarSource.fallbackUri);
   const account = authStore.currentUser;
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [helpMessage, setHelpMessage] = useState('');
@@ -192,13 +196,13 @@ function ProfileScreen() {
   const allergies = profile.preferences?.allergies ?? [];
   // photoUrl (backend filename) wins when present; photoUri (local-only, either
   // a family member's avatar or a pre-migration "me" avatar) is the fallback.
-  const avatarUri = profile.photoUrl ? toFileUrl(profile.photoUrl) : profile.photoUri;
+  const avatarUri = avatar.uri;
 
   return <ScreenScrollView gap={Spacing.three}>
       <View style={styles.heroSection}>
         <View style={styles.avatarWrapper}>
           <Pressable onPress={handleEditPhoto} style={styles.avatar}>
-            {avatarUri ? <Image source={{ uri: avatarUri }} style={styles.avatarImage} contentFit="cover" onError={() => { if (!profile.photoUrl) profileStore.updateProfile({ photoUri: null }); }} /> : <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={44} tintColor={theme.accent} />}
+            {avatarUri ? <Image source={{ uri: avatarUri }} style={styles.avatarImage} contentFit="cover" cachePolicy="memory-disk" onError={() => { avatar.onError(); if (!profile.photoUrl) profileStore.updateProfile({ photoUri: null }); }} /> : <SymbolView name={{ ios: 'person.fill', android: 'person', web: 'person' }} size={44} tintColor={theme.accent} />}
           </Pressable>
           <Pressable onPress={handleEditPhoto} hitSlop={8} style={styles.avatarEditBadge}>
             <SymbolView name={{ ios: 'pencil', android: 'edit', web: 'edit' }} size={15} tintColor="#ffffff" />
