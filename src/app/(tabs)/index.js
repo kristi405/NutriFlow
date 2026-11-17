@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from '@/components/ui/symbol-view';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';

@@ -32,7 +32,7 @@ import { themeStore } from '@/store/themeStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from '@/components/ui/symbol-view';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
 import { Alert, Linking, Modal, Pressable, ScrollView, StyleSheet, Switch, TextInput, View } from 'react-native';

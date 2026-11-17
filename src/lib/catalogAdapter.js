@@ -101,6 +101,9 @@ export function adaptIngredient(raw, slugs, currentUserId) {
     gramsPerUnit: raw.grams_per_unit || {},
     per100g: { nutrition, vitamins, minerals },
     allergens: tagValuesByType(raw.tags, 'allergen', slugs),
+    // food_group slugs ("meat", "vegetables", "side dish", ...) — decide which
+    // ingredients can replace each other in a recipe (lib/ingredientSwap.js).
+    foodGroups: tagValuesByType(raw.tags, 'food_group', slugs),
     // Kept alongside `allergens` (slugs, used by existing logic) with real
     // ids/localized names — the ingredients screen's tag filter needs those.
     tags: (raw.tags || []).map(({ id, name }) => ({ id, name })),

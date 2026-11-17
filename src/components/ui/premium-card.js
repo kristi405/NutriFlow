@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from '@/components/ui/symbol-view';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
 import { observer } from 'mobx-react-lite';

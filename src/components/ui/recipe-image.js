@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from '@/components/ui/symbol-view';
 import { StyleSheet, View } from 'react-native';
 import { useImageFallback } from '@/hooks/useImageFallback';
 import { useTheme } from '@/hooks/use-theme';

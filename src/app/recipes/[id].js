@@ -10,8 +10,9 @@ import { getIngredientById, getIngredients, getRecipeById } from '@/data/catalog
 import { useTheme } from '@/hooks/use-theme';
 import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { formatQuantity, formatUnit, parseQuantity } from '@/lib/ingredientUnits';
-import { guessIngredientCategory, guessIngredientImage, ingredientThumbUri } from '@/lib/ingredientImage';
-import { calculateRecipeNutrition, canMeasureIn, scaleForServings } from '@/lib/nutrition';
+import { guessIngredientImage, ingredientThumbUri } from '@/lib/ingredientImage';
+import { isSwappableIngredient, swapPoolForIngredient } from '@/lib/ingredientSwap';
+import { calculateRecipeNutrition, scaleForServings } from '@/lib/nutrition';
 import { recipeImageUri, recipeThumbUri } from '@/lib/recipeImage';
 import { formatNutrientAmount, MINERAL_ROWS, NUTRIENT_ROWS, nonZeroRows, VITAMIN_ROWS } from '@/lib/nutrientRows';
 import { authStore } from '@/store/authStore';
@@ -23,7 +24,7 @@ import { subscriptionStore } from '@/store/subscriptionStore';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from '@/components/ui/symbol-view';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -39,30 +40,6 @@ const TABS = [
   { key: 'nutrients', labelKey: 'recipes.nutrients', icon: { ios: 'chart.pie.fill', android: 'pie_chart', web: 'pie_chart' } }
 ];
 
-
-// Swapping is only offered for ingredient groups that have several interchangeable
-// options in the dataset — meat, fish, vegetables, and grain-based sides. The
-// backend doesn't tag ingredients with a real category (categoryId/subcategoryId
-// are always a generic fallback), so the group comes from guessIngredientCategory
-// instead, which classifies by the ingredient's name.
-const PROTEIN_CATEGORIES = new Set(['poultry', 'redMeat', 'seafood']);
-
-function isSwappableIngredient(ingredient) {
-  if (!ingredient) return false;
-  const category = guessIngredientCategory(ingredient);
-  return PROTEIN_CATEGORIES.has(category) || category === 'vegetables' || category === 'grains';
-}
-
-function swapPoolForIngredient(ingredient, unit, allIngredients) {
-  if (!ingredient) return [];
-  const category = guessIngredientCategory(ingredient);
-  let pool;
-  // Meat and fish share one pool — either is a reasonable protein swap for the
-  // other. Vegetables and grains stay within their own category.
-  if (PROTEIN_CATEGORIES.has(category)) pool = allIngredients.filter(item => PROTEIN_CATEGORIES.has(guessIngredientCategory(item)));else if (category === 'vegetables' || category === 'grains') pool = allIngredients.filter(item => guessIngredientCategory(item) === category);else return [];
-  // Only offer substitutes that can be measured in the recipe line's existing unit.
-  return pool.filter(item => item.id !== ingredient.id && canMeasureIn(item, unit));
-}
 
 function RecipeDetailScreen() {
   const { t } = useTranslation();

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { pushOnce } from '@/lib/navigation';
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from '@/components/ui/symbol-view';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Animated, Easing, Image as RNImage, Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';

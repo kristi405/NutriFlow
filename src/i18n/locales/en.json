@@ -507,7 +507,11 @@
     "emptyMessageWeek": "Plan some meals for this week first, then come back to generate your shopping list.",
     "customCategory": "My items",
     "addItemTitle": "Add an item",
-    "addItemPlaceholder": "e.g. toothpaste"
+    "addItemPlaceholder": "e.g. toothpaste",
+    "copyList": "Copy list as text",
+    "copied": "Copied: {{count}} — paste it into a message or email",
+    "copyHint": "Copies the items you still need to buy as plain text, ready to paste into a message or email.",
+    "copyHintChecked": "Crossed-out items ({{count}}) won't be copied — only what you still need to buy."
   },
   "aiAnalysis": {
     "title": "AI Analysis",
@@ -712,6 +716,8 @@
     "ingredientPublished": "Added to the shared catalog — it can no longer be edited.",
     "inCatalogBadge": "In the catalog",
     "recipePublished": "Your recipe was added to the catalog — it can no longer be edited.",
-    "recipePendingUpload": "Not uploaded to your account yet — it will be uploaded automatically when you're online."
+    "recipePendingUpload": "Not uploaded to your account yet — it will be uploaded automatically when you're online.",
+    "category": "Category",
+    "categoryHint": "Used to suggest replacements for this ingredient in recipes — e.g. meat can be swapped for fish."
   }
 }

@@ -507,7 +507,11 @@
     "emptyMessageWeek": "Najpierw zaplanuj posiłki na ten tydzień, potem wróć po listę zakupów.",
     "customCategory": "Moje produkty",
     "addItemTitle": "Dodaj produkt",
-    "addItemPlaceholder": "np. pasta do zębów"
+    "addItemPlaceholder": "np. pasta do zębów",
+    "copyList": "Skopiuj listę jako tekst",
+    "copied": "Skopiowano: {{count}} — wklej do wiadomości lub e-maila",
+    "copyHint": "Kopiuje to, co jeszcze trzeba kupić, jako zwykły tekst — gotowy do wklejenia do wiadomości lub e-maila.",
+    "copyHintChecked": "Przekreślone ({{count}}) nie są kopiowane — tylko to, co jeszcze trzeba kupić."
   },
   "aiAnalysis": {
     "title": "Analiza AI",
@@ -712,6 +716,8 @@
     "ingredientPublished": "Dodany do wspólnego katalogu — nie można go już edytować.",
     "inCatalogBadge": "W katalogu",
     "recipePublished": "Twój przepis został dodany do katalogu — nie można go już edytować.",
-    "recipePendingUpload": "Jeszcze nie przesłany na Twoje konto — nastąpi to automatycznie, gdy będziesz online."
+    "recipePendingUpload": "Jeszcze nie przesłany na Twoje konto — nastąpi to automatycznie, gdy będziesz online.",
+    "category": "Kategoria",
+    "categoryHint": "Na jej podstawie proponujemy zamienniki w przepisach — np. mięso można zamienić na rybę."
   }
 }

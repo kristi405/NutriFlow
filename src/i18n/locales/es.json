@@ -507,7 +507,11 @@
     "emptyMessageWeek": "Planifica primero algunas comidas de esta semana y luego vuelve para generar tu lista de la compra.",
     "customCategory": "Mis artículos",
     "addItemTitle": "Añadir artículo",
-    "addItemPlaceholder": "p. ej. pasta de dientes"
+    "addItemPlaceholder": "p. ej. pasta de dientes",
+    "copyList": "Copiar lista como texto",
+    "copied": "Copiado: {{count}} — pégalo en un mensaje o correo",
+    "copyHint": "Copia lo que aún tienes que comprar como texto, listo para pegar en un mensaje o correo.",
+    "copyHintChecked": "Lo tachado ({{count}}) no se copia, solo lo que aún tienes que comprar."
   },
   "aiAnalysis": {
     "title": "Análisis con IA",
@@ -712,6 +716,8 @@
     "ingredientPublished": "Añadido al catálogo común: ya no se puede editar.",
     "inCatalogBadge": "En el catálogo",
     "recipePublished": "Tu receta se añadió al catálogo: ya no se puede editar.",
-    "recipePendingUpload": "Aún no se ha subido a tu cuenta: se subirá automáticamente cuando tengas conexión."
+    "recipePendingUpload": "Aún no se ha subido a tu cuenta: se subirá automáticamente cuando tengas conexión.",
+    "category": "Categoría",
+    "categoryHint": "Sirve para sugerir sustitutos en las recetas: por ejemplo, la carne se puede cambiar por pescado."
   }
 }

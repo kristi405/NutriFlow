@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Stack, useLocalSearchParams } from 'expo-router';
+import * as Clipboard from 'expo-clipboard';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from '@/components/ui/symbol-view';
 import { observer } from 'mobx-react-lite';
 import { useTranslation } from 'react-i18next';
 import { Alert, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -43,6 +44,20 @@ function buildShoppingListHtml(title, groups) {
     ${sections}
   </body></html>`;
 }
+
+// Plain text for pasting into a message or email: the title, then one "• item"
+// line per item still to buy. Category headings only when there is more than
+// one category (most catalog ingredients share the catch-all one).
+function buildShoppingListText(title, groups) {
+  const withHeadings = groups.length > 1;
+  const sections = groups.map(group => {
+    const lines = group.items.map(item => `• ${item.name}`).join('\n');
+    return withHeadings ? `${group.categoryName}\n${lines}` : lines;
+  });
+  return `${title}\n\n${sections.join('\n\n')}`;
+}
+
+const COPIED_FEEDBACK_MS = 2500;
 
 const CATEGORY_ICONS = {
   meat: 'fork.knife',
@@ -103,12 +118,32 @@ function ShoppingListScreen() {
     shoppingListStore.removeCustomItem(scopeKey, id);
   }
 
-  async function handleShare() {
-    const remainingGroups = groups.map(group => ({
-      ...group,
-      items: group.items.filter(item => !checkedIds.has(item.ingredientId))
-    })).filter(group => group.items.length > 0);
+  // What is still to buy — checked (crossed-out) items are left out of both
+  // the copied text and the shared PDF.
+  const remainingGroups = groups.map(group => ({
+    ...group,
+    items: group.items.filter(item => !checkedIds.has(item.ingredientId))
+  })).filter(group => group.items.length > 0);
+  const remainingCount = totalCount - checkedIds.size;
 
+  // "Copied" confirmation shown on the button itself for a moment.
+  const [copiedCount, setCopiedCount] = useState(null);
+  const copiedTimer = useRef(null);
+  useEffect(() => () => clearTimeout(copiedTimer.current), []);
+
+  async function handleCopy() {
+    if (remainingGroups.length === 0) return;
+    try {
+      await Clipboard.setStringAsync(buildShoppingListText(t('shoppingList.title'), remainingGroups));
+      setCopiedCount(remainingCount);
+      clearTimeout(copiedTimer.current);
+      copiedTimer.current = setTimeout(() => setCopiedCount(null), COPIED_FEEDBACK_MS);
+    } catch {
+      Alert.alert(t('common.errorTitle'), t('common.errorDefault'));
+    }
+  }
+
+  async function handleShare() {
     if (remainingGroups.length === 0) return;
 
     try {
@@ -143,6 +178,18 @@ function ShoppingListScreen() {
           <View style={styles.progressCard}>
             <MacroBar label={t('shoppingList.progress')} value={checkedIds.size} target={totalCount} unit={t('shoppingList.items')} color={theme.accent} />
           </View>
+
+          {remainingCount > 0 && <View style={styles.copySection}>
+              <Pressable onPress={handleCopy} accessibilityRole="button" accessibilityHint={t('shoppingList.copyHint')} style={({ pressed }) => [styles.copyButton, copiedCount !== null && styles.copyButtonDone, pressed && styles.pressed]}>
+                <SymbolView name={copiedCount !== null ? 'checkmark.circle.fill' : 'doc.on.doc'} size={18} tintColor={copiedCount !== null ? '#ffffff' : theme.accent} />
+                <ThemedText type="smallBold" color={copiedCount !== null ? '#ffffff' : theme.accent}>
+                  {copiedCount !== null ? t('shoppingList.copied', { count: copiedCount }) : t('shoppingList.copyList')}
+                </ThemedText>
+              </Pressable>
+              <ThemedText type="caption" color={theme.textSecondary} style={styles.copyHint}>
+                {checkedIds.size > 0 ? t('shoppingList.copyHintChecked', { count: checkedIds.size }) : t('shoppingList.copyHint')}
+              </ThemedText>
+            </View>}
 
           {checkedIds.size === totalCount && <View style={styles.allDoneBanner}>
               <SymbolView name="checkmark.circle.fill" size={18} tintColor={theme.accent} />
@@ -209,6 +256,29 @@ function ShoppingListScreen() {
 export default observer(ShoppingListScreen);
 
 const createStyles = theme => StyleSheet.create({
+  copySection: {
+    gap: 6
+  },
+  copyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.two,
+    borderWidth: 1.5,
+    borderColor: theme.accent,
+    backgroundColor: theme.accentSoft,
+    borderRadius: 14,
+    paddingVertical: Spacing.two + 4
+  },
+  copyButtonDone: {
+    backgroundColor: theme.accent
+  },
+  pressed: {
+    opacity: 0.85
+  },
+  copyHint: {
+    textAlign: 'center'
+  },
   progressCard: {
     backgroundColor: theme.background,
     borderColor: theme.secondary,

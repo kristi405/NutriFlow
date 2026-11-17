@@ -507,7 +507,11 @@
     "emptyMessageWeek": "Planeje algumas refeições desta semana primeiro e depois volte para gerar sua lista de compras.",
     "customCategory": "Meus itens",
     "addItemTitle": "Adicionar item",
-    "addItemPlaceholder": "ex.: pasta de dente"
+    "addItemPlaceholder": "ex.: pasta de dente",
+    "copyList": "Copiar lista como texto",
+    "copied": "Copiado: {{count}} — cole numa mensagem ou e-mail",
+    "copyHint": "Copia o que ainda precisa comprar como texto, pronto para colar numa mensagem ou e-mail.",
+    "copyHintChecked": "Itens riscados ({{count}}) não são copiados — só o que ainda precisa comprar."
   },
   "aiAnalysis": {
     "title": "Análise com IA",
@@ -712,6 +716,8 @@
     "ingredientPublished": "Adicionado ao catálogo comum — não pode mais ser editado.",
     "inCatalogBadge": "No catálogo",
     "recipePublished": "Sua receita foi adicionada ao catálogo — não pode mais ser editada.",
-    "recipePendingUpload": "Ainda não enviada para sua conta — isso acontecerá automaticamente quando você estiver online."
+    "recipePendingUpload": "Ainda não enviada para sua conta — isso acontecerá automaticamente quando você estiver online.",
+    "category": "Categoria",
+    "categoryHint": "Usada para sugerir substitutos nas receitas — por exemplo, carne pode ser trocada por peixe."
   }
 }

@@ -8,7 +8,7 @@ import { recipeImageUri, recipeThumbUri } from '@/lib/recipeImage';
 import { favoritesStore } from '@/store/favoritesStore';
 import { Link } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from '@/components/ui/symbol-view';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 const FAVORITE_RED = '#E0245E';

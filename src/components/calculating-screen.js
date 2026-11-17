@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from '@/components/ui/symbol-view';
 import { useTranslation } from 'react-i18next';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
 import { Fonts } from '@/constants/theme';

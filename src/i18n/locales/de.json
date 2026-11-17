@@ -507,7 +507,11 @@
     "emptyMessageWeek": "Plane zuerst Mahlzeiten für diese Woche und komm dann für deine Einkaufsliste zurück.",
     "customCategory": "Eigene Artikel",
     "addItemTitle": "Artikel hinzufügen",
-    "addItemPlaceholder": "z. B. Zahnpasta"
+    "addItemPlaceholder": "z. B. Zahnpasta",
+    "copyList": "Liste als Text kopieren",
+    "copied": "Kopiert: {{count}} – in eine Nachricht oder E-Mail einfügen",
+    "copyHint": "Kopiert die noch zu kaufenden Artikel als Text – zum Einfügen in eine Nachricht oder E-Mail.",
+    "copyHintChecked": "Durchgestrichenes ({{count}}) wird nicht kopiert – nur was du noch kaufen musst."
   },
   "aiAnalysis": {
     "title": "KI-Analyse",
@@ -712,6 +716,8 @@
     "ingredientPublished": "Zum gemeinsamen Katalog hinzugefügt – kann nicht mehr bearbeitet werden.",
     "inCatalogBadge": "Im Katalog",
     "recipePublished": "Dein Rezept wurde zum Katalog hinzugefügt – es kann nicht mehr bearbeitet werden.",
-    "recipePendingUpload": "Noch nicht in deinem Konto gespeichert – das passiert automatisch, sobald du online bist."
+    "recipePendingUpload": "Noch nicht in deinem Konto gespeichert – das passiert automatisch, sobald du online bist.",
+    "category": "Kategorie",
+    "categoryHint": "Danach werden in Rezepten Ersatzzutaten vorgeschlagen – z. B. Fleisch durch Fisch."
   }
 }

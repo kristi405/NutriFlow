@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from '@/components/ui/symbol-view';
 import * as SplashScreen from 'expo-splash-screen';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
 import { Fonts, LoginButtonGreen } from '@/constants/theme';

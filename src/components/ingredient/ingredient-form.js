@@ -1,11 +1,11 @@
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from '@/components/ui/symbol-view';
 import { observer } from 'mobx-react-lite';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
-import { getAllergenTags } from '@/data/catalog';
+import { getAllergenTags, getFoodGroupTags } from '@/data/catalog';
 import { useTheme } from '@/hooks/use-theme';
 import { formatUnit } from '@/lib/ingredientUnits';
 import { BASIC_NUTRIENTS, createIngredient, EXTRA_NUTRIENTS, INGREDIENT_UNITS, isWeightUnit, updateIngredient } from '@/lib/userContent';
@@ -53,6 +53,7 @@ function IngredientForm({ ingredient, initialName = '', onSaved, onCancel }) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const allergenTags = getAllergenTags();
+  const foodGroupTags = getFoodGroupTags();
 
   const [name, setName] = useState(ingredient?.name ?? initialName);
   const [unit, setUnit] = useState(ingredient?.defaultUnit ?? 'g');
@@ -78,6 +79,16 @@ function IngredientForm({ ingredient, initialName = '', onSaved, onCancel }) {
 
   function setNutrient(key, value) {
     setNutrients(current => ({ ...current, [key]: value }));
+  }
+
+  // One category at most: picking one replaces the previous, tapping the
+  // selected one again clears it. Allergen tags in tagIds are left untouched.
+  function selectFoodGroup(id) {
+    const groupIds = new Set(foodGroupTags.map(tag => tag.id));
+    setTagIds(current => {
+      const others = current.filter(tagId => !groupIds.has(tagId));
+      return current.includes(id) ? others : [...others, id];
+    });
   }
 
   function toggleTag(id) {
@@ -158,6 +169,24 @@ function IngredientForm({ ingredient, initialName = '', onSaved, onCancel }) {
           </View>}
         {unitWeightError && <ThemedText type="caption" color={theme.error}>{t('userContent.unitWeightRequired')}</ThemedText>}
       </View>
+
+      {foodGroupTags.length > 0 && <View style={styles.sectionCard}>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.sectionIcon, { backgroundColor: theme.accentSoft }]}>
+              <SymbolView name={{ ios: 'square.grid.2x2.fill', android: 'grid_view', web: 'grid_view' }} size={14} tintColor={theme.accent} />
+            </View>
+            <ThemedText type="smallBold" color={theme.text}>{t('userContent.category')}</ThemedText>
+          </View>
+          <ThemedText type="caption" color={theme.textSecondary}>{t('userContent.categoryHint')}</ThemedText>
+          <View style={styles.chipRow}>
+            {foodGroupTags.map(tag => {
+            const isActive = tagIds.includes(tag.id);
+            return <Pressable key={tag.id} onPress={() => selectFoodGroup(tag.id)} style={[styles.chip, isActive && styles.chipActive]}>
+                  <ThemedText type="smallBold" color={isActive ? '#ffffff' : theme.text}>{tag.name}</ThemedText>
+                </Pressable>;
+          })}
+          </View>
+        </View>}
 
       <View style={styles.sectionCard}>
         <View style={styles.sectionHeader}>

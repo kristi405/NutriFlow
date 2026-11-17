@@ -134,6 +134,11 @@ export function getCategoryTagId(categorySlug) {
   return catalogStore.tags.find(tag => tag.type === 'category' && (catalogStore.tagSlugs[tag.id] ?? tag.name.toLowerCase()) === categorySlug)?.id;
 }
 
+/** Food group tags (localized) — the "Category" choice on the own-ingredient form. */
+export function getFoodGroupTags() {
+  return catalogStore.tags.filter(tag => tag.type === 'food_group').map(({ id, name }) => ({ id, name }));
+}
+
 /** Allergen tags (localized) — offered on the own-ingredient form. */
 export function getAllergenTags() {
   return catalogStore.tags.filter(tag => tag.type === 'allergen').map(({ id, name }) => ({ id, name }));

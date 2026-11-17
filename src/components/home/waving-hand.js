@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { SymbolView } from 'expo-symbols';
+import { SymbolView } from '@/components/ui/symbol-view';
 import { Animated, Easing, Pressable } from 'react-native';
 
 const SKIN_TONES = ['#FFDBAC', '#F1C27D', '#C68642', '#8D5524'];

@@ -73,8 +73,14 @@ export function ScreenFlatList({
 }) {
   const theme = useTheme();
   const { insets, tabScreenPadding, platformStyle } = useScreenPadding(isTabScreen);
+  // paddingLeft/Right from platformStyle (Android safe-area insets) would
+  // override a paddingHorizontal, so the side padding is added to them explicitly.
+  const sidePadding = {
+    paddingLeft: (platformStyle?.paddingLeft ?? 0) + horizontalPadding,
+    paddingRight: (platformStyle?.paddingRight ?? 0) + horizontalPadding
+  };
   return <LinearGradient colors={[theme.background, theme.primarySoft, theme.accentSoft]} style={styles.flex1}>
-      <FlatList style={[styles.scrollView, styles.list]} contentInset={isTabScreen ? undefined : insets} contentContainerStyle={[tabScreenPadding, platformStyle, { gap, paddingHorizontal: horizontalPadding }, contentContainerStyle]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" initialNumToRender={12} maxToRenderPerBatch={12} windowSize={7} removeClippedSubviews={Platform.OS === 'android'} {...rest} />
+      <FlatList style={[styles.scrollView, styles.list]} contentInset={isTabScreen ? undefined : insets} contentContainerStyle={[tabScreenPadding, platformStyle, { gap }, sidePadding, contentContainerStyle]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" initialNumToRender={12} maxToRenderPerBatch={12} windowSize={7} removeClippedSubviews={Platform.OS === 'android'} {...rest} />
       {Platform.OS === 'android' && <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.10)']} style={styles.tabBarShadow} pointerEvents="none" />}
     </LinearGradient>;
 }
