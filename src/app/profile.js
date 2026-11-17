@@ -25,6 +25,7 @@ import { shoppingListStore } from '@/store/shoppingListStore';
 import { termsStore } from '@/store/termsStore';
 import { waterStore } from '@/store/waterStore';
 import { weightLogStore } from '@/store/weightLogStore';
+import { userDataSyncState } from '@/store/userDataSync';
 import { removeFamilyMember } from '@/store/peopleActions';
 import { profileStore } from '@/store/profileStore';
 import { notificationsStore } from '@/store/notificationsStore';
@@ -182,6 +183,7 @@ function ProfileScreen() {
         termsStore.reset();
         recentlyViewedStore.clear();
         labReportStore.reset();
+        userDataSyncState.reset();
       }
     }]);
   }

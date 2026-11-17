@@ -16,6 +16,7 @@ import { catalogStore } from '@/store/catalogStore';
 import { localeStore } from '@/store/localeStore';
 import { peopleStore } from '@/store/peopleStore';
 import { syncFamilyMembers } from '@/store/peopleSync';
+import { syncUserData } from '@/store/userDataSync';
 import { profileStore } from '@/store/profileStore';
 import { subscriptionStore } from '@/store/subscriptionStore';
 import { termsStore } from '@/store/termsStore';
@@ -93,6 +94,11 @@ function TabLayout() {
     // be uploaded when the owner's profile exists.
     if (authStore.isAuthenticated && peopleStore.hasHydrated) syncFamilyMembers();
   }, [authStore.isAuthenticated, peopleStore.hasHydrated, profileStore.hasOnboarded]);
+  // Food log, water and favorites ↔ server (also re-syncs on app foreground, see userDataSync.js).
+  const syncAccountId = authStore.isGuest ? null : authStore.currentUser?.id;
+  useEffect(() => {
+    if (authStore.isAuthenticated && syncAccountId) syncUserData();
+  }, [authStore.isAuthenticated, syncAccountId]);
   const userId = authStore.currentUser?.id;
   useEffect(() => {
     if (!appStreakStore.hasHydrated) return;
