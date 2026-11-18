@@ -827,6 +827,8 @@
       "endBody": "Pode comer até às {{time}}. Não se esqueça de terminar o jejum na app.",
       "goalTitle": "Meta de jejum alcançada 🎉",
       "goalBody": "{{hours}} h concluídas. Já pode terminar o jejum."
-    }
+    },
+    "homePromo": "16:8 e outros planos — temporizador e lembretes",
+    "homePromoHide": "Ocultar"
   }
 }

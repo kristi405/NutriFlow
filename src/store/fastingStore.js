@@ -74,11 +74,13 @@ class FastingStore {
   settings = { ...DEFAULT_FASTING_SETTINGS };
   // [{ id, startedAt, endedAt | null, targetHours, updatedAt }] — endedAt null = in progress
   fasts = [];
+  // The home "try fasting" invitation was closed — this phone only, not synced.
+  isHomePromoHidden = false;
   hasHydrated = false;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
-    persistStore(this, 'nutriflow.fasting', ['settings', 'fasts']);
+    persistStore(this, 'nutriflow.fasting', ['settings', 'fasts', 'isHomePromoHidden']);
   }
 
   get isEnabled() {
@@ -131,6 +133,10 @@ class FastingStore {
     };
   }
 
+  hideHomePromo() {
+    this.isHomePromoHidden = true;
+  }
+
   updateSettings(patch) {
     this.settings = { ...this.settings, ...patch, updatedAt: new Date().toISOString() };
   }
@@ -172,6 +178,7 @@ class FastingStore {
   reset() {
     this.settings = { ...DEFAULT_FASTING_SETTINGS };
     this.fasts = [];
+    this.isHomePromoHidden = false;
   }
 }
 

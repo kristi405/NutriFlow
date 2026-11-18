@@ -827,6 +827,8 @@
       "endBody": "Puedes comer hasta las {{time}}. No olvides terminar el ayuno en la app.",
       "goalTitle": "Objetivo de ayuno alcanzado 🎉",
       "goalBody": "{{hours}} h completadas. Ya puedes terminar el ayuno."
-    }
+    },
+    "homePromo": "16:8 y otros planes: temporizador y recordatorios",
+    "homePromoHide": "Ocultar"
   }
 }

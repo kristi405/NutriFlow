@@ -177,7 +177,7 @@ function HomeScreen() {
 
       {isMe && <StepsCard />}
 
-      {isMe && fastingStore.isEnabled && <FastingCard />}
+      {isMe && <FastingCard />}
 
       {scoreResult && <NutritionScoreCard score={scoreResult.score} explanation={scoreResult.explanation} />}
 

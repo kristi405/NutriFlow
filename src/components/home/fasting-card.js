@@ -12,10 +12,26 @@ import { fastingStore } from '@/store/fastingStore';
 
 const FASTING_COLOR = '#7B61FF';
 
-/** Home summary of intermittent fasting — only rendered when the mode is on. */
-function FastingCardComponent() {
+/** Fasting mode off: a small invitation that leads to turning it on (can be hidden). */
+function FastingPromo({ theme }) {
   const { t } = useTranslation();
-  const theme = useTheme();
+  return <Pressable onPress={() => pushOnce('/fasting')} style={({ pressed }) => [styles.card, styles.promo, { backgroundColor: theme.background, borderColor: FASTING_COLOR + '66' }, pressed && styles.pressed]}>
+      <View style={[styles.promoIcon, { backgroundColor: FASTING_COLOR + '1F' }]}>
+        <SymbolView name={{ ios: 'clock', android: 'schedule', web: 'schedule' }} size={20} tintColor={FASTING_COLOR} />
+      </View>
+      <View style={styles.flex1}>
+        <ThemedText type="smallBold" color={theme.text}>{t('fasting.title')}</ThemedText>
+        <ThemedText type="caption" color={theme.textSecondary}>{t('fasting.homePromo')}</ThemedText>
+      </View>
+      <Pressable onPress={fastingStore.hideHomePromo} hitSlop={10} accessibilityLabel={t('fasting.homePromoHide')}>
+        <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={14} tintColor={theme.textSecondary} />
+      </Pressable>
+    </Pressable>;
+}
+
+// observer of its own: it reads the running fast from the store.
+const FastingStatus = observer(function FastingStatus({ theme }) {
+  const { t } = useTranslation();
   const now = useNow(30000);
   const fast = fastingStore.activeFast;
   const running = fast ? fastProgress(fast, now) : null;
@@ -45,6 +61,17 @@ function FastingCardComponent() {
           </Pressable>
         </View>}
     </Pressable>;
+});
+
+/**
+ * Home entry point for intermittent fasting: the live status when the mode is
+ * on, otherwise an invitation to try it (until hidden — the mode stays
+ * reachable from the profile).
+ */
+function FastingCardComponent() {
+  const theme = useTheme();
+  if (!fastingStore.isEnabled) return fastingStore.isHomePromoHidden ? null : <FastingPromo theme={theme} />;
+  return <FastingStatus theme={theme} />;
 }
 
 export const FastingCard = observer(FastingCardComponent);
@@ -53,6 +80,8 @@ const styles = StyleSheet.create({
   flex1: { flex: 1 },
   pressed: { opacity: 0.85 },
   card: { borderRadius: 20, borderWidth: 1, padding: Spacing.three, gap: Spacing.two },
+  promo: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
+  promoIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   track: { height: 8, borderRadius: 4, overflow: 'hidden' },

@@ -827,6 +827,8 @@
       "endBody": "Du kannst bis {{time}} essen. Vergiss nicht, das Fasten in der App zu beenden.",
       "goalTitle": "Fastenziel erreicht 🎉",
       "goalBody": "{{hours}} h geschafft. Du kannst das Fasten jetzt beenden."
-    }
+    },
+    "homePromo": "16:8 und andere Pläne – Timer und Erinnerungen",
+    "homePromoHide": "Ausblenden"
   }
 }

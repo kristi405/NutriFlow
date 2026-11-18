@@ -827,6 +827,8 @@
       "endBody": "Możesz jeść do {{time}}. Nie zapomnij zakończyć postu w aplikacji.",
       "goalTitle": "Cel postu osiągnięty 🎉",
       "goalBody": "Minęło {{hours}} h. Możesz już zakończyć post."
-    }
+    },
+    "homePromo": "16:8 i inne schematy — timer i przypomnienia",
+    "homePromoHide": "Ukryj"
   }
 }

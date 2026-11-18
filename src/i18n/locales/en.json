@@ -827,6 +827,8 @@
       "endBody": "You can eat until {{time}}. Don't forget to end your fast in the app.",
       "goalTitle": "Fasting goal reached 🎉",
       "goalBody": "{{hours}} h done. You can end your fast now."
-    }
+    },
+    "homePromo": "16:8 and other schedules — timer and reminders",
+    "homePromoHide": "Hide"
   }
 }
