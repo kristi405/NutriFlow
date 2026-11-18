@@ -10,6 +10,7 @@ import { DateStrip } from '@/components/home/date-strip';
 import { MacroCard } from '@/components/home/macro-card';
 import { MealRow } from '@/components/home/meal-row';
 import { NutritionScoreCard } from '@/components/home/nutrition-score-card';
+import { FastingCard } from '@/components/home/fasting-card';
 import { StepsCard } from '@/components/home/steps-card';
 import { WaterCard } from '@/components/home/water-card';
 import { WavingHand } from '@/components/home/waving-hand';
@@ -37,6 +38,7 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { articleStore } from '@/store/articleStore';
 import { authStore } from '@/store/authStore';
+import { fastingStore } from '@/store/fastingStore';
 import { localeStore } from '@/store/localeStore';
 import { subscriptionStore } from '@/store/subscriptionStore';
 import { foodLogStore } from '@/store/foodLogStore';
@@ -174,6 +176,8 @@ function HomeScreen() {
       <WaterCard consumedMl={waterMl} targetMl={targets.water} onAdd={amount => addWater(date, amount)} />
 
       {isMe && <StepsCard />}
+
+      {isMe && fastingStore.isEnabled && <FastingCard />}
 
       {scoreResult && <NutritionScoreCard score={scoreResult.score} explanation={scoreResult.explanation} />}
 

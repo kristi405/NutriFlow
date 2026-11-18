@@ -70,7 +70,14 @@
           "speechRecognitionPermission": "Allow NutriFlow to use speech recognition for voice search."
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/android-icon-monochrome.png",
+          "color": "#4CAF50"
+        }
+      ]
     ],
     "experiments": {
       "reactCompiler": false

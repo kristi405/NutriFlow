@@ -719,5 +719,114 @@
     "recipePendingUpload": "Ainda não enviada para sua conta — isso acontecerá automaticamente quando você estiver online.",
     "category": "Categoria",
     "categoryHint": "Usada para sugerir substitutos nas receitas — por exemplo, carne pode ser trocada por peixe."
+  },
+  "fasting": {
+    "title": "Jejum intermitente",
+    "settingsTitle": "Definições do jejum",
+    "introTitle": "Jejum intermitente",
+    "introText": "Coma dentro de uma janela diária e jejue no resto do dia. Escolha um plano, acompanhe cada jejum com um temporizador e receba lembretes para começar e terminar.",
+    "enable": "Ativar o modo jejum",
+    "enableHint": "Pode alterar o plano ou desativá-lo a qualquer momento.",
+    "disclaimer": "Não recomendado durante a gravidez ou amamentação, com diabetes, distúrbios alimentares ou outras doenças, nem para menores de 18 anos. Fale com o seu médico antes de começar.",
+    "protocols": {
+      "12-12": {
+        "label": "12:12",
+        "description": "12 h de jejum, 12 h de refeições — um início suave"
+      },
+      "14-10": {
+        "label": "14:10",
+        "description": "14 h de jejum, 10 h de refeições"
+      },
+      "16-8": {
+        "label": "16:8",
+        "description": "16 h de jejum, 8 h de refeições — o mais popular"
+      },
+      "18-6": {
+        "label": "18:6",
+        "description": "18 h de jejum, 6 h de refeições"
+      },
+      "20-4": {
+        "label": "20:4",
+        "description": "20 h de jejum, 4 h de refeições"
+      },
+      "omad": {
+        "label": "23:1",
+        "description": "Uma refeição por dia"
+      }
+    },
+    "fastingNow": "Em jejum",
+    "eatingWindow": "Janela de refeições",
+    "scheduledFast": "Hora de jejum segundo o plano",
+    "goalReached": "Meta de {{hours}} h alcançada 🎉",
+    "untilGoal": "Faltam {{time}} para a meta",
+    "goalAt": "Meta {{hours}} h às {{time}}",
+    "windowClosesAt": "Pode comer até às {{time}}",
+    "windowOpensAt": "Próxima refeição às {{time}}",
+    "started": "Início",
+    "goal": "Meta {{hours}} h",
+    "notStartedHint": "Segundo o seu plano, agora é hora de jejum — inicie o temporizador.",
+    "start": "Começar",
+    "startFast": "Começar jejum de {{hours}} h",
+    "endFast": "Terminar jejum",
+    "editStart": "Começou antes? Ajustar o início",
+    "startedEarlier": "Mover o início:",
+    "minutesShort": "{{minutes}} min",
+    "eatingWindowRange": "Janela de refeições {{from}} – {{to}}",
+    "stats": {
+      "streak": "dias seguidos",
+      "count": "jejuns",
+      "longest": "recorde, h"
+    },
+    "history": "Histórico",
+    "historyDuration": "{{hours}} h de {{goal}} h",
+    "deleteTitle": "Eliminar este jejum?",
+    "endEarlyTitle": "Terminar o jejum mais cedo?",
+    "endEarlyMessage": "{{done}} h de {{goal}} h concluídas. Será guardado como não concluído.",
+    "stages": {
+      "digesting": {
+        "title": "Digestão",
+        "description": "O corpo ainda está a processar a última refeição."
+      },
+      "sugarDrop": {
+        "title": "O açúcar estabiliza",
+        "description": "Cerca de 4–12 h: o nível de insulina desce."
+      },
+      "fatBurning": {
+        "title": "Energia da gordura",
+        "description": "Cerca de 12 h em diante o corpo recorre mais às reservas de gordura."
+      },
+      "deep": {
+        "title": "Jejum profundo",
+        "description": "16 h ou mais. Beba água e esteja atento a como se sente."
+      },
+      "long": {
+        "title": "Jejum prolongado",
+        "description": "24 h ou mais. Não exagere — termine o jejum se não se sentir bem."
+      }
+    },
+    "modeTitle": "Modo jejum",
+    "modeHint": "Ao desativar, o histórico é mantido.",
+    "protocolTitle": "Plano",
+    "windowTitle": "Janela de refeições",
+    "windowHint": "Quando come durante o dia. O resto do tempo é jejum.",
+    "eatingHours": "Janela de refeições de {{hours}} h",
+    "notificationsTitle": "Lembretes",
+    "notifyFastStart": "Início do jejum",
+    "notifyFastStartHint": "Todos os dias às {{end}}, quando a janela de refeições fecha",
+    "notifyFastEnd": "Fim do jejum",
+    "notifyFastEndHint": "Todos os dias às {{start}}, quando a janela de refeições abre",
+    "notifyGoal": "Meta alcançada",
+    "notifyGoalHint": "Quando o jejum em curso atingir a meta",
+    "notificationsOffInProfile": "As notificações estão desativadas nas definições do perfil.",
+    "notificationsDenied": "As notificações do NutriFlow não são permitidas. Toque para abrir as definições do sistema.",
+    "notifications": {
+      "channel": "Lembretes de jejum",
+      "startTitle": "Hora de começar o jejum",
+      "startBody": "A janela de refeições fechou. Próxima refeição às {{time}} — {{hours}} h de jejum.",
+      "endTitle": "A janela de refeições está aberta",
+      "endBody": "Pode comer até às {{time}}. Não se esqueça de terminar o jejum na app.",
+      "goalTitle": "Meta de jejum alcançada 🎉",
+      "goalBody": "{{hours}} h concluídas. Já pode terminar o jejum."
+    }
   }
 }

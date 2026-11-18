@@ -719,5 +719,114 @@
     "recipePendingUpload": "Aún no se ha subido a tu cuenta: se subirá automáticamente cuando tengas conexión.",
     "category": "Categoría",
     "categoryHint": "Sirve para sugerir sustitutos en las recetas: por ejemplo, la carne se puede cambiar por pescado."
+  },
+  "fasting": {
+    "title": "Ayuno intermitente",
+    "settingsTitle": "Ajustes del ayuno",
+    "introTitle": "Ayuno intermitente",
+    "introText": "Come dentro de una ventana diaria y ayuna el resto del día. Elige un plan, controla cada ayuno con un temporizador y recibe recordatorios para empezar y terminar.",
+    "enable": "Activar el modo ayuno",
+    "enableHint": "Puedes cambiar el plan o desactivarlo cuando quieras.",
+    "disclaimer": "No recomendado durante el embarazo o la lactancia, con diabetes, trastornos alimentarios u otras enfermedades, ni para menores de 18 años. Consulta a tu médico antes de empezar.",
+    "protocols": {
+      "12-12": {
+        "label": "12:12",
+        "description": "12 h de ayuno, 12 h de comidas: un inicio suave"
+      },
+      "14-10": {
+        "label": "14:10",
+        "description": "14 h de ayuno, 10 h de comidas"
+      },
+      "16-8": {
+        "label": "16:8",
+        "description": "16 h de ayuno, 8 h de comidas: el más popular"
+      },
+      "18-6": {
+        "label": "18:6",
+        "description": "18 h de ayuno, 6 h de comidas"
+      },
+      "20-4": {
+        "label": "20:4",
+        "description": "20 h de ayuno, 4 h de comidas"
+      },
+      "omad": {
+        "label": "23:1",
+        "description": "Una comida al día"
+      }
+    },
+    "fastingNow": "Ayunando",
+    "eatingWindow": "Ventana de comidas",
+    "scheduledFast": "Hora de ayuno según el plan",
+    "goalReached": "Objetivo de {{hours}} h alcanzado 🎉",
+    "untilGoal": "Faltan {{time}} para el objetivo",
+    "goalAt": "Objetivo {{hours}} h a las {{time}}",
+    "windowClosesAt": "Puedes comer hasta las {{time}}",
+    "windowOpensAt": "Próxima comida a las {{time}}",
+    "started": "Inicio",
+    "goal": "Objetivo {{hours}} h",
+    "notStartedHint": "Según tu plan, ahora es hora de ayunar: inicia el temporizador.",
+    "start": "Empezar",
+    "startFast": "Empezar ayuno de {{hours}} h",
+    "endFast": "Terminar ayuno",
+    "editStart": "¿Empezaste antes? Ajusta el inicio",
+    "startedEarlier": "Mover el inicio:",
+    "minutesShort": "{{minutes}} min",
+    "eatingWindowRange": "Ventana de comidas {{from}} – {{to}}",
+    "stats": {
+      "streak": "días seguidos",
+      "count": "ayunos",
+      "longest": "récord, h"
+    },
+    "history": "Historial",
+    "historyDuration": "{{hours}} h de {{goal}} h",
+    "deleteTitle": "¿Eliminar este ayuno?",
+    "endEarlyTitle": "¿Terminar el ayuno antes?",
+    "endEarlyMessage": "Llevas {{done}} h de {{goal}} h. Se guardará como no completado.",
+    "stages": {
+      "digesting": {
+        "title": "Digestión",
+        "description": "Tu cuerpo todavía procesa la última comida."
+      },
+      "sugarDrop": {
+        "title": "El azúcar se estabiliza",
+        "description": "Aprox. 4–12 h: baja el nivel de insulina."
+      },
+      "fatBurning": {
+        "title": "Energía de las grasas",
+        "description": "Aprox. desde las 12 h el cuerpo recurre más a sus reservas de grasa."
+      },
+      "deep": {
+        "title": "Ayuno profundo",
+        "description": "16 h o más. Bebe agua y escucha a tu cuerpo."
+      },
+      "long": {
+        "title": "Ayuno prolongado",
+        "description": "24 h o más. No te excedas: termina el ayuno si no te sientes bien."
+      }
+    },
+    "modeTitle": "Modo ayuno",
+    "modeHint": "Si lo desactivas, tu historial se conserva.",
+    "protocolTitle": "Plan",
+    "windowTitle": "Ventana de comidas",
+    "windowHint": "Cuándo comes durante el día. El resto del tiempo es ayuno.",
+    "eatingHours": "Ventana de comidas de {{hours}} h",
+    "notificationsTitle": "Recordatorios",
+    "notifyFastStart": "Inicio del ayuno",
+    "notifyFastStartHint": "Cada día a las {{end}}, cuando se cierra la ventana de comidas",
+    "notifyFastEnd": "Fin del ayuno",
+    "notifyFastEndHint": "Cada día a las {{start}}, cuando se abre la ventana de comidas",
+    "notifyGoal": "Objetivo alcanzado",
+    "notifyGoalHint": "Cuando el ayuno en curso alcance su objetivo",
+    "notificationsOffInProfile": "Las notificaciones están desactivadas en los ajustes del perfil.",
+    "notificationsDenied": "Las notificaciones de NutriFlow no están permitidas. Toca para abrir los ajustes del sistema.",
+    "notifications": {
+      "channel": "Recordatorios de ayuno",
+      "startTitle": "Hora de empezar el ayuno",
+      "startBody": "La ventana de comidas se ha cerrado. Próxima comida a las {{time}}: {{hours}} h de ayuno.",
+      "endTitle": "La ventana de comidas está abierta",
+      "endBody": "Puedes comer hasta las {{time}}. No olvides terminar el ayuno en la app.",
+      "goalTitle": "Objetivo de ayuno alcanzado 🎉",
+      "goalBody": "{{hours}} h completadas. Ya puedes terminar el ayuno."
+    }
   }
 }

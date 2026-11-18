@@ -719,5 +719,114 @@
     "recipePendingUpload": "Not uploaded to your account yet — it will be uploaded automatically when you're online.",
     "category": "Category",
     "categoryHint": "Used to suggest replacements for this ingredient in recipes — e.g. meat can be swapped for fish."
+  },
+  "fasting": {
+    "title": "Intermittent fasting",
+    "settingsTitle": "Fasting settings",
+    "introTitle": "Intermittent fasting",
+    "introText": "Eat within a daily time window and fast the rest of the day. Pick a schedule, track each fast with a timer and get reminders when to start and stop.",
+    "enable": "Turn on fasting mode",
+    "enableHint": "You can change the schedule or turn it off at any time.",
+    "disclaimer": "Not recommended during pregnancy or breastfeeding, for people with diabetes, eating disorders or other medical conditions, or under 18. Talk to your doctor before you start.",
+    "protocols": {
+      "12-12": {
+        "label": "12:12",
+        "description": "12 h fasting, 12 h eating — a gentle start"
+      },
+      "14-10": {
+        "label": "14:10",
+        "description": "14 h fasting, 10 h eating"
+      },
+      "16-8": {
+        "label": "16:8",
+        "description": "16 h fasting, 8 h eating — the most popular"
+      },
+      "18-6": {
+        "label": "18:6",
+        "description": "18 h fasting, 6 h eating"
+      },
+      "20-4": {
+        "label": "20:4",
+        "description": "20 h fasting, 4 h eating"
+      },
+      "omad": {
+        "label": "23:1",
+        "description": "One meal a day"
+      }
+    },
+    "fastingNow": "Fasting",
+    "eatingWindow": "Eating window",
+    "scheduledFast": "Fasting time by schedule",
+    "goalReached": "Goal of {{hours}} h reached 🎉",
+    "untilGoal": "{{time}} to goal",
+    "goalAt": "Goal {{hours}} h at {{time}}",
+    "windowClosesAt": "Eating until {{time}}",
+    "windowOpensAt": "Next meal at {{time}}",
+    "started": "Started",
+    "goal": "Goal {{hours}} h",
+    "notStartedHint": "By your schedule it's fasting time — start the timer.",
+    "start": "Start",
+    "startFast": "Start a {{hours}} h fast",
+    "endFast": "End fast",
+    "editStart": "Started earlier? Adjust the start",
+    "startedEarlier": "Move start:",
+    "minutesShort": "{{minutes}} min",
+    "eatingWindowRange": "Eating window {{from}} – {{to}}",
+    "stats": {
+      "streak": "day streak",
+      "count": "fasts",
+      "longest": "longest, h"
+    },
+    "history": "History",
+    "historyDuration": "{{hours}} h of {{goal}} h",
+    "deleteTitle": "Delete this fast?",
+    "endEarlyTitle": "End the fast early?",
+    "endEarlyMessage": "{{done}} h of {{goal}} h done. It will be saved as unfinished.",
+    "stages": {
+      "digesting": {
+        "title": "Digesting",
+        "description": "Your body is still processing the last meal."
+      },
+      "sugarDrop": {
+        "title": "Blood sugar settles",
+        "description": "Roughly 4–12 h: insulin levels go down."
+      },
+      "fatBurning": {
+        "title": "Using fat for energy",
+        "description": "Roughly from 12 h the body relies more on fat stores."
+      },
+      "deep": {
+        "title": "Deep fasting",
+        "description": "16 h+. Drink water and listen to how you feel."
+      },
+      "long": {
+        "title": "Extended fast",
+        "description": "24 h+. Don't overdo it — end the fast if you feel unwell."
+      }
+    },
+    "modeTitle": "Fasting mode",
+    "modeHint": "Turning it off keeps your history.",
+    "protocolTitle": "Schedule",
+    "windowTitle": "Eating window",
+    "windowHint": "When you eat during the day. Fasting is the rest of the time.",
+    "eatingHours": "{{hours}} h eating window",
+    "notificationsTitle": "Reminders",
+    "notifyFastStart": "Start of the fast",
+    "notifyFastStartHint": "Daily at {{end}}, when the eating window closes",
+    "notifyFastEnd": "End of the fast",
+    "notifyFastEndHint": "Daily at {{start}}, when the eating window opens",
+    "notifyGoal": "Goal reached",
+    "notifyGoalHint": "When the running fast reaches its goal",
+    "notificationsOffInProfile": "Notifications are turned off in your profile settings.",
+    "notificationsDenied": "Notifications aren't allowed for NutriFlow. Tap to open system settings.",
+    "notifications": {
+      "channel": "Fasting reminders",
+      "startTitle": "Time to start fasting",
+      "startBody": "The eating window is closed. Next meal at {{time}} — {{hours}} h of fasting.",
+      "endTitle": "The eating window is open",
+      "endBody": "You can eat until {{time}}. Don't forget to end your fast in the app.",
+      "goalTitle": "Fasting goal reached 🎉",
+      "goalBody": "{{hours}} h done. You can end your fast now."
+    }
   }
 }

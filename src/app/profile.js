@@ -26,6 +26,7 @@ import { termsStore } from '@/store/termsStore';
 import { waterStore } from '@/store/waterStore';
 import { weightLogStore } from '@/store/weightLogStore';
 import { userDataSyncState } from '@/store/userDataSync';
+import { fastingStore } from '@/store/fastingStore';
 import { removeFamilyMember } from '@/store/peopleActions';
 import { profileStore } from '@/store/profileStore';
 import { notificationsStore } from '@/store/notificationsStore';
@@ -184,6 +185,7 @@ function ProfileScreen() {
         recentlyViewedStore.clear();
         labReportStore.reset();
         userDataSyncState.reset();
+        fastingStore.reset();
       }
     }]);
   }
@@ -304,6 +306,7 @@ function ProfileScreen() {
           <ThemedText type="smallBold" color={theme.text}>{t('profile.settings')}</ThemedText>
         </View>
         <View style={styles.settingsList}>
+          <SettingsRow styles={styles} theme={theme} icon={{ ios: 'clock', android: 'schedule', web: 'schedule' }} label={t('fasting.title')} onPress={() => router.push('/fasting')} />
           <SettingsRow styles={styles} theme={theme} icon={{ ios: 'bell.fill', android: 'notifications', web: 'notifications' }} label={t('profile.notifications')} right={<Switch value={notificationsStore.isEnabled} onValueChange={value => notificationsStore.setEnabled(value)} trackColor={{
           false: theme.textSecondary,
           true: theme.accent

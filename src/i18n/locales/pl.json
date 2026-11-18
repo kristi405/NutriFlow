@@ -719,5 +719,114 @@
     "recipePendingUpload": "Jeszcze nie przesłany na Twoje konto — nastąpi to automatycznie, gdy będziesz online.",
     "category": "Kategoria",
     "categoryHint": "Na jej podstawie proponujemy zamienniki w przepisach — np. mięso można zamienić na rybę."
+  },
+  "fasting": {
+    "title": "Post przerywany",
+    "settingsTitle": "Ustawienia postu",
+    "introTitle": "Post przerywany",
+    "introText": "Jedz w codziennym oknie żywieniowym, a przez resztę doby pość. Wybierz schemat, śledź każdy post timerem i otrzymuj przypomnienia, kiedy zacząć i skończyć.",
+    "enable": "Włącz tryb postu",
+    "enableHint": "Schemat możesz zmienić lub wyłączyć tryb w każdej chwili.",
+    "disclaimer": "Niezalecany w ciąży i podczas karmienia piersią, przy cukrzycy, zaburzeniach odżywiania lub innych chorobach oraz poniżej 18. roku życia. Przed rozpoczęciem skonsultuj się z lekarzem.",
+    "protocols": {
+      "12-12": {
+        "label": "12:12",
+        "description": "12 h postu, 12 h jedzenia — łagodny start"
+      },
+      "14-10": {
+        "label": "14:10",
+        "description": "14 h postu, 10 h jedzenia"
+      },
+      "16-8": {
+        "label": "16:8",
+        "description": "16 h postu, 8 h jedzenia — najpopularniejszy"
+      },
+      "18-6": {
+        "label": "18:6",
+        "description": "18 h postu, 6 h jedzenia"
+      },
+      "20-4": {
+        "label": "20:4",
+        "description": "20 h postu, 4 h jedzenia"
+      },
+      "omad": {
+        "label": "23:1",
+        "description": "Jeden posiłek dziennie"
+      }
+    },
+    "fastingNow": "Post",
+    "eatingWindow": "Okno żywieniowe",
+    "scheduledFast": "Czas postu według schematu",
+    "goalReached": "Cel {{hours}} h osiągnięty 🎉",
+    "untilGoal": "Do celu {{time}}",
+    "goalAt": "Cel {{hours}} h o {{time}}",
+    "windowClosesAt": "Możesz jeść do {{time}}",
+    "windowOpensAt": "Następny posiłek o {{time}}",
+    "started": "Początek",
+    "goal": "Cel {{hours}} h",
+    "notStartedHint": "Według schematu teraz jest czas postu — uruchom timer.",
+    "start": "Zacznij",
+    "startFast": "Zacznij post {{hours}} h",
+    "endFast": "Zakończ post",
+    "editStart": "Zacząłeś wcześniej? Zmień godzinę początku",
+    "startedEarlier": "Przesuń początek:",
+    "minutesShort": "{{minutes}} min",
+    "eatingWindowRange": "Okno żywieniowe {{from}} – {{to}}",
+    "stats": {
+      "streak": "dni z rzędu",
+      "count": "postów",
+      "longest": "rekord, h"
+    },
+    "history": "Historia",
+    "historyDuration": "{{hours}} h z {{goal}} h",
+    "deleteTitle": "Usunąć ten post?",
+    "endEarlyTitle": "Zakończyć post wcześniej?",
+    "endEarlyMessage": "Minęło {{done}} h z {{goal}} h. Post zostanie zapisany jako nieukończony.",
+    "stages": {
+      "digesting": {
+        "title": "Trawienie",
+        "description": "Organizm wciąż przetwarza ostatni posiłek."
+      },
+      "sugarDrop": {
+        "title": "Cukier się stabilizuje",
+        "description": "Około 4–12 h: poziom insuliny spada."
+      },
+      "fatBurning": {
+        "title": "Energia z tłuszczu",
+        "description": "Mniej więcej od 12 h organizm częściej sięga po zapasy tłuszczu."
+      },
+      "deep": {
+        "title": "Głęboki post",
+        "description": "16 h i więcej. Pij wodę i obserwuj samopoczucie."
+      },
+      "long": {
+        "title": "Długi post",
+        "description": "24 h i więcej. Nie przesadzaj — zakończ post, jeśli źle się czujesz."
+      }
+    },
+    "modeTitle": "Tryb postu",
+    "modeHint": "Po wyłączeniu historia zostanie zachowana.",
+    "protocolTitle": "Schemat",
+    "windowTitle": "Okno żywieniowe",
+    "windowHint": "Kiedy jesz w ciągu dnia. Pozostały czas to post.",
+    "eatingHours": "Okno żywieniowe {{hours}} h",
+    "notificationsTitle": "Przypomnienia",
+    "notifyFastStart": "Początek postu",
+    "notifyFastStartHint": "Codziennie o {{end}}, gdy zamyka się okno żywieniowe",
+    "notifyFastEnd": "Koniec postu",
+    "notifyFastEndHint": "Codziennie o {{start}}, gdy otwiera się okno żywieniowe",
+    "notifyGoal": "Cel osiągnięty",
+    "notifyGoalHint": "Gdy trwający post osiągnie cel",
+    "notificationsOffInProfile": "Powiadomienia są wyłączone w ustawieniach profilu.",
+    "notificationsDenied": "Powiadomienia NutriFlow są zablokowane. Dotknij, aby otworzyć ustawienia systemu.",
+    "notifications": {
+      "channel": "Przypomnienia o poście",
+      "startTitle": "Czas zacząć post",
+      "startBody": "Okno żywieniowe się zamknęło. Następny posiłek o {{time}} — {{hours}} h postu.",
+      "endTitle": "Okno żywieniowe jest otwarte",
+      "endBody": "Możesz jeść do {{time}}. Nie zapomnij zakończyć postu w aplikacji.",
+      "goalTitle": "Cel postu osiągnięty 🎉",
+      "goalBody": "Minęło {{hours}} h. Możesz już zakończyć post."
+    }
   }
 }

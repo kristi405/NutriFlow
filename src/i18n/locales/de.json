@@ -719,5 +719,114 @@
     "recipePendingUpload": "Noch nicht in deinem Konto gespeichert – das passiert automatisch, sobald du online bist.",
     "category": "Kategorie",
     "categoryHint": "Danach werden in Rezepten Ersatzzutaten vorgeschlagen – z. B. Fleisch durch Fisch."
+  },
+  "fasting": {
+    "title": "Intervallfasten",
+    "settingsTitle": "Fasten-Einstellungen",
+    "introTitle": "Intervallfasten",
+    "introText": "Iss innerhalb eines täglichen Essensfensters und faste den Rest des Tages. Wähle einen Plan, verfolge jedes Fasten mit dem Timer und erhalte Erinnerungen zum Beginnen und Beenden.",
+    "enable": "Fastenmodus einschalten",
+    "enableHint": "Du kannst den Plan jederzeit ändern oder den Modus ausschalten.",
+    "disclaimer": "Nicht empfohlen in Schwangerschaft und Stillzeit, bei Diabetes, Essstörungen oder anderen Erkrankungen sowie unter 18 Jahren. Sprich vor dem Start mit deinem Arzt.",
+    "protocols": {
+      "12-12": {
+        "label": "12:12",
+        "description": "12 h fasten, 12 h essen – sanfter Einstieg"
+      },
+      "14-10": {
+        "label": "14:10",
+        "description": "14 h fasten, 10 h essen"
+      },
+      "16-8": {
+        "label": "16:8",
+        "description": "16 h fasten, 8 h essen – am beliebtesten"
+      },
+      "18-6": {
+        "label": "18:6",
+        "description": "18 h fasten, 6 h essen"
+      },
+      "20-4": {
+        "label": "20:4",
+        "description": "20 h fasten, 4 h essen"
+      },
+      "omad": {
+        "label": "23:1",
+        "description": "Eine Mahlzeit am Tag"
+      }
+    },
+    "fastingNow": "Fasten",
+    "eatingWindow": "Essensfenster",
+    "scheduledFast": "Fastenzeit laut Plan",
+    "goalReached": "Ziel von {{hours}} h erreicht 🎉",
+    "untilGoal": "Noch {{time}} bis zum Ziel",
+    "goalAt": "Ziel {{hours}} h um {{time}}",
+    "windowClosesAt": "Essen bis {{time}}",
+    "windowOpensAt": "Nächste Mahlzeit um {{time}}",
+    "started": "Start",
+    "goal": "Ziel {{hours}} h",
+    "notStartedHint": "Laut deinem Plan ist jetzt Fastenzeit – starte den Timer.",
+    "start": "Starten",
+    "startFast": "{{hours}}-h-Fasten starten",
+    "endFast": "Fasten beenden",
+    "editStart": "Früher angefangen? Startzeit anpassen",
+    "startedEarlier": "Start verschieben:",
+    "minutesShort": "{{minutes}} Min.",
+    "eatingWindowRange": "Essensfenster {{from}} – {{to}}",
+    "stats": {
+      "streak": "Tage in Folge",
+      "count": "Fastenzeiten",
+      "longest": "Rekord, h"
+    },
+    "history": "Verlauf",
+    "historyDuration": "{{hours}} h von {{goal}} h",
+    "deleteTitle": "Dieses Fasten löschen?",
+    "endEarlyTitle": "Fasten vorzeitig beenden?",
+    "endEarlyMessage": "{{done}} h von {{goal}} h geschafft. Es wird als nicht abgeschlossen gespeichert.",
+    "stages": {
+      "digesting": {
+        "title": "Verdauung",
+        "description": "Dein Körper verarbeitet noch die letzte Mahlzeit."
+      },
+      "sugarDrop": {
+        "title": "Blutzucker pendelt sich ein",
+        "description": "Etwa 4–12 h: der Insulinspiegel sinkt."
+      },
+      "fatBurning": {
+        "title": "Energie aus Fett",
+        "description": "Etwa ab 12 h greift der Körper stärker auf Fettreserven zurück."
+      },
+      "deep": {
+        "title": "Tiefes Fasten",
+        "description": "Ab 16 h. Trink Wasser und achte auf dein Befinden."
+      },
+      "long": {
+        "title": "Langes Fasten",
+        "description": "Ab 24 h. Übertreib es nicht – beende das Fasten, wenn es dir nicht gut geht."
+      }
+    },
+    "modeTitle": "Fastenmodus",
+    "modeHint": "Beim Ausschalten bleibt dein Verlauf erhalten.",
+    "protocolTitle": "Plan",
+    "windowTitle": "Essensfenster",
+    "windowHint": "Wann du tagsüber isst. Die übrige Zeit wird gefastet.",
+    "eatingHours": "{{hours}}-h-Essensfenster",
+    "notificationsTitle": "Erinnerungen",
+    "notifyFastStart": "Beginn des Fastens",
+    "notifyFastStartHint": "Täglich um {{end}}, wenn das Essensfenster schließt",
+    "notifyFastEnd": "Ende des Fastens",
+    "notifyFastEndHint": "Täglich um {{start}}, wenn das Essensfenster öffnet",
+    "notifyGoal": "Ziel erreicht",
+    "notifyGoalHint": "Wenn das laufende Fasten sein Ziel erreicht",
+    "notificationsOffInProfile": "Benachrichtigungen sind in den Profileinstellungen ausgeschaltet.",
+    "notificationsDenied": "Benachrichtigungen für NutriFlow sind nicht erlaubt. Tippe, um die Systemeinstellungen zu öffnen.",
+    "notifications": {
+      "channel": "Fasten-Erinnerungen",
+      "startTitle": "Zeit zu fasten",
+      "startBody": "Das Essensfenster ist geschlossen. Nächste Mahlzeit um {{time}} – {{hours}} h Fasten.",
+      "endTitle": "Das Essensfenster ist offen",
+      "endBody": "Du kannst bis {{time}} essen. Vergiss nicht, das Fasten in der App zu beenden.",
+      "goalTitle": "Fastenziel erreicht 🎉",
+      "goalBody": "{{hours}} h geschafft. Du kannst das Fasten jetzt beenden."
+    }
   }
 }

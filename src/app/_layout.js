@@ -8,7 +8,10 @@ import { ThemedView } from '@/components/themed-view';
 import { useTheme } from '@/hooks/use-theme';
 import '@/i18n';
 import { syncUiDictionary } from '@/i18n/uiDictionarySync';
+import { startFastingNotifications } from '@/lib/fastingNotifications';
 import { migrateLegacyRecipes } from '@/lib/legacyRecipeMigration';
+import { pushOnce } from '@/lib/navigation';
+import { onNotificationOpened } from '@/lib/notifications';
 import { queryClient } from '@/lib/query-client';
 import { appStreakStore } from '@/store/appStreakStore';
 import { authStore } from '@/store/authStore';
@@ -30,6 +33,7 @@ import { useTranslation } from 'react-i18next';
 import { AppState } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 SplashScreen.preventAutoHideAsync();
+startFastingNotifications();
 const SKIP_AUTH_FOR_TESTING = false;
 function TabLayout() {
   const { t } = useTranslation();
@@ -153,6 +157,15 @@ function TabLayout() {
     }
     prevHasOnboardedRef.current = hasOnboarded;
   }, [hasOnboarded]);
+  // A tapped reminder opens its screen (data.url) — once the main navigator
+  // is on screen; a tap that launched the app is handled when it gets there.
+  const isMainAppVisible = hasHydrated && isAuthenticated && hasOnboarded && !showCalculating;
+  useEffect(() => {
+    if (!isMainAppVisible) return undefined;
+    return onNotificationOpened(data => {
+      if (typeof data.url === 'string') pushOnce(data.url);
+    });
+  }, [isMainAppVisible]);
   function renderContent() {
     if (!hasHydrated) return <ThemedView key="loading" style={{ flex: 1 }} />;
     if (!isAuthenticated && !isGuest) return <AuthFlow key="auth" />;
@@ -239,6 +252,22 @@ function TabLayout() {
         <Stack.Screen name="ingredients" options={{
           headerShown: true,
           headerTitle: t('ingredients.title'),
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+          headerTitleStyle: { fontWeight: '700' }
+        }} />
+        <Stack.Screen name="fasting" options={{
+          headerShown: true,
+          headerTitle: t('fasting.title'),
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: theme.background },
+          headerTintColor: theme.text,
+          headerTitleStyle: { fontWeight: '700' }
+        }} />
+        <Stack.Screen name="fasting-settings" options={{
+          headerShown: true,
+          headerTitle: t('fasting.settingsTitle'),
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.text,
